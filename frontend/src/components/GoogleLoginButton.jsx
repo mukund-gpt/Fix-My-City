@@ -11,7 +11,7 @@ export default function GoogleLoginButton({ role }) {
 
     // Decode token
     const user = jwtDecode(token);
-    console.log("Google user info:", user);
+    // console.log("Google user info:", user);
 
     try {
       const res = await axiosInstance.post("/auth/google-login", {
@@ -19,6 +19,7 @@ export default function GoogleLoginButton({ role }) {
         role,
       });
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Login successful!");
       navigate("/");
     } catch (error) {

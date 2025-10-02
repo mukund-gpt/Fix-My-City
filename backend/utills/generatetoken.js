@@ -1,5 +1,8 @@
-const generateToken= () => {
-    return 0;
-}
+// Example: generateToken.js
+import jwt from "jsonwebtoken";
 
-export default {generateToken}
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
+
+export default generateToken;  // <-- export default at the end

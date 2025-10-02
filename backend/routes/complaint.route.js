@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { createComplaint, getComplaints } from "../controllers/complaint.controller.js";
+import { createComplaint, getComplaints } from '../controllers/complaint.controller.js';
 import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();

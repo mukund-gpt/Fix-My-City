@@ -19,8 +19,9 @@ export default function Login() {
         role,
       });
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
       toast.success("Login successful!");
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Error logging in");

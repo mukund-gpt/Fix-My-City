@@ -1,14 +1,18 @@
 import User from "../models/user.model.js";
 import generateToken from "../utills/generatetoken.js";
+import { OAuth2Client } from "google-auth-library";
 
 export const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
     // Check if user already exists
-    const userExists = await User.findOne({ email, role });
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
+    }
+    if (userExists && userExists.role !== role) {
+      return res.status(400).json({ message: `User is not a ${role}` });
     }
 
     // Create new user
@@ -56,5 +60,40 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+export const googleLogin = async (req, res) => {
+  const { token, role } = req.body;
+
+  try {
+    // Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub, email, name, picture } = payload;
+
+    let user = await User.findOne({ email });
+    if (user && user.role !== role) {
+      return res.status(400).json({ message: `User is not a ${role}` });
+    }
+    // Create new user
+    if (!user) {
+      user = await User.create({ name, email, role });
+    }
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Invalid Google token" });
   }
 };

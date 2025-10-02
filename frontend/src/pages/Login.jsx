@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance";
 import toast from "react-hot-toast";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -104,6 +105,7 @@ export default function Login() {
           >
             Login
           </button>
+          <GoogleLoginButton role={role} />
           <a
             href="/register"
             className="text-sm text-blue-500 hover:underline block text-center"

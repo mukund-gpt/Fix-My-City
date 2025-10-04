@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer.jsx";
 import NavBar from "./components/Navbar.jsx";
 import { adminTabs, staffTabs, userTabs } from './constants/route.jsx';
+import "./index.css";
 import ComplaintDetail from "./pages/ComplaintDetail.jsx";
-
 function App() {
   
   const userRole = "user"; // "admin" | "staff" | "user"

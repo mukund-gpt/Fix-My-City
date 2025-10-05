@@ -10,42 +10,53 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import axiosInstance from "../../api/axiosinstance";
-
-
 import * as maptilersdk from "@maptiler/sdk";
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 
-maptilersdk.config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY; 
+maptilersdk.config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
-const DEFAULT_LOCATION = { lat: 28.7041, lng: 77.1025 }; // fallback (Delhi) — stored as {lat,lng}
+const DEFAULT_LOCATION = { lat: 28.7041, lng: 77.1025 }; // Delhi
 
 export default function SubmitComplaint() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [photo, setPhoto] = useState(null);
-  const [preview, setPreview] = useState(null);
-
-  // Single source-of-truth for coordinates — avoids accidental swaps
+  const [photos, setPhotos] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [location, setLocation] = useState({ lat: null, lng: null });
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
 
-  // --- File input ---
   const handlePhotoChange = (e) => {
-    const file = e.target.files?.[0] ?? null;
-    setPhoto(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setPreview(null);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Limit to 5 images total
+    const remainingSlots = 5 - photos.length;
+    const filesToAdd = files.slice(0, remainingSlots);
+
+    if (files.length > remainingSlots) {
+      alert(`You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`);
     }
+
+    setPhotos((prev) => [...prev, ...filesToAdd]);
+
+    // Generate previews
+    filesToAdd.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviews((prev) => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  // --- Geolocation: store into location state as (lat, lng) ---
+  const handleRemovePhoto = (index) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation not supported by your browser.");
@@ -54,100 +65,114 @@ export default function SubmitComplaint() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const latitude = Number(pos.coords.latitude);
-        const longitude = Number(pos.coords.longitude);
-        console.log("Geolocation ->", { latitude, longitude });
-        // Keep state consistent: lat first, lng second
-        setLocation({ lat: latitude, lng: longitude });
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setLocation({ lat, lng });
       },
       (err) => {
-        console.error("geolocation error", err);
+        console.error("Geolocation error:", err);
         alert("Unable to fetch location. Please allow location access.");
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  // --- Initialize map once on mount ---
+  // Initialize map once
   useEffect(() => {
-    if (!mapContainerRef.current) return;
-    if (mapRef.current) return;
+    if (!mapContainerRef.current || mapRef.current) return;
 
     mapRef.current = new maptilersdk.Map({
       container: mapContainerRef.current,
       style: maptilersdk.MapStyle.STREETS,
-      // MapTiler/Mapbox-style APIs expect [lng, lat]
-      center: [DEFAULT_LOCATION.lng, DEFAULT_LOCATION.lat],
+      center: [DEFAULT_LOCATION.lng, DEFAULT_LOCATION.lat], // [lng, lat]
       zoom: 11,
     });
 
     mapRef.current.addControl(new maptilersdk.NavigationControl(), "top-left");
-    console.log("Map initialized with center (lng,lat):", [
-      DEFAULT_LOCATION.lng,
-      DEFAULT_LOCATION.lat,
-    ]);
 
     return () => {
       if (mapRef.current) {
-        try {
-          mapRef.current.remove();
-        } catch (e) {
-          /* ignore */
-        }
+        mapRef.current.remove();
         mapRef.current = null;
       }
     };
-    // run once
   }, []);
 
-  // --- Update or create marker when location changes ---
+  // Update marker when location changes
   useEffect(() => {
-    if (!mapRef.current) return;
-    const { lat, lng } = location;
-    // only act when both coordinates are present
-    if (lat == null || lng == null) return;
+    if (!mapRef.current || location.lat == null || location.lng == null) return;
 
-    // ALWAYS convert to [lng, lat] when giving coords to the map SDK
-    const center = [Number(lng), Number(lat)];
-    console.log("Update map/marker to (lng,lat):", center);
+    const lngLat = [location.lng, location.lat]; // [lng, lat] for MapTiler
 
     if (!markerRef.current) {
       markerRef.current = new maptilersdk.Marker({ draggable: true })
-        .setLngLat(center)
+        .setLngLat(lngLat)
         .addTo(mapRef.current);
 
-      // On dragend: read marker coordinates and update the single source-of-truth (location)
       markerRef.current.on("dragend", () => {
-        const lngLat = markerRef.current.getLngLat();
-        const newLat = Number(lngLat.lat);
-        const newLng = Number(lngLat.lng);
-        console.log("marker dragend ->", { newLat, newLng });
-        // IMPORTANT: setLocation({ lat: newLat, lng: newLng })
-        setLocation({ lat: newLat, lng: newLng });
+        const { lat, lng } = markerRef.current.getLngLat();
+        setLocation({ lat, lng });
       });
     } else {
-      // move marker to new position
-      markerRef.current.setLngLat(center);
+      markerRef.current.setLngLat(lngLat);
     }
 
-    try {
-      mapRef.current.easeTo({ center, zoom: 15 });
-    } catch (e) {
-      mapRef.current.setCenter(center);
-      mapRef.current.setZoom(15);
-    }
+    mapRef.current.easeTo({ center: lngLat, zoom: 15 });
   }, [location]);
+
+  // Add click handler to place marker on map
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const handleMapClick = (e) => {
+      const { lng, lat } = e.lngLat;
+      setLocation({ lat, lng });
+    };
+
+    mapRef.current.on("click", handleMapClick);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("click", handleMapClick);
+      }
+    };
+  }, []);
+
+  const resetLocation = () => {
+    setLocation({ lat: null, lng: null });
+    if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
+    if (mapRef.current) {
+      mapRef.current.easeTo({
+        center: [DEFAULT_LOCATION.lng, DEFAULT_LOCATION.lat],
+        zoom: 11,
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPhotos([]);
+    setPreviews([]);
+    resetLocation();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    console.log("Submitting complaint with location:", location);
 
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    if (photo) formData.append("photo", photo);
-
+    
+    // Append multiple photos
+    photos.forEach((photo) => {
+      formData.append("photos", photo);
+    });
+    
     if (location.lat != null && location.lng != null) {
       formData.append("latitude", String(location.lat));
       formData.append("longitude", String(location.lng));
@@ -157,37 +182,16 @@ export default function SubmitComplaint() {
       const res = await axiosInstance.post("/complaints", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("submit response", res?.data);
-      alert("Complaint submitted!");
-      // reset
-      setTitle("");
-      setDescription("");
-      setPhoto(null);
-      setPreview(null);
-      setLocation({ lat: null, lng: null });
-      // remove marker (optional)
-      if (markerRef.current) {
-        markerRef.current.remove();
-        markerRef.current = null;
-      }
-      if (mapRef.current) {
-        mapRef.current.setCenter([DEFAULT_LOCATION.lng, DEFAULT_LOCATION.lat]);
-        mapRef.current.setZoom(11);
-      }
+      alert("Complaint submitted successfully!");
+      resetForm();
     } catch (err) {
-      console.error("submit error", err);
-      alert("Error submitting complaint! See console for details.");
+      console.error("Submit error:", err);
+      alert("Error submitting complaint!");
     }
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      mt={5}
-      px={2}
-    >
+    <Box display="flex" justifyContent="center" alignItems="center" mt={5} px={2}>
       <Card sx={{ maxWidth: 700, width: "100%", p: 2, boxShadow: 4 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom align="center">
@@ -218,29 +222,59 @@ export default function SubmitComplaint() {
                 variant="outlined"
                 component="label"
                 startIcon={<UploadFileIcon />}
+                disabled={photos.length >= 5}
               >
-                Upload Image
+                Upload Images ({photos.length}/5)
                 <input
                   type="file"
                   accept="image/*"
                   hidden
+                  multiple
                   onChange={handlePhotoChange}
                 />
               </Button>
 
-              {preview && (
+              {previews.length > 0 && (
                 <Box
-                  component="img"
-                  src={preview}
-                  alt="Preview"
                   sx={{
-                    width: "100%",
-                    height: 200,
-                    objectFit: "cover",
-                    borderRadius: 1,
-                    border: "1px solid #ccc",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                    gap: 2,
                   }}
-                />
+                >
+                  {previews.map((preview, index) => (
+                    <Box key={index} sx={{ position: "relative" }}>
+                      <Box
+                        component="img"
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        sx={{
+                          width: "100%",
+                          height: 150,
+                          objectFit: "cover",
+                          borderRadius: 1,
+                          border: "1px solid #ccc",
+                        }}
+                      />
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleRemovePhoto(index)}
+                        sx={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          minWidth: "auto",
+                          px: 1,
+                          py: 0.5,
+                        }}
+                      >
+                        ✕
+                      </Button>
+                    </Box>
+                  ))}
+                </Box>
               )}
 
               <Stack direction="row" spacing={2}>
@@ -252,24 +286,7 @@ export default function SubmitComplaint() {
                   Get Current Location
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setLocation({ lat: null, lng: null });
-                    if (markerRef.current) {
-                      markerRef.current.remove();
-                      markerRef.current = null;
-                    }
-                    if (mapRef.current) {
-                      mapRef.current.setCenter([
-                        DEFAULT_LOCATION.lng,
-                        DEFAULT_LOCATION.lat,
-                      ]);
-                      mapRef.current.setZoom(11);
-                    }
-                    console.log("Location reset to default");
-                  }}
-                >
+                <Button variant="outlined" onClick={resetLocation}>
                   Reset Location
                 </Button>
               </Stack>
@@ -282,15 +299,18 @@ export default function SubmitComplaint() {
                   borderRadius: 8,
                   border: "1px solid #ddd",
                   overflow: "hidden",
+                  cursor: "pointer",
                 }}
               />
 
-              <Typography variant="body2" mt={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+                💡 Click anywhere on the map to place a marker, or drag the marker to adjust location
+              </Typography>
+
+              <Typography variant="body2">
                 {location.lat != null && location.lng != null
-                  ? `Latitude: ${Number(location.lat).toFixed(
-                      6
-                    )}, Longitude: ${Number(location.lng).toFixed(6)}`
-                  : "No location selected yet"}
+                  ? `Latitude: ${location.lat.toFixed(6)}, Longitude: ${location.lng.toFixed(6)}`
+                  : "No location selected"}
               </Typography>
 
               <Button

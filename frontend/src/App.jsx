@@ -5,6 +5,9 @@ import NavBar from "./components/Navbar.jsx";
 import { adminTabs, staffTabs, userTabs } from './constants/route.jsx';
 import "./index.css";
 import ComplaintDetail from "./pages/ComplaintDetail.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+
 function App() {
   
   const userRole = "user"; // "admin" | "staff" | "user"
@@ -14,11 +17,11 @@ function App() {
       <NavBar tabs={tabs} />
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
-            <Route path="/complaint/:id" element={<ComplaintDetail />} />
+          <Route path="/login" element={<Login/>} />
+          <Route path="/register" element={<Register/>} />
+          <Route path="/complaint/:id" element={<ComplaintDetail />} />
           {tabs.map(tab => (
-            
               <Route key={tab.path} path={tab.path} element={tab.element} />
-             
           ))}
         </Routes>
       </Suspense>

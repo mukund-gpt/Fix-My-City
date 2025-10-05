@@ -97,3 +97,73 @@ export const googleLogin = async (req, res) => {
     res.status(400).json({ message: "Invalid Google token" });
   }
 };
+
+export const getUserDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+
+    res.status(500).json({ message: error.message });
+  }
+};
+export const deleteUserAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } 
+    await user.remove();
+    res.status(200).json({ message: "User account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } 
+    // Here you would typically send a password reset email
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  } 
+};  
+export const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+  try {
+    // Here you would typically verify the token and reset the password
+    const user = await
+    User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } 
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const logoutUser = async (req, res) => {
+  try {
+    req.session.destroy((err) => {  
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("connect.sid");
+      res.status(200).json({ message: "Logout successful" });
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  } 
+};
+
+
+  

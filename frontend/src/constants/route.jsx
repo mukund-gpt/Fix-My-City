@@ -18,7 +18,7 @@ const ReportsPage = lazy(() => import("../pages/Reports.jsx"));
 const SettingsPage = lazy(() => import("../pages/Settings.jsx"));
 const NotificationsPage = lazy(() => import("../pages/Notifications.jsx"));
 const ProfilePage = lazy(() => import("../pages/Profile.jsx"));
-
+const SubmitComplaintPage = lazy(()=> import ("../pages/SubmitComplaint.jsx"))
 // Tabs with elements
 export const adminTabs = [
   { name: "Dashboard", path: "/admin/dashboard", icon: <Dashboard />, element: <DashboardPage role="admin" /> },
@@ -38,7 +38,7 @@ export const staffTabs = [
 
 export const userTabs = [
   { name: "Home", path: "/", icon: <Home />, element: <HomePage /> },
-  { name: "Submit Complaint", path: "/submit-complaint", icon: <ReportProblem />, element: <ComplaintsPage role="user" type="submit" /> },
+  { name: "Submit Complaint", path: "/submit-complaint", icon: <ReportProblem />, element: <SubmitComplaintPage role="user" type="submit" /> },
   { name: "My Complaints", path: "/my-complaints", icon: <Assignment />, element: <ComplaintsPage role="user" type="my" /> },
   { name: "Notifications", path: "/notifications", icon: <Notifications />, element: <NotificationsPage role="user" /> },
   { name: "Profile", path: "/profile", icon: <Settings />, element: <ProfilePage /> }

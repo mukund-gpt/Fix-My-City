@@ -1,15 +1,19 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance";
-import toast from "react-hot-toast";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import { userExist } from "../redux/reducers/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("citizen");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  const { user, userRole, loader, isAdmin } = useSelector((state) => state.auth);
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -18,8 +22,12 @@ export default function Login() {
         password,
         role,
       });
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
+      dispatch(userExist(data));
+      // Store user data and token in localStorage
+      userRole = data.role;
+      user = data.user;
+      loader = false;
+      isAdmin = data.role=='admin'?true:false;
       toast.success("Login successful!");
       navigate("/dashboard");
     } catch (error) {

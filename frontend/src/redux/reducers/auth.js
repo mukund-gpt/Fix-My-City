@@ -1,12 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { toast } from 'react-hot-toast';
 import { adminlogin, adminLogout, getadminDetails } from "../thunks/admin";
+import { deleteUserAccount, getUserDetails, updateUserDetails, userLogout } from "../thunks/user";
 const initialState = {
     user: null,
+    userRole: "citizen", // 'admin', 'staff', 'user'
     isAdmin: false,
     loader:true,
 }
 
+// This slice manages authentication state, including user details and admin status
+// It handles actions related to user login, logout, and fetching user details
+// It also includes admin-specific actions for login and logout
+// The initial state includes a user object, user role, admin status, and a loader for async operations
 
 const authSlice = createSlice({
     name: 'auth',
@@ -21,6 +27,7 @@ const authSlice = createSlice({
             state.loader = false;
         },
     },
+
     extraReducers: (builder) => {
         builder.addCase(adminlogin.fulfilled, (state, action) => {
             state.isAdmin = true
@@ -46,6 +53,44 @@ const authSlice = createSlice({
             state.isAdmin = true;
             toast.error(action.error.message)
         })
+        .addCase(getUserDetails.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.loader = false;
+        })
+        .addCase(getUserDetails.rejected, (state, action) => {
+            state.user = null;      
+            state.loader = false;
+            toast.error(action.error.message || "Failed to fetch user details");
+        })
+        .addCase(updateUserDetails.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.loader = false;
+            toast.success("User details updated successfully");
+        })
+        .addCase(updateUserDetails.rejected, (state, action) => {
+            state.loader = false;
+            toast.error(action.error.message || "Failed to update user details");
+        }
+        )   
+        .addCase(deleteUserAccount.fulfilled, (state, action) => {
+            state.user = null;
+            state.loader = false;
+            toast.success(action.payload);
+        })
+        .addCase(deleteUserAccount.rejected, (state, action) => {
+            state.loader = false;   
+            toast.error(action.error.message || "Failed to delete user account");
+        })
+        .addCase(userLogout.fulfilled, (state, action) => {
+            state.user = null;
+            state.loader = false;
+            toast.success(action.payload);
+        })
+        .addCase(userLogout.rejected, (state, action) => {
+            state.loader = false;
+            toast.error(action.error.message || "Failed to logout user");
+        })
+        
         
     }
 })

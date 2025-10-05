@@ -2,9 +2,13 @@ import Link from "@mui/material/Link";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import samplemessage from "../constants/sampleData.js";
+import { useDispatch, useSelector } from "react-redux";
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  // useSelector and useDispatch can be used here if you want to connect to Redux store
+  const { user, userRole, loader, isAdmin } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   useEffect(() => {
     // Load data from JSON
     setComplaints(samplemessage);

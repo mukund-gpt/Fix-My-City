@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 
-const Dashboard = ({ user }) => {
-  console.log(user);
-
+const Dashboard = ({user}) => {
+  // console.log(user);
+  // const { user } = useSelector((state) => state.auth);
+  const user = {name: "John Doe", role: "citizen"}; // Mock user data for demonstration
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">

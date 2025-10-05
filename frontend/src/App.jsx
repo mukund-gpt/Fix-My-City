@@ -4,9 +4,10 @@ import Footer from "./components/Footer.jsx";
 import NavBar from "./components/Navbar.jsx";
 import { adminTabs, staffTabs, userTabs } from './constants/route.jsx';
 import "./index.css";
-import ComplaintDetail from "./pages/ComplaintDetail.jsx";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
+import Login from "./pages/auth/Login.jsx";
+import Register from "./pages/auth/Register.jsx";
+import ComplaintDetail from "./pages/complaints/ComplaintDetail.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 
 function App() {
   
@@ -18,7 +19,8 @@ function App() {
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route path="/login" element={<Login/>} />
-          <Route path="/register" element={<Register/>} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complaint/:id" element={<ComplaintDetail />} />
           {tabs.map(tab => (
               <Route key={tab.path} path={tab.path} element={tab.element} />

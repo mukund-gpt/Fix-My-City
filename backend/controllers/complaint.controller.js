@@ -2,7 +2,7 @@
 import Complaint from "../models/complaint.model.js";
 
 
-const createComplaint = async (req, res) => {
+export const createComplaint= async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -28,10 +28,8 @@ const createComplaint = async (req, res) => {
   }
 };
 
-// @desc    Get complaints
-// @route   GET /api/complaints
-// @access  Private
-const getComplaints = async (req, res) => {
+
+export const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find()
       .populate("citizen", "name email") // Populate citizen details
@@ -42,10 +40,7 @@ const getComplaints = async (req, res) => {
   }
 };
 
-// @desc    Update complaint status or assignment
-// @route   PUT /api/complaints/:id
-// @access  Private (Staff/Admin)
-const updateComplaint = async (req, res) => {
+export const updateComplaintByStaff = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: "Complaint not found" });
@@ -60,7 +55,7 @@ const updateComplaint = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const getmyComplaints = async (req, res) => {
+export const getmyComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({ citizen: req.user._id }).populate("citizen", "name email"); 
     res.json(complaints);
@@ -68,7 +63,7 @@ const getmyComplaints = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const getComplaintsById = async (req, res) => {
+export const getComplaintsById = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id).populate("citizen", "name email");  
     if (!complaint) return res.status(404).json({ message: "Complaint not found" });
@@ -78,7 +73,7 @@ const getComplaintsById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const assignComplaint = async (req, res) => {
+export const assignComplaint = async (req, res) => {
   try {
     const { complaintId, staffId } = req.body;    
     const complaint = await Complaint.findById(complaintId);
@@ -93,11 +88,11 @@ const assignComplaint = async (req, res) => {
 };
 
 
-export default {
-  assignComplaint,
-  getComplaintsById,
-  getmyComplaints,
-  createComplaint,
-  getComplaints,
-  updateComplaint,
-};
+// export default {
+//   assignComplaint,
+//   getComplaintsById,
+//   getmyComplaints,
+//   createComplaint,
+//   getComplaints,
+//   updateComplaint,
+// };

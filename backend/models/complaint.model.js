@@ -7,7 +7,10 @@ const complaintSchema = new mongoose.Schema({
   location: { type: String },
   photo: { type: String },
   status: { type: String, enum: ["OPEN", "IN_PROGRESS", "RESOLVED"], default: "OPEN" },
-  assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  assignedTo: [{
+    type: mongoose.Schema.Types.ObjectId, ref: "User",
+    
+   }],
   createdAt: { type: Date, default: Date.now }
 });
 

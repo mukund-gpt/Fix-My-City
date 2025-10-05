@@ -1,8 +1,8 @@
 import Link from "@mui/material/Link";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import samplemessage from "../constants/sampleData.js";
-import { useDispatch, useSelector } from "react-redux";
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
@@ -130,7 +130,7 @@ const Home = () => {
       </section>
       <h1 className="text-3xl font-bold mb-6 text-center">Recent Complaints</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {complaints.map((complaint) => (
+        {Array.isArray(complaints) && complaints?.map((complaint) => (
           <div
             key={complaint.id}
                 className="bg-white border rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"

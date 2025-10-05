@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import axiosInstance from "../api/axiosinstance";
+import axiosInstance from "../../api/axiosinstance";
 
 export default function SubmitComplaint() {
   const [title, setTitle] = useState("");

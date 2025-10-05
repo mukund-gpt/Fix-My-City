@@ -1,22 +1,20 @@
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserDetails } from "../redux/thunks/user";
 
-const Profile = () => {
-  
+const Settings = () => {
+ 
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getUserDetails());
   }, [dispatch]);
-
+ 
 
   return (
     <div>
-      <div>{user ? `Welcome, ${user.name}` : "Loading..."}</div>
-      Profile
+          Settings
+          
     </div>
   );
 };
 
-export default Profile;
+export default Settings;

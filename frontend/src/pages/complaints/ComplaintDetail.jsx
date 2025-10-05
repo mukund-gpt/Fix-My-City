@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import samplemessage from "../constants/sampleData.js";
+import samplemessage from "../../constants/sampleData.js";
 
 const ComplaintDetail = () => {
   const { id } = useParams();

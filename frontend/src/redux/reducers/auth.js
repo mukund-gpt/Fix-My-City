@@ -9,10 +9,6 @@ const initialState = {
     loader:true,
 }
 
-// This slice manages authentication state, including user details and admin status
-// It handles actions related to user login, logout, and fetching user details
-// It also includes admin-specific actions for login and logout
-// The initial state includes a user object, user role, admin status, and a loader for async operations
 
 const authSlice = createSlice({
     name: 'auth',

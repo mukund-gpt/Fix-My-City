@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema(
       enum: ["citizen", "staff", "admin"],
       default: "citizen",
     },
+    department: {
+      type: String,
+      enum: process.env.DEPARTMENTS,
+    },
   },
   { timestamps: true }
 );

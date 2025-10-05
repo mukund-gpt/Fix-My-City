@@ -56,11 +56,15 @@ export const updateComplaintByStaff = async (req, res) => {
   }
 };
 export const getmyComplaints = async (req, res) => {
+  // console.log('user in get complaints');
   try {
-    const complaints = await Complaint.find({ citizen: req.user._id }).populate("citizen", "name email"); 
+    console.log('user in get complaints', req.user);
+    const complaints = await Complaint.find({ citizen: req.user.id }).populate("citizen", "name email"); 
+    console.log('complaints', complaints);
+    
     res.json(complaints);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(502).json({ message: error.message });
   }
 };
 export const getComplaintsById = async (req, res) => {

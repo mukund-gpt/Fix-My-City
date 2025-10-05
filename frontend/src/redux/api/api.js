@@ -9,8 +9,12 @@ import { server } from "../../constants/config.js";
   endpoints: (builder) => ({
     // ---------- Citizen Endpoints ----------
     getMyComplaints: builder.query({
-      query: () => ({
+      query: (token) => ({
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         url: "complaints/my",
+        method: "GET",
         credentials: "include",
       }),
       providesTags: ["Complaint"],

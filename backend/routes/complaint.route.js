@@ -6,9 +6,10 @@ import { protect } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-router.get("/", getComplaints);
+router.get("/my", protect,getmyComplaints); 
+// router.get("/", getComplaints);
 router.get("/:id", protect, getComplaintsById); // Assuming this is for getting a specific complaint
-router.get("/my", protect, getmyComplaints); 
+
 router.post("/new", protect, upload.single("photo"),createComplaint); // For users to submit a new complaint);
 router.get("/staff/complaints", protect, getComplaints); // For staff to get all complaints
 router.get("/admin/complaints", protect, getComplaints); // For admin to get all complaints

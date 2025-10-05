@@ -1,9 +1,11 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import adminroutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
+import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
 
 dotenv.config();
@@ -27,7 +29,8 @@ app.use("/api/test", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
+app.use("/api/admin", adminroutes);
+app.use("/api/staff", staffroutes);
 const PORT = process.env.PORT || 5000;
 connectDB().then(() =>
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

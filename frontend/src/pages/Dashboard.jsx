@@ -1,10 +1,14 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import UnresolvedComplaints from "./admin/UnresolvedComplaints";
+import ResolvedComplaints from "./admin/ResolvedComplaints";
+import ConfigureSLA from "./admin/ConfigureSLA";
+import ViewAnalytics from "./admin/ViewAnalytics";
+import { useState } from "react";
 
 const Dashboard = () => {
   // console.log(user);
   const { user } = useSelector((state) => state.auth);
-  
 
   // console.log(user);
   // const user = {name: "John Doe", role: "citizen"}; // Mock user data for demonstration
@@ -15,6 +19,7 @@ const Dashboard = () => {
       </div>
     );
   }
+  const [activeView, setActiveView] = useState(null);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -23,10 +28,10 @@ const Dashboard = () => {
         You are logged in as <span className="font-semibold">{user.role}</span>.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div>
         {/* Citizen Dashboard */}
         {user.role === "citizen" && (
-          <>
+          <div className="grid md:grid-cols-3 gap-6">
             <Link
               to="/citizen/submit-complaint"
               className="bg-blue-600 text-white p-6 rounded-lg shadow hover:bg-blue-700 transition text-center"
@@ -45,12 +50,12 @@ const Dashboard = () => {
             >
               Notifications
             </Link>
-          </>
+          </div>
         )}
 
         {/* Staff Dashboard */}
         {user.role === "staff" && (
-          <>
+          <div className="grid md:grid-cols-3 gap-6">
             <Link
               to="/staff/all-complaints"
               className="bg-yellow-600 text-white p-6 rounded-lg shadow hover:bg-yellow-700 transition text-center"
@@ -69,31 +74,51 @@ const Dashboard = () => {
             >
               Add Resolution Notes
             </Link>
-          </>
+          </div>
         )}
 
         {/* Admin Dashboard */}
         {user.role === "admin" && (
-          <>
-            <Link
-              to="/admin/manage-complaints"
+          <div className="grid md:grid-cols-4 gap-3">
+            <button
+              onClick={() => setActiveView("unresolved")}
               className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
             >
-              Manage Complaints
-            </Link>
-            <Link
-              to="/admin/view-analytics"
+              Unresolved Complaints
+            </button>
+            <button
+              onClick={() => setActiveView("resolved")}
+              className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
+            >
+              Resolved Complaints
+            </button>
+            <button
+              onClick={() => setActiveView("analytics")}
               className="bg-teal-600 text-white p-6 rounded-lg shadow hover:bg-teal-700 transition text-center"
             >
               View Analytics
-            </Link>
-            <Link
-              to="/admin/configure-sla"
+            </button>
+            <button
+              onClick={() => setActiveView("sla")}
               className="bg-pink-600 text-white p-6 rounded-lg shadow hover:bg-pink-700 transition text-center"
             >
               Configure SLAs
-            </Link>
-          </>
+            </button>
+          </div>
+        )}
+      </div>
+      <div>
+        {activeView === "unresolved" && (
+          <UnresolvedComplaints onBack={() => setActiveView(null)} />
+        )}
+        {activeView === "resolved" && (
+          <ResolvedComplaints onBack={() => setActiveView(null)} />
+        )}
+        {activeView === "analytics" && (
+          <ViewAnalytics onBack={() => setActiveView(null)} />
+        )}
+        {activeView === "sla" && (
+          <ConfigureSLA onBack={() => setActiveView(null)} />
         )}
       </div>
     </div>

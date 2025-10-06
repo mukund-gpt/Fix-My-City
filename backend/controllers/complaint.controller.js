@@ -6,7 +6,7 @@ export const createComplaint = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     console.log(req?.file);
-    
+
     const { title, description, location } = req.body;
 
     const complaint = new Complaint({
@@ -129,7 +129,7 @@ export const getResolvedComplaints = async (req, res) => {
 export const viewAssignedComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
-      assignedTo: { $in: [req.user._id] },
+      assignedTo: { $in: [req.user.id] },
     });
     console.log(complaints);
     res.status(200).json(complaints);

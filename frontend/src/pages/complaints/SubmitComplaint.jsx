@@ -1,3 +1,5 @@
+import * as maptilersdk from "@maptiler/sdk";
+import "@maptiler/sdk/dist/maptiler-sdk.css";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import {
   Box,
@@ -9,9 +11,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import axiosInstance from "../../api/axiosinstance";
-import * as maptilersdk from "@maptiler/sdk";
-import "@maptiler/sdk/dist/maptiler-sdk.css";
+import { useSelector } from "react-redux";
+import { useCreateComplaintMutation } from "../../redux/api/api";
 
 maptilersdk.config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
@@ -23,6 +24,14 @@ export default function SubmitComplaint() {
   const [photos, setPhotos] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [location, setLocation] = useState({ lat: null, lng: null });
+  const token = useSelector((state) => state.auth.user?.token);
+  const [createComplaint, { isLoading }] = useCreateComplaintMutation();
+  
+  if(!token){
+    return <Typography variant="h6" color="error" align="center" mt={5}>
+      You must be logged in to submit a complaint.
+    </Typography>
+  } 
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -162,7 +171,11 @@ export default function SubmitComplaint() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+
+    if (!title || !description || photos.length === 0) {
+      alert("Please fill all fields and upload at least one photo.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("title", title);
@@ -179,11 +192,14 @@ export default function SubmitComplaint() {
     }
 
     try {
-      const res = await axiosInstance.post("/complaints", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("Complaint submitted successfully!");
-      resetForm();
+      // const res = await axiosInstance.post("/complaints", formData, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      await createComplaint({ data: formData, token }).unwrap();
+      if (res.status === 201) {
+        alert("Complaint submitted successfully!");
+        resetForm();
+      }
     } catch (err) {
       console.error("Submit error:", err);
       alert("Error submitting complaint!");

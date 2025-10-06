@@ -21,7 +21,10 @@ import { server } from "../../constants/config.js";
     }),
 
     createComplaint: builder.mutation({
-      query: (data) => ({
+      query: (data, token) => ({
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         url: "complaints/new",
         method: "POST",
         credentials: "include",

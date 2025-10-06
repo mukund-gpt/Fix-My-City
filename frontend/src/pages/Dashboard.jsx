@@ -76,10 +76,10 @@ const Dashboard = () => {
         {user.role === "admin" && (
           <>
             <Link
-              to="/admin/manage-users"
+              to="/admin/manage-complaints"
               className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
             >
-              Manage Users
+              Manage Complaints
             </Link>
             <Link
               to="/admin/view-analytics"

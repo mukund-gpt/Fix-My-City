@@ -1,8 +1,7 @@
-import Link from "@mui/material/Link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import samplemessage from "../constants/sampleData.js";
+import { Link, useNavigate } from "react-router-dom";
+import samplemessage from "../constants/sampleData.js"; // Sample data for complaints
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
@@ -11,7 +10,7 @@ const Home = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     // Load data from JSON
-    setComplaints(samplemessage);
+    setComplaints(samplemessage.samplemessage);
   }, []);
 
   return (
@@ -115,19 +114,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-20 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-        <p className="mb-6 text-lg">
-          Register today and start tracking civic issues in your area.
-        </p>
-        <Link
-          to="/register"
-          className="bg-blue-600 text-white font-semibold px-6 py-3 rounded shadow hover:bg-blue-700 transition"
-        >
-          Register Now
-        </Link>
-      </section>
+    
       <h1 className="text-3xl font-bold mb-6 text-center">Recent Complaints</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.isArray(complaints) && complaints?.map((complaint) => (

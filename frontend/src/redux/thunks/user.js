@@ -132,8 +132,6 @@ export const userUpdateProfilePicture = createAsyncThunk("user/updateProfilePict
             headers: {
                 "Content-Type": "multipart/form-data",
             },
-
-
         };
         const { data } = await axios.post(`${server}/api/auth/upload-profile-picture`, formData, config);
         return data.user;

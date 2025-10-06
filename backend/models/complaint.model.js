@@ -9,6 +9,7 @@ const complaintSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     description: { type: String },
+    urgency: { type: String, enum: ["LOW", "MEDIUM", "HIGH"], default: "LOW" },
     location: { type: String },
     photo: { type: String },
     status: {

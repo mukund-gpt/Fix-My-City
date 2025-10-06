@@ -1,6 +1,6 @@
 
 import Complaint from "../models/complaint.model.js";
-
+import User from "../models/user.model.js";
 export const logoutAdmin = async (req, res) => {
   try {
     req.session.destroy((err) => {
@@ -79,5 +79,34 @@ export const updateComplaintByAdmin = async (req, res) => {
     res.status(200).json({ message: "Complaint updated successfully", complaint });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const getStaffByDepartment = async (req, res) => {
+  try {
+    // console.log('somone is demanind all staff ');
+    
+    const search = req.query.search || "";
+    let staff;
+
+    if (search.trim() === "") {
+      // No search query → return all staff
+      staff = await User.find({ role: "staff" }).select(
+        "name email department"
+      );
+    } else {
+      // Search query provided → filter by department
+      const regex = new RegExp(search, "i"); // case-insensitive
+      staff = await User.find({
+        role: "staff",
+        department: { $regex: regex },
+      }).select("name email department");
+    }
+
+    // console.log("staff:", staff);
+    res.status(200).json(staff);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };

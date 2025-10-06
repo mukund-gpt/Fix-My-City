@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
+import StaffSearch from "./admin/Search";
 const Dashboard = () => {
   // console.log(user);
   const { user } = useSelector((state) => state.auth);
@@ -39,12 +39,7 @@ const Dashboard = () => {
             >
               My Complaints
             </Link>
-            <Link
-              to="/citizen/notifications"
-              className="bg-purple-600 text-white p-6 rounded-lg shadow hover:bg-purple-700 transition text-center"
-            >
-              Notifications
-            </Link>
+            
           </>
         )}
 
@@ -52,7 +47,7 @@ const Dashboard = () => {
         {user.role === "staff" && (
           <>
             <Link
-              to="/staff/all-complaints"
+              to="/staff/complaints"
               className="bg-yellow-600 text-white p-6 rounded-lg shadow hover:bg-yellow-700 transition text-center"
             >
               View All Complaints
@@ -75,6 +70,7 @@ const Dashboard = () => {
         {/* Admin Dashboard */}
         {user.role === "admin" && (
           <>
+            <StaffSearch/>
             <Link
               to="/admin/manage-complaints"
               className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"

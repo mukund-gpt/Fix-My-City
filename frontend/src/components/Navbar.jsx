@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 const NavBar = ({ tabs }) => {
+  
   return (
     <nav className="bg-gray-900 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

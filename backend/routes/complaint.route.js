@@ -10,7 +10,7 @@ router.get("/my", protect,getmyComplaints);
 // router.get("/", getComplaints);
 router.get("/:id", protect, getComplaintsById); // Assuming this is for getting a specific complaint
 
-router.post("/new", protect, upload.single("photo"),createComplaint); // For users to submit a new complaint);
+router.post("/new", protect, upload.single("photos"),createComplaint); // For users to submit a new complaint);
 router.get("/staff/complaints", protect, getComplaints); // For staff to get all complaints
 router.get("/admin/complaints", protect, getComplaints); // For admin to get all complaints
 router.put("/staff/complaints/:id", protect, updateComplaintByStaff); // For staff to update complaint status

@@ -73,5 +73,30 @@ const samplenotification = [{
   description: "The system will undergo maintenance on 2023-10-07 from 2 AM to 4 AM.",
   date: "2023-10-07",
   status: "UNREAD"
-}]
+  }]
+
+
+const departments = [
+  { name: 'Water Supply', email: 'water@bareillygov.in' },
+  { name: 'Electricity', email: 'electricity@bareillygov.in' },
+  { name: 'Sanitation', email: 'sanitation@bareillygov.in' },
+  { name: 'Road & Transport', email: 'transport@bareillygov.in' },
+  { name: 'Waste Management', email: 'waste@bareillygov.in' },
+  { name: 'Public Health', email: 'health@bareillygov.in' },
+  { name: 'Street Lighting', email: 'streetlight@bareillygov.in' },
+  { name: 'Parks & Gardens', email: 'parks@bareillygov.in' },
+  { name: 'Building & Construction', email: 'construction@bareillygov.in' },
+  { name: 'Sewage Management', email: 'sewage@bareillygov.in' },
+  { name: 'Environment', email: 'environment@bareillygov.in' },
+  { name: 'Fire & Safety', email: 'fire@bareillygov.in' },
+  { name: 'Women & Child Welfare', email: 'womenchild@bareillygov.in' },
+  { name: 'Housing', email: 'housing@bareillygov.in' },
+  { name: 'Tax Department', email: 'tax@bareillygov.in' },
+  { name: 'Disaster Management', email: 'disaster@bareillygov.in' },
+  { name: 'Law & Order Support', email: 'laworder@bareillygov.in' },
+  { name: 'Agriculture Support', email: 'agriculture@bareillygov.in' },
+  { name: 'Animal Welfare', email: 'animal@bareillygov.in' },
+  { name: 'Tourism & Culture', email: 'tourism@bareillygov.in' },
+];
+
 export default {samplemessage, samplenotification};

@@ -196,10 +196,9 @@ export default function SubmitComplaint() {
       //   headers: { Authorization: `Bearer ${token}` },
       // });
       await createComplaint({ data: formData, token }).unwrap();
-      if (res.status === 201) {
-        toast.success("Complaint submitted successfully!");
-        resetForm();
-      }
+      toast.success("Complaint submitted successfully!");
+      resetForm();
+      
     } catch (err) {
       console.error("Submit error:", err);
       toast.error(err?.data?.message || "Failed to submit complaint. Please try again.");

@@ -16,6 +16,8 @@ const authSlice = createSlice({
     reducers: {
         userExist: (state, action) => {
             state.user = action.payload;
+            state.userRole = action.payload?.role || "citizen";
+            state.isAdmin = action.payload?.role === 'admin';
             state.loader = false;
         },
         userNotExist: (state, action) => {

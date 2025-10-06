@@ -25,16 +25,16 @@ export const createComplaint = async (req, res) => {
   }
 };
 
-export const getComplaints = async (req, res) => {
-  try {
-    const complaints = await Complaint.find()
-      .populate("citizen", "name email") // Populate citizen details
-      .populate("assignedTo", "name email"); // Populate assigned staff details
-    res.json(complaints);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// export const getComplaints = async (req, res) => {
+//   try {
+//     const complaints = await Complaint.find()
+//       .populate("citizen", "name email") // Populate citizen details
+//       .populate("assignedTo", "name email"); // Populate assigned staff details
+//     res.json(complaints);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 export const updateComplaintByStaff = async (req, res) => {
   try {
@@ -93,6 +93,7 @@ export const assignComplaint = async (req, res) => {
   }
 };
 
+//admin
 export const getUnresolvedComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find({
@@ -116,6 +117,20 @@ export const getResolvedComplaints = async (req, res) => {
 
     console.log(complaints);
 
+    res.status(200).json(complaints);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//staff
+export const viewAssignedComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find({
+      assignedTo: { $in: [req.user._id] },
+    });
+    console.log(complaints);
     res.status(200).json(complaints);
   } catch (error) {
     console.log(error);

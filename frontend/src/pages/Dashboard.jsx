@@ -5,6 +5,7 @@ import ResolvedComplaints from "./admin/ResolvedComplaints";
 import ConfigureSLA from "./admin/ConfigureSLA";
 import ViewAnalytics from "./admin/ViewAnalytics";
 import { useState } from "react";
+import ViewAssignedComplaints from "./staff/ViewAssignedComplaints";
 
 const Dashboard = () => {
   // console.log(user);
@@ -54,28 +55,7 @@ const Dashboard = () => {
         )}
 
         {/* Staff Dashboard */}
-        {user.role === "staff" && (
-          <div className="grid md:grid-cols-3 gap-6">
-            <Link
-              to="/staff/all-complaints"
-              className="bg-yellow-600 text-white p-6 rounded-lg shadow hover:bg-yellow-700 transition text-center"
-            >
-              View All Complaints
-            </Link>
-            <Link
-              to="/staff/assign-complaints"
-              className="bg-orange-600 text-white p-6 rounded-lg shadow hover:bg-orange-700 transition text-center"
-            >
-              Assign Complaints
-            </Link>
-            <Link
-              to="/staff/resolution-notes"
-              className="bg-red-600 text-white p-6 rounded-lg shadow hover:bg-red-700 transition text-center"
-            >
-              Add Resolution Notes
-            </Link>
-          </div>
-        )}
+        {user.role === "staff" && <ViewAssignedComplaints />}
 
         {/* Admin Dashboard */}
         {user.role === "admin" && (

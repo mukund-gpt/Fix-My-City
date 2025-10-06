@@ -10,6 +10,8 @@ const complaintSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String },
     location: { type: String },
+    longitude: { type: Number },
+    latitude: { type: Number },
     photo: { type: String },
     status: {
       type: String,

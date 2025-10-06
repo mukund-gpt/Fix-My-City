@@ -1,8 +1,11 @@
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useGetMyComplaintsQuery } from "../../redux/api/api";
 
 const Complaints = () => {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
   if (!user) return <div>Please log in to view your complaints.</div>;
   // console.log(user);
   const { data: complaints, error, isLoading } = useGetMyComplaintsQuery(user.token);

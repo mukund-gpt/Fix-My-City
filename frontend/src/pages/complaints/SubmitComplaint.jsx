@@ -11,9 +11,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { toast } from 'react-hot-toast';
 import { useSelector } from "react-redux";
 import { useCreateComplaintMutation } from "../../redux/api/api";
-
 maptilersdk.config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
 const DEFAULT_LOCATION = { lat: 28.7041, lng: 77.1025 }; // Delhi
@@ -197,12 +197,12 @@ export default function SubmitComplaint() {
       // });
       await createComplaint({ data: formData, token }).unwrap();
       if (res.status === 201) {
-        alert("Complaint submitted successfully!");
+        toast.success("Complaint submitted successfully!");
         resetForm();
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Error submitting complaint!");
+      toast.error(err?.data?.message || "Failed to submit complaint. Please try again.");
     }
   };
 

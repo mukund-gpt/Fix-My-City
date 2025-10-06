@@ -24,10 +24,12 @@ export default function Login() {
       });
       dispatch(userExist(data));
       // Store user data and token in localStorage
-      userRole = data.role;
-      user = data.user;
-      loader = false;
-      isAdmin = data.role=='admin'?true:false;
+      console.log(data?.role);
+      
+      // userRole = data?.role;
+      // user = data.user;
+      // loader = false;
+      // isAdmin = data.role=='admin'?true:false;
       toast.success("Login successful!");
       navigate("/dashboard");
     } catch (error) {

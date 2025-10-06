@@ -1,16 +1,17 @@
 import express from "express";
 import {
-  assignComplaint,
-  getComplaints,
-  updateComplaintByAdmin,
+    assignComplaint,
+    getComplaints,
+    getStaffByDepartment,
+    updateComplaintByAdmin
 } from "../controllers/admin.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
 import {
-  getResolvedComplaints,
-  getUnresolvedComplaints,
+    getResolvedComplaints,
+    getUnresolvedComplaints,
 } from "../controllers/complaint.controller.js";
+import { protect } from "../middlewares/auth.middleware.js";
 const router = express.Router();
-
+router.get("/staff", getStaffByDepartment);
 router.get("/complaints", protect, getComplaints);
 router.put("/complaints/assign", protect, assignComplaint); // For admin to assign complaints
 router.get("/complaints/unresolved", protect, getUnresolvedComplaints);

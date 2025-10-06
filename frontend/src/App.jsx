@@ -1,4 +1,5 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer.jsx";
 import NavBar from "./components/Navbar.jsx";
@@ -10,9 +11,18 @@ import ComplaintDetail from "./pages/complaints/ComplaintDetail.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 
 function App() {
-  
-  const userRole = "user"; // "admin" | "staff" | "user"
-  const tabs = userRole === "admin" ? adminTabs : userRole === "staff" ? staffTabs : userTabs;
+  const  userRole = useSelector ((state) => state.auth.userRole);  
+  // const userRole = "user"; // "admin" | "staff" | "user"
+  const [tabs, setTabs] = useState(userTabs);
+  useEffect(() => {
+
+    let updatedtabs = userRole === "admin" ? adminTabs : userRole === "staff" ? staffTabs : userTabs;
+    
+    setTabs(updatedtabs);
+    console.log(updatedtabs);
+    
+  }, [userRole]);
+
   return (
      <BrowserRouter>
       <NavBar tabs={tabs} />

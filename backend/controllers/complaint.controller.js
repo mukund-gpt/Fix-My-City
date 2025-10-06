@@ -5,11 +5,12 @@ export const createComplaint = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
+    console.log(req?.file);
+    
     const { title, description, location } = req.body;
 
     const complaint = new Complaint({
-      citizen: req.user._id,
+      citizen: req.user.id,
       title,
       description,
       location,

@@ -9,6 +9,7 @@ import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import ComplaintDetail from "./pages/complaints/ComplaintDetail.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import MapComponent from "./pages/map/MapComponent.jsx";
 
 function App() {
   const  userRole = useSelector ((state) => state.auth.userRole);  
@@ -32,6 +33,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complaint/:id" element={<ComplaintDetail />} />
+          <Route path="/map" element={<MapComponent />} />
           {tabs.map(tab => (
               <Route key={tab.path} path={tab.path} element={tab.element} />
           ))}

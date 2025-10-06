@@ -11,6 +11,8 @@ const complaintSchema = new mongoose.Schema(
     description: { type: String },
     urgency: { type: String, enum: ["LOW", "MEDIUM", "HIGH"], default: "LOW" },
     location: { type: String },
+    longitude: { type: Number },
+    latitude: { type: Number },
     photo: { type: String },
     status: {
       type: String,

@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import ConfigureSLA from "./admin/ConfigureSLA";
+import ResolvedComplaints from "./admin/ResolvedComplaints";
 import StaffSearch from "./admin/Search";
-const Dashboard = () => {
-  // console.log(user);
-  const { user } = useSelector((state) => state.auth);
-  
+import UnresolvedComplaints from "./admin/UnresolvedComplaints";
+import ViewAnalytics from "./admin/ViewAnalytics";
 
-  // console.log(user);
-  // const user = {name: "John Doe", role: "citizen"}; // Mock user data for demonstration
+const Dashboard = () => {
+  const { user } = useSelector((state) => state.auth);
+  const [activeView, setActiveView] = useState(null);
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,75 +26,92 @@ const Dashboard = () => {
         You are logged in as <span className="font-semibold">{user.role}</span>.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Citizen Dashboard */}
-        {user.role === "citizen" && (
-          <>
-            <Link
-              to="/citizen/submit-complaint"
-              className="bg-blue-600 text-white p-6 rounded-lg shadow hover:bg-blue-700 transition text-center"
-            >
-              Submit Complaint
-            </Link>
-            <Link
-              to="/citizen/my-complaints"
-              className="bg-green-600 text-white p-6 rounded-lg shadow hover:bg-green-700 transition text-center"
-            >
-              My Complaints
-            </Link>
-            
-          </>
-        )}
+      {/* Citizen Dashboard */}
+      {user.role === "citizen" && (
+        <div className="grid md:grid-cols-3 gap-6">
+          <Link
+            to="/citizen/submit-complaint"
+            className="bg-blue-600 text-white p-6 rounded-lg shadow hover:bg-blue-700 transition text-center"
+          >
+            Submit Complaint
+          </Link>
+          <Link
+            to="/citizen/my-complaints"
+            className="bg-green-600 text-white p-6 rounded-lg shadow hover:bg-green-700 transition text-center"
+          >
+            My Complaints
+          </Link>
+        </div>
+      )}
 
-        {/* Staff Dashboard */}
-        {user.role === "staff" && (
-          <>
-            <Link
-              to="/staff/complaints"
-              className="bg-yellow-600 text-white p-6 rounded-lg shadow hover:bg-yellow-700 transition text-center"
-            >
-              View All Complaints
-            </Link>
-            <Link
-              to="/staff/assign-complaints"
-              className="bg-orange-600 text-white p-6 rounded-lg shadow hover:bg-orange-700 transition text-center"
-            >
-              Assign Complaints
-            </Link>
-            <Link
-              to="/staff/resolution-notes"
-              className="bg-red-600 text-white p-6 rounded-lg shadow hover:bg-red-700 transition text-center"
-            >
-              Add Resolution Notes
-            </Link>
-          </>
-        )}
+      {/* Staff Dashboard */}
+      {user.role === "staff" && (
+        <div className="grid md:grid-cols-3 gap-6">
+          <Link
+            to="/staff/complaints"
+            className="bg-yellow-600 text-white p-6 rounded-lg shadow hover:bg-yellow-700 transition text-center"
+          >
+            View All Complaints
+          </Link>
+          <Link
+            to="/staff/assign-complaints"
+            className="bg-orange-600 text-white p-6 rounded-lg shadow hover:bg-orange-700 transition text-center"
+          >
+            Assign Complaints
+          </Link>
+          <Link
+            to="/staff/resolution-notes"
+            className="bg-red-600 text-white p-6 rounded-lg shadow hover:bg-red-700 transition text-center"
+          >
+            Add Resolution Notes
+          </Link>
+        </div>
+      )}
 
-        {/* Admin Dashboard */}
-        {user.role === "admin" && (
-          <>
-            <StaffSearch/>
+      {/* Admin Dashboard */}
+      {user.role === "admin" && (
+        <>
+          <StaffSearch />
+
+          <div className="grid md:grid-cols-3 gap-6 mt-6">
             <Link
               to="/admin/manage-complaints"
               className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
             >
-              Manage Complaints
+              Resolved Complaints
             </Link>
-            <Link
-              to="/admin/view-analytics"
+
+            <button
+              onClick={() => setActiveView("analytics")}
               className="bg-teal-600 text-white p-6 rounded-lg shadow hover:bg-teal-700 transition text-center"
             >
               View Analytics
-            </Link>
-            <Link
-              to="/admin/configure-sla"
+            </button>
+
+            <button
+              onClick={() => setActiveView("sla")}
               className="bg-pink-600 text-white p-6 rounded-lg shadow hover:bg-pink-700 transition text-center"
             >
               Configure SLAs
-            </Link>
-          </>
-        )}
-      </div>
+            </button>
+          </div>
+
+          <div className="mt-6">
+            {activeView === "unresolved" && (
+              <UnresolvedComplaints onBack={() => setActiveView(null)} />
+            )}
+            {activeView === "resolved" && (
+              <ResolvedComplaints onBack={() => setActiveView(null)} />
+            )}
+            {activeView === "analytics" && (
+              <ViewAnalytics onBack={() => setActiveView(null)} />
+            )}
+            {activeView === "sla" && (
+              <ConfigureSLA onBack={() => setActiveView(null)} />
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

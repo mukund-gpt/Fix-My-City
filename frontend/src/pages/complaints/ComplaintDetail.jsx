@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import axiosInstance from "../../api/axiosinstance.js";
+import StaffSearch from "../admin/Search.jsx";
 
 const ComplaintDetail = () => {
   const { id } = useParams();
@@ -69,6 +70,9 @@ const ComplaintDetail = () => {
       >
         Status: {complaint.status}
       </p>
+      <div className="m-2">
+        <StaffSearch />
+      </div>
     </div>
   );
 };

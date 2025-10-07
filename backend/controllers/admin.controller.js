@@ -1,4 +1,5 @@
 
+import mongoose from "mongoose";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
 export const logoutAdmin = async (req, res) => {
@@ -50,21 +51,33 @@ export const assignComplaint = async (req, res) => {
 
   try {
     const complaint = await Complaint.findById(complaintId);
+    // console.log(complaint);
+    
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });
     }
-
+    if (!Array.isArray(complaint.assignedTo)) {
+      complaint.assignedTo = [];
+    }
     // Add all staff if not already assigned
-    userIds.forEach((id) => {
-      if (!complaint.assignedTo.includes(id)) {
-        complaint.assignedTo.push(id);
+    for (const id of userIds) {
+      try {
+        
+        if (mongoose.Types.ObjectId.isValid(id) && !complaint.assignedTo.includes(id)) {
+          complaint.assignedTo.push(id); 
+        }
+      } catch (error) {
+        console.error('Error adding staff:', error);
       }
-    });
-
+    }
+    complaint.status = "IN_PROGRESS"; 
     await complaint.save();
-
-    res.status(200).json({ message: "Complaint assigned successfully", complaint });
+    const assignedDepartments = await User.find({ _id: { $in: complaint.assignedTo } }).distinct("department");
+      
+    res.status(200).json({ message: "Complaint assigned successfully", complaint ,assignedDepartments});
   } catch (error) {
+    console.log('error',error);
+    
     res.status(500).json({ message: error.message });
   }
 };

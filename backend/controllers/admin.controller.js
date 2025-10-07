@@ -40,22 +40,35 @@ export const verifyAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }     
 };
+
 export const assignComplaint = async (req, res) => {
-  const { complaintId, userId } = req.body; 
+  const { complaintId, userIds } = req.body; // expect an array of staff IDs
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ message: "No staff selected for assignment" });
+  }
+
   try {
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });
-    }   
-    if (!complaint.assignedTo.includes(userId)) {
-      complaint.assignedTo.push(userId);
-      await complaint.save();
-    } 
+    }
+
+    // Add all staff if not already assigned
+    userIds.forEach((id) => {
+      if (!complaint.assignedTo.includes(id)) {
+        complaint.assignedTo.push(id);
+      }
+    });
+
+    await complaint.save();
+
     res.status(200).json({ message: "Complaint assigned successfully", complaint });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const getComplaints = async (req, res) => {
   try {
@@ -110,3 +123,34 @@ export const getStaffByDepartment = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getanalyatics = async (req, res) => {
+  try {
+    const totalComplaints = await Complaint.countDocuments();
+    const resolved = await Complaint.countDocuments({ status: "RESOLVED" });
+    const inProgress = await Complaint.countDocuments({ status: "IN_PROGRESS" });
+    const open = await Complaint.countDocuments({ status: "OPEN" });
+
+    const urgencyCounts = await Complaint.aggregate([
+      { $group: { _id: "$urgency", count: { $sum: 1 } } },
+    ]);
+
+    const locationCounts = await Complaint.aggregate([
+      { $group: { _id: "$location", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.json({
+      totalComplaints,
+      resolved,
+      inProgress,
+      open,
+      urgencyCounts,
+      locationCounts,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+

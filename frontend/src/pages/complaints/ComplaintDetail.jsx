@@ -1,78 +1,107 @@
-import { useParams } from "react-router-dom";
-import samplemessage from "../../constants/sampleData.js";
+import { Box, Button } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import axiosInstance from "../../api/axiosinstance.js";
-import StaffSearch from "../admin/Search.jsx";
+import ComplaintCard from "../../components/ComplainCard.jsx";
+import StaffSearch from "../admin/Search.jsx"; // your existing StaffSearch
 
 const ComplaintDetail = () => {
   const { id } = useParams();
-  // const complaint = samplemessage.find((c) => c.id === parseInt(id));
-  const [complaint, setComplaint] = useState();
-  const token = useSelector((state) => state.auth.user.token);
+  const { userRole, user } = useSelector((state) => state.auth);
+  const [complaint, setComplaint] = useState(null);
+  const [assignedStaff, setAssignedStaff] = useState([]);
+  const [showAssign, setShowAssign] = useState(false); // new state
+  const token = user?.token;
 
+  // Fetch complaint
   useEffect(() => {
     const fetchComplaint = async () => {
       if (!token) {
-        toast.error("Please login to view unresolved complaints.");
+        toast.error("Please login to view complaint details.");
         return;
       }
 
       try {
         const res = await axiosInstance.get(`/complaints/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         setComplaint(res.data);
-        console.log(res.data);
+        setAssignedStaff(res.data.assignedTo || []);
       } catch (error) {
-        console.error("Error fetching unresolved complaints:", error);
+        console.error(error);
         toast.error(error.message || "Error fetching complaint");
       }
     };
 
     fetchComplaint();
-  }, [token]);
+  }, [id, token]);
 
-  if (!complaint) {
-    return <p className="p-6 text-center">Complaint not found!</p>;
-  }
-  console.log(complaint);
+  // Handle assignment callback from StaffSearch
+  const handleAssignStaff = async (selectedStaff) => {
+    try {
+     await axiosInstance.put(
+      `/admin/complaints/assign`,
+      { complaintId: complaint._id, userIds: selectedStaff }, // selectedStaff is an array
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+      setComplaint(res.data);
+      setAssignedStaff(res.data.assignedTo);
+      toast.success("Complaint assigned successfully!");
+      setShowAssign(false); // close after assignment
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to assign staff");
+    }
+  };
+
+  if (!complaint) return <p className="p-6 text-center">Loading complaint...</p>;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded shadow">
-      <h1 className="text-3xl font-bold mb-4">{complaint.title}</h1>
-      <img
-        src={complaint.photo}
-        alt={complaint.title}
-        className="w-full h-64 object-cover mb-4 rounded"
-      />
-      <p className="mb-2 text-gray-700">{complaint.description}</p>
-      <p className="text-gray-500 mb-2">Location: {complaint.location}</p>
-      <p className="text-gray-500 mb-2">Owner: {complaint.citizen.name}</p>
-      <p className="text-gray-500 mb-2">
-        Assigned To:{" "}
-        {complaint.assignedTo && complaint.assignedTo.length > 0
-          ? complaint.assignedTo.map((staff) => staff.name).join(", ")
-          : "Not assigned"}
-      </p>
-      <p
-        className={`inline-block px-3 py-1 rounded-full text-white text-sm font-semibold ${
-          complaint.status === "OPEN"
-            ? "bg-red-500"
-            : complaint.status === "IN_PROGRESS"
-            ? "bg-yellow-500"
-            : "bg-green-500"
-        }`}
-      >
-        Status: {complaint.status}
-      </p>
-      <div className="m-2">
-        <StaffSearch />
-      </div>
+    <div className="p-6 max-w-3xl mx-auto">
+      {/* Show complaint */}
+      <ComplaintCard complaint={complaint} />
+
+      {/* Admin Assignment */}
+      {userRole === "admin" && (
+        <Box className="mt-4">
+          {!showAssign && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setShowAssign(true)}
+            >
+              Assign Staff
+            </Button>
+          )}
+
+          {showAssign && (
+            <Box className="mt-4 bg-white p-4 rounded shadow">
+              <StaffSearch
+                selectedStaff={assignedStaff}
+                onChange={setAssignedStaff} // update local state
+              />
+              <Box className="mt-4 flex space-x-2">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleAssignStaff(assignedStaff)}
+                >
+                  Assign Selected Staff
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => setShowAssign(false)}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )}
     </div>
   );
 };

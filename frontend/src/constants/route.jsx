@@ -1,6 +1,5 @@
 import {
   Assignment,
-  Dashboard,
   Home,
   Notifications,
   People,
@@ -42,5 +41,4 @@ export const userTabs = [
   { name: "Submit Complaint", path: "citizen/submit-complaint", icon: <ReportProblem />, element: <SubmitComplaintPage role="user" type="submit" /> },
   { name: "My Complaints", path: "citizen/my-complaints", icon: <Assignment />, element: <ComplaintsPage role="user" type="my" /> },
   { name: "Notifications", path: "citizen/notifications", icon: <Notifications />, element: <NotificationsPage role="user" /> },
-  { name: "Profile", path: "/profile", icon: <Settings />, element: <ProfilePage /> }
 ];

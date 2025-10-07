@@ -3,9 +3,11 @@ import { useSelector } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer.jsx";
 import NavBar from "./components/Navbar.jsx";
+import OthersProfile from "./components/OthersProfile.jsx";
 import { adminTabs, staffTabs, userTabs } from './constants/route.jsx';
 import "./index.css";
 import Login from "./pages/auth/Login.jsx";
+import Profile from "./pages/auth/Profile.jsx";
 import Register from "./pages/auth/Register.jsx";
 import ComplaintDetail from "./pages/complaints/ComplaintDetail.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -20,7 +22,7 @@ function App() {
     let updatedtabs = userRole === "admin" ? adminTabs : userRole === "staff" ? staffTabs : userTabs;
     
     setTabs(updatedtabs);
-    console.log(updatedtabs);
+    // console.log(updatedtabs);
     
   }, [userRole]);
 
@@ -31,6 +33,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<OthersProfile />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/complaint/:id" element={<ComplaintDetail />} />
           <Route path="/map" element={<MapComponent />} />

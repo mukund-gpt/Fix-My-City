@@ -5,6 +5,11 @@ const samplemessage = [
     description: "Large pothole causing traffic delays.",
     location: "Main Street, Block A",
     status: "OPEN",
+    citizen: {
+      _id: '68e28645997566fcb50ce7da',
+      name: 'Mukund',
+      email: 'alice@example.com'
+    },
     photo: "https://picsum.photos/400/200?random=1",
     owner: "John Doe",
     department: "Road Maintenance"
@@ -15,6 +20,11 @@ const samplemessage = [
     description: "Burst pipe causing water accumulation.",
     location: "Sector 5, Park Road",
     status: "IN_PROGRESS",
+    citizen: {
+      _id: '68e28645997566fcb50ce7d9',
+      name: 'Shreyansh',
+      email: 'shrey@example.com'
+    },
     photo: "https://picsum.photos/400/200?random=2",
     owner: "Jane Smith",
     department: "Water Department"
@@ -25,6 +35,11 @@ const samplemessage = [
     description: "Bins overflowing for 2 days.",
     location: "Central Market",
     status: "RESOLVED",
+    citizen: {
+      _id: '68e28645997566fcb50ce7d9',
+      name: 'Suresh',
+      email: 'bob@example.com'
+    },
     photo: "https://picsum.photos/400/200?random=3",
     owner: "Alice Johnson",
     department: "Sanitation"

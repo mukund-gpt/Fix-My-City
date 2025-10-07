@@ -1,97 +1,169 @@
-import { Avatar, Box, Card, CardContent, Chip, Divider, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Typography,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const ComplaintCard = ({ complaint }) => {
-    const { user } = useSelector((state) => state.auth);
-    const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
   if (!complaint) return null;
 
-  const { urgency, title, description, photo, status, citizen, createdAt, updatedAt } = complaint;
+  const {
+    urgency,
+    title,
+    description,
+    photo,
+    status,
+    citizen,
+    createdAt,
+    updatedAt,
+  } = complaint;
 
   return (
-    <Card className="mb-4 bg-gray-900 text-white border border-gray-700 shadow-lg">
+    <Card
+      sx={{
+        mb: 2,
+        color: "white",
+        border: "1px solid #374151",
+        boxShadow: 3,
+      }}
+    >
       <CardContent>
         {/* Citizen Info */}
         {citizen?._id !== user?._id && (
-                  <Box className="flex items-center space-x-3 mb-3"
-                  onclick={() => navigate(`/profile/${citizen?._id}`)}>
-            <Avatar>{citizen?.name?.[0]}</Avatar>
-            <Box>
-              <Typography variant="subtitle1" className="font-bold">
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              mb: 2,
+              cursor: "pointer",
+              "&:hover": { opacity: 0.8 },
+            }}
+            onClick={() => navigate(`/profile/${citizen?._id}`)}
+          >
+            <Avatar sx={{ bgcolor: "#facc15" }}>
+              {citizen?.name?.[0]?.toUpperCase()}
+            </Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 600, color: "black" }}
+              >
                 {citizen?.name}
               </Typography>
-              <Typography variant="caption" className="text-gray-400">
+              <Typography variant="caption" sx={{ color: "#9ca3af" }}>
                 {citizen?.email}
               </Typography>
             </Box>
             <Chip
               label={urgency}
               color={
-                urgency === "HIGH" ? "error" : urgency === "MEDIUM" ? "warning" : "default"
+                urgency === "HIGH"
+                  ? "error"
+                  : urgency === "MEDIUM"
+                  ? "warning"
+                  : "default"
               }
               size="small"
-              className="ml-auto font-semibold"
+              sx={{ fontWeight: 600 }}
             />
           </Box>
         )}
 
-        <Divider className="bg-gray-700 mb-3" />
+        {citizen?._id !== user?._id && (
+          <Divider sx={{ bgcolor: "#374151", mb: 2 }} />
+        )}
 
         {/* Complaint Title & Description */}
-        <Typography variant="h6" className="font-semibold text-yellow-400">
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: "#fbbf24",
+            mb: 1,
+          }}
+        >
           {title}
         </Typography>
-        <Typography variant="body2" className="text-gray-300 mb-2">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#d1d5db",
+            mb: 2,
+            lineHeight: 1.6,
+          }}
+        >
           {description}
         </Typography>
 
         {/* Photo */}
         {photo && (
-          <img
-            src={photo.replace("\\", "/")} // Replace backslash with slash
+          <Box
+            component="img"
+            src={photo.replace(/\\/g, "/")}
             alt={title}
-            className="w-full h-48 object-cover rounded-md mb-2"
+            sx={{
+              width: "100%",
+              height: 250,
+              objectFit: "cover",
+              borderRadius: 1,
+              mb: 2,
+            }}
           />
         )}
 
-        <Divider className="bg-gray-700 mb-2" />
+        <Divider sx={{ bgcolor: "#374151", mb: 2 }} />
 
         {/* Status and timestamps */}
-        <Box className="flex justify-between items-center text-sm text-gray-400">
-          <Box>
-            <Typography variant="body2" component="span">
-              Status:{" "}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" sx={{ color: "#9ca3af" }}>
+              Status:
             </Typography>
-            <Typography
-              variant="body2"
-              component="span"
+            <Chip
+              label={status.replace("_", " ")}
+              size="small"
               sx={{
-                display: "inline-block",
-                px: 2,
-                py: 0.5,
-                borderRadius: "9999px",
                 fontWeight: 600,
                 color: "white",
                 backgroundColor:
                   status === "OPEN"
                     ? "#ef4444"
                     : status === "IN_PROGRESS"
-                    ? "#facc15"
+                    ? "#f59e0b"
                     : "#22c55e",
               }}
-            >
-              {status}
-            </Typography>
+            />
           </Box>
 
-          <Typography variant="body2">
-            Created: {new Date(createdAt).toLocaleString()}
+          <Typography variant="caption" sx={{ color: "#6b7280" }}>
+            Created: {new Date(createdAt).toLocaleDateString()}{" "}
+            {new Date(createdAt).toLocaleTimeString()}
           </Typography>
         </Box>
 
-        <Box className="flex justify-end text-xs text-gray-500 mt-1">
-          <Typography>Updated: {new Date(updatedAt).toLocaleString()}</Typography>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
+          <Typography variant="caption" sx={{ color: "#6b7280" }}>
+            Updated: {new Date(updatedAt).toLocaleDateString()}{" "}
+            {new Date(updatedAt).toLocaleTimeString()}
+          </Typography>
         </Box>
       </CardContent>
     </Card>

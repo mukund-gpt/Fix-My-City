@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import {
   createComplaint,
+  getComplaints,
   getComplaintsById,
   getmyComplaints,
 } from "../controllers/complaint.controller.js";
@@ -10,8 +11,8 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
 router.get("/my", protect, getmyComplaints);
-// router.get("/", getComplaints);
-router.get("/:id", protect, getComplaintsById); // Assuming this is for getting a specific complaint
+router.get("/", getComplaints);
+router.get("/:id", getComplaintsById); // Assuming this is for getting a specific complaint
 
 router.post("/new", protect, upload.single("photo"), createComplaint); // For users to submit a new complaint);
 

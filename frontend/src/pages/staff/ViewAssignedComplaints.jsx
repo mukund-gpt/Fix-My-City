@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../api/axiosinstance";
 import { useNavigate } from "react-router-dom";
+import ComplaintCard from "../../components/ComplainCard";
 
 const ViewAssignedComplaints = () => {
   const navigate = useNavigate();
@@ -49,31 +50,14 @@ const ViewAssignedComplaints = () => {
           <p className="text-gray-600">No complaints assigned to you yet.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {complaints.map((complaint) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {complaints?.map((complaint) => (
             <div
               key={complaint._id}
+              className="cursor-pointer transform hover:scale-105 transition duration-300"
               onClick={() => navigate(`/complaint/${complaint._id}`)}
-              className="bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
             >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {complaint.title}
-                </h3>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    complaint.status === "RESOLVED"
-                      ? "bg-green-100 text-green-800"
-                      : complaint.status === "IN_PROGRESS"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {complaint.status}
-                </span>
-              </div>
-
-              <p className="text-gray-700 mb-3">{complaint.description}</p>
+              <ComplaintCard complaint={complaint} />
             </div>
           ))}
         </div>

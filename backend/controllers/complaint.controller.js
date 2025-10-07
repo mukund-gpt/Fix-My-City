@@ -26,16 +26,17 @@ export const createComplaint = async (req, res) => {
   }
 };
 
-// export const getComplaints = async (req, res) => {
-//   try {
-//     const complaints = await Complaint.find()
-//       .populate("citizen", "name email") // Populate citizen details
-//       .populate("assignedTo", "name email"); // Populate assigned staff details
-//     res.json(complaints);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+export const getComplaints = async (req, res) => {
+  try {
+    const complaints = await Complaint.find()
+      .populate("citizen", "name email") // Populate citizen details
+      .populate("assignedTo", "name email") // Populate assigned staff details
+      .limit(6);
+    res.json(complaints);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const updateComplaintByStaff = async (req, res) => {
   try {

@@ -1,16 +1,24 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import ComplaintCard from "../components/ComplainCard.jsx";
-import samplemessage from "../constants/sampleData.js";
+import axiosInstance from "../api/axiosinstance.js";
 
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    setComplaints(samplemessage.samplemessage);
+    const fetchComplaint = async () => {
+      try {
+        const res = await axiosInstance.get(`/complaints`);
+        setComplaints(res.data);
+      } catch (error) {
+        console.error(error);
+        toast.error(error.message || "Error fetching complaint");
+      }
+    };
+
+    fetchComplaint();
   }, []);
 
   return (
@@ -19,10 +27,12 @@ const Home = () => {
       <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            Welcome to <span className="text-yellow-400">The Caravan Chronicle</span>
+            Welcome to{" "}
+            <span className="text-yellow-400">The Caravan Chronicle</span>
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-            Submit complaints, track progress, and stay updated on civic issues in your city.
+            Submit complaints, track progress, and stay updated on civic issues
+            in your city.
           </p>
           <Link
             to="/register"
@@ -34,7 +44,7 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24">
+      <section className="py-10">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
           <div className="grid md:grid-cols-3 gap-10">
@@ -65,9 +75,11 @@ const Home = () => {
       </section>
 
       {/* Dashboards Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-10 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Role-Based Dashboards</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Role-Based Dashboards
+          </h2>
           <div className="grid md:grid-cols-3 gap-10">
             {[
               {
@@ -96,9 +108,11 @@ const Home = () => {
       </section>
 
       {/* Recent Complaints */}
-      <section className="py-24">
+      <section className="py-10">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8 text-center">Recent Complaints</h1>
+          <h1 className="text-3xl font-bold mb-8 text-center">
+            Recent Complaints
+          </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {complaints?.map((complaint) => (
               <div

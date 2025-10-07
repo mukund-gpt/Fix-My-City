@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import axiosInstance from "../../api/axiosinstance";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import ComplaintCard from "../../components/ComplainCard";
 
 const UnresolvedComplaints = () => {
   const [complaints, setComplaints] = useState([]);
@@ -55,18 +56,14 @@ const UnresolvedComplaints = () => {
       {complaints.length === 0 ? (
         <p>No unresolved complaints found.</p>
       ) : (
-        <div className="space-y-4">
-          {complaints.map((complaint) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {complaints?.map((complaint) => (
             <div
               key={complaint._id}
-              className="p-4 border rounded shadow"
+              className="cursor-pointer transform hover:scale-105 transition duration-300"
               onClick={() => navigate(`/complaint/${complaint._id}`)}
             >
-              <h3 className="font-bold">{complaint.title}</h3>
-              <p>{complaint.description}</p>
-              <p className="text-sm text-gray-600">
-                Status: {complaint.status}
-              </p>
+              <ComplaintCard complaint={complaint} />
             </div>
           ))}
         </div>

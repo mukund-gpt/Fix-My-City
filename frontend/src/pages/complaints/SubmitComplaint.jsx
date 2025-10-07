@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useCreateComplaintMutation } from "../../redux/api/api";
 maptilersdk.config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
@@ -26,12 +26,14 @@ export default function SubmitComplaint() {
   const [location, setLocation] = useState({ lat: null, lng: null });
   const token = useSelector((state) => state.auth.user?.token);
   const [createComplaint, { isLoading }] = useCreateComplaintMutation();
-  
-  if(!token){
-    return <Typography variant="h6" color="error" align="center" mt={5}>
-      You must be logged in to submit a complaint.
-    </Typography>
-  } 
+
+  if (!token) {
+    return (
+      <Typography variant="h6" color="error" align="center" mt={5}>
+        You must be logged in to submit a complaint.
+      </Typography>
+    );
+  }
 
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -46,7 +48,9 @@ export default function SubmitComplaint() {
     const filesToAdd = files.slice(0, remainingSlots);
 
     if (files.length > remainingSlots) {
-      alert(`You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`);
+      alert(
+        `You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`
+      );
     }
 
     setPhotos((prev) => [...prev, ...filesToAdd]);
@@ -180,12 +184,12 @@ export default function SubmitComplaint() {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    
+
     // Append multiple photos
     photos.forEach((photo) => {
       formData.append("photos", photo);
     });
-    
+
     if (location.lat != null && location.lng != null) {
       formData.append("latitude", String(location.lat));
       formData.append("longitude", String(location.lng));
@@ -198,15 +202,20 @@ export default function SubmitComplaint() {
       await createComplaint({ data: formData, token }).unwrap();
       toast.success("Complaint submitted successfully!");
       resetForm();
-      
     } catch (err) {
       console.error("Submit error:", err);
-      toast.error(err?.data?.message || "Failed to submit complaint. Please try again.");
+      toast.error(err.message || "Failed to submit complaint");
     }
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" mt={5} px={2}>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      mt={5}
+      px={2}
+    >
       <Card sx={{ maxWidth: 700, width: "100%", p: 2, boxShadow: 4 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom align="center">
@@ -253,7 +262,8 @@ export default function SubmitComplaint() {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(150px, 1fr))",
                     gap: 2,
                   }}
                 >
@@ -318,13 +328,20 @@ export default function SubmitComplaint() {
                 }}
               />
 
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
-                💡 Click anywhere on the map to place a marker, or drag the marker to adjust location
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontStyle: "italic" }}
+              >
+                💡 Click anywhere on the map to place a marker, or drag the
+                marker to adjust location
               </Typography>
 
               <Typography variant="body2">
                 {location.lat != null && location.lng != null
-                  ? `Latitude: ${location.lat.toFixed(6)}, Longitude: ${location.lng.toFixed(6)}`
+                  ? `Latitude: ${location.lat.toFixed(
+                      6
+                    )}, Longitude: ${location.lng.toFixed(6)}`
                   : "No location selected"}
               </Typography>
 

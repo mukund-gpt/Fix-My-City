@@ -14,7 +14,7 @@ export const createComplaint = async (req, res) => {
       title,
       description,
       location,
-      photo: req.file ? req.file.path : null,
+      photos: req.files ? req.files.map((file) => file.path) : [],
       status: "OPEN",
       assignedTo: null,
     });
@@ -143,7 +143,7 @@ export const viewAssignedComplaints = async (req, res) => {
 export const getFilteredComplaints = async (req, res) => {
   try {
     let { urgency, location, status, startDate, endDate } = req.query;
-    
+
     const filter = {};
     if (urgency) filter.urgency = urgency;
     if (location) filter.location = location;

@@ -14,8 +14,7 @@ const Complaints = () => {
     error,
     isLoading,
   } = useGetMyComplaintsQuery(user.token);
-  console.log(complaints);
-  console.log(user.token);
+  // console.log(complaints);
 
   if (isLoading) return <div>Loading...</div>;
   if (error)
@@ -27,17 +26,16 @@ const Complaints = () => {
     );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {complaints?.map((complaint) => (
         <div
           key={complaint._id}
           className="cursor-pointer"
           onClick={() => navigate(`/complaint/${complaint._id}`)}
         >
-          <ComplaintCard  complaint={complaint} />
+          <ComplaintCard complaint={complaint} />
         </div>
       ))}
-      
     </div>
   );
 };

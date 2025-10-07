@@ -18,11 +18,6 @@ const ComplaintDetail = () => {
   // Fetch complaint
   useEffect(() => {
     const fetchComplaint = async () => {
-      if (!token) {
-        toast.error("Please login to view complaint details.");
-        return;
-      }
-
       try {
         const res = await axiosInstance.get(`/complaints/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -41,11 +36,11 @@ const ComplaintDetail = () => {
   // Handle assignment callback from StaffSearch
   const handleAssignStaff = async (selectedStaff) => {
     try {
-     await axiosInstance.put(
-      `/admin/complaints/assign`,
-      { complaintId: complaint._id, userIds: selectedStaff }, // selectedStaff is an array
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      await axiosInstance.put(
+        `/admin/complaints/assign`,
+        { complaintId: complaint._id, userIds: selectedStaff }, // selectedStaff is an array
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setComplaint(res.data);
       setAssignedStaff(res.data.assignedTo);
       toast.success("Complaint assigned successfully!");
@@ -56,7 +51,8 @@ const ComplaintDetail = () => {
     }
   };
 
-  if (!complaint) return <p className="p-6 text-center">Loading complaint...</p>;
+  if (!complaint)
+    return <p className="p-6 text-center">Loading complaint...</p>;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">

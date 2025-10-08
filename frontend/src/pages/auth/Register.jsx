@@ -25,12 +25,16 @@ export default function Register() {
         password,
         role,
       });
-      console.log(data);
-      toast.success("Registration successful! Please login.");
-      navigate("/login");
+      if (data?.success === true) {
+        console.log(data);
+        toast.success("Registration successful! Please login.");
+        navigate("/login");
+      } else {
+        toast.error(data?.message || "Error registering");
+      }
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Error registering");
+      toast.error(error.message || "Error registering");
     }
   };
 

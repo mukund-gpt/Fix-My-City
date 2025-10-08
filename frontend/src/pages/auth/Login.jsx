@@ -22,16 +22,21 @@ export default function Login() {
         password,
         role,
       });
-      dispatch(userExist(data));
-      // Store user data and token in localStorage
-      console.log(data?.role);
+      console.log(data);
+      if (data?.success === true) {
+        dispatch(userExist(data));
+        // Store user data and token in localStorage
+        console.log(data?.role);
 
-      // userRole = data?.role;
-      // user = data.user;
-      // loader = false;
-      // isAdmin = data.role=='admin'?true:false;
-      toast.success("Login successful!");
-      navigate("/dashboard");
+        // userRole = data?.role;
+        // user = data.user;
+        // loader = false;
+        // isAdmin = data.role=='admin'?true:false;
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      } else {
+        toast.error(data?.message || "Error logging in");
+      }
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Error logging in");

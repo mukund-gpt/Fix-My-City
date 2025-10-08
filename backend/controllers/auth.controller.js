@@ -9,10 +9,14 @@ export const registerUser = async (req, res) => {
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(201)
+        .json({ message: "User already exists", success: false });
     }
     if (userExists && userExists.role !== role) {
-      return res.status(400).json({ message: `User is not a ${role}` });
+      return res
+        .status(201)
+        .json({ message: `User is not a ${role}`, success: false });
     }
 
     // Create new user
@@ -25,12 +29,13 @@ export const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         token: generateToken(user._id),
+        success: true,
       });
     } else {
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(201).json({ message: "Invalid user data", success: false });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message, success: false });
   }
 };
 export const loginUser = async (req, res) => {
@@ -39,7 +44,7 @@ export const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid email" });
+      return res.status(201).json({ message: "Invalid email", success: false });
     }
 
     // const isPasswordCorrect = await user.matchPassword(password);
@@ -48,7 +53,9 @@ export const loginUser = async (req, res) => {
     // }
 
     if (user.role !== role) {
-      return res.status(401).json({ message: `User is not a ${role}` });
+      return res
+        .status(201)
+        .json({ message: `User is not a ${role}`, success: false });
     }
     console.log(user);
     res.json({
@@ -57,9 +64,10 @@ export const loginUser = async (req, res) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
+      success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message, success: false });
   }
 };
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -78,7 +86,9 @@ export const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ email });
     if (user && user.role !== role) {
-      return res.status(200).json({ message: `User is not a ${role}` });
+      return res
+        .status(200)
+        .json({ message: `User is not a ${role}`, success: false });
     }
     // Create new user
     if (!user) {

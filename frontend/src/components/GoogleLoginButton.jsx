@@ -21,9 +21,11 @@ export default function GoogleLoginButton({ role }) {
         token,
         role,
       });
-      dispatch(userExist(res));
-      toast.success("Login successful!");
-      navigate("/");
+      if (res.data.success === true) {
+        dispatch(userExist(res.data));
+        toast.success("Login successful!");
+        navigate("/");
+      } else return toast.error(res.data.message || "Google login failed");
     } catch (error) {
       console.log(error);
       toast.error(error.message || "Error logging in with Google");

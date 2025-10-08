@@ -78,7 +78,7 @@ export const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ email });
     if (user && user.role !== role) {
-      return res.status(400).json({ message: `User is not a ${role}` });
+      return res.status(200).json({ message: `User is not a ${role}` });
     }
     // Create new user
     if (!user) {
@@ -91,10 +91,11 @@ export const googleLogin = async (req, res) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
+      success: true,
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: "Invalid Google token" });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -106,7 +107,6 @@ export const getUserDetails = async (req, res) => {
     }
     res.status(200).json({ user });
   } catch (error) {
-
     res.status(500).json({ message: error.message });
   }
 };
@@ -115,7 +115,7 @@ export const deleteUserAccount = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    } 
+    }
     await user.remove();
     res.status(200).json({ message: "User account deleted successfully" });
   } catch (error) {
@@ -128,22 +128,21 @@ export const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    } 
+    }
     // Here you would typically send a password reset email
     res.status(200).json({ message: "Password reset email sent" });
   } catch (error) {
     res.status(500).json({ message: error.message });
-  } 
-};  
+  }
+};
 export const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
   try {
     // Here you would typically verify the token and reset the password
-    const user = await
-    User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    } 
+    }
     user.password = newPassword;
     await user.save();
     res.status(200).json({ message: "Password reset successfully" });
@@ -153,7 +152,7 @@ export const resetPassword = async (req, res) => {
 };
 export const logoutUser = async (req, res) => {
   try {
-    req.session.destroy((err) => {  
+    req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({ message: "Logout failed" });
       }
@@ -162,8 +161,5 @@ export const logoutUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
-  } 
+  }
 };
-
-
-  

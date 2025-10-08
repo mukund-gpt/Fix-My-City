@@ -36,13 +36,17 @@ const ComplaintDetail = () => {
   // Handle assignment callback from StaffSearch
   const handleAssignStaff = async (selectedStaff) => {
     try {
-      await axiosInstance.put(
+      const res =  await axiosInstance.put(
         `/admin/complaints/assign`,
         { complaintId: complaint._id, userIds: selectedStaff }, // selectedStaff is an array
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setComplaint(res.data);
-      setAssignedStaff(res.data.assignedTo);
+      // console.log(res);
+
+      console.log('assigned staff', res?.data?.assignedDepartments);
+      
+      setComplaint(res?.data?.complaint);
+      setAssignedStaff(res?.data?.assignedTo || []);
       toast.success("Complaint assigned successfully!");
       setShowAssign(false); // close after assignment
     } catch (err) {

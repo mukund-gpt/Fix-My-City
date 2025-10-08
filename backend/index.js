@@ -12,25 +12,30 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors(
-  {
-    origin: ["http://localhost:5173", "*"],
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL, "*"],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
-  }
-));
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/test", (req, res) => {
   res.send("API is working");
-}); 
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminroutes);
 app.use("/api/staff", staffroutes);
+
+app.get("/", (req, res) => {
+  return res.send("Backend is working fine");
+});
+
 const PORT = process.env.PORT || 5000;
 connectDB().then(() =>
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

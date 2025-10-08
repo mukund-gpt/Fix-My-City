@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import FilterComplaints from "./components/Filter.jsx";
 import Footer from "./components/Footer.jsx";
 import NavBar from "./components/Navbar.jsx";
 import OthersProfile from "./components/OthersProfile.jsx";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<OthersProfile />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path='/search' element={<FilterComplaints />} />
           <Route path="/complaint/:id" element={<ComplaintDetail />} />
           <Route path="/map" element={<MapComponent />} />
           {tabs.map(tab => (

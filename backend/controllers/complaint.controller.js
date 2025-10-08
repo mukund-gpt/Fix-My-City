@@ -14,7 +14,7 @@ export const createComplaint = async (req, res) => {
       title,
       description,
       location,
-      photo: req.file ? req.file.path : null,
+      photos: req.files ? req.files.map((file) => file.path) : [],
       status: "OPEN",
       assignedTo: null,
     });
@@ -137,5 +137,31 @@ export const viewAssignedComplaints = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const getFilteredComplaints = async (req, res) => {
+  try {
+    let { urgency, location, status, startDate, endDate } = req.query;
+
+    const filter = {};
+    if (urgency) filter.urgency = urgency;
+    if (location) filter.location = location;
+    if (status) filter.status = status;
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
+    }
+
+    const complaints = await Complaint.find(filter)
+      .populate("citizen", "name email")
+      .populate("assignedTo", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(complaints);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch complaints" });
   }
 };

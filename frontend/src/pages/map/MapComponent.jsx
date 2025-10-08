@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
 import { Map, MapStyle, config } from '@maptiler/sdk';
+import { useEffect, useRef } from 'react';
 
-// Sample locations with coordinates (longitude, latitude)
+
 const sampleLocations = [
   { lng: 77.2090, lat: 28.6139, students: 3500 }, // Delhi, India
   { lng: 72.8777, lat: 19.0760, students: 4200 }, // Mumbai, India
@@ -46,24 +46,24 @@ export default function MapComponent() {
     // Set your MapTiler API key
     config.apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
-    if (map.current) return; // Initialize map only once
+    if (map.current) return; 
 
-    // Initialize map
+   
     map.current = new Map({
       container: mapContainer.current,
       zoom: 4,
-      center: [78.9629, 20.5937], // Center on India
+      center: [78.9629, 20.5937], 
       style: MapStyle.DATAVIZ.DARK
     });
 
     map.current.on('load', function () {
-      // Add GeoJSON source with sample data
+      
       map.current.addSource('school_source', {
         type: 'geojson',
         data: createGeoJSON(sampleLocations)
       });
 
-      // Add heatmap layer
+      
       map.current.addLayer({
         id: 'school_heat',
         type: 'heatmap',
@@ -124,7 +124,7 @@ export default function MapComponent() {
         }
       });
 
-      // Add circle layer (visible on zoom)
+      
       map.current.addLayer({
         id: 'school_point',
         type: 'circle',
@@ -170,7 +170,7 @@ export default function MapComponent() {
       });
     });
 
-    // Cleanup
+  
     return () => {
       if (map.current) {
         map.current.remove();
@@ -183,12 +183,9 @@ export default function MapComponent() {
     <div className="w-full h-screen relative">
       <div ref={mapContainer} className="absolute top-0 left-0 w-full h-full" />
       <div className="absolute top-4 left-4 bg-gray-900 bg-opacity-80 text-white p-4 rounded-lg shadow-lg max-w-xs">
-        <h2 className="text-lg font-bold mb-2">Sample Locations Heatmap</h2>
-        <p className="text-sm text-gray-300 mb-2">
-          Showing {sampleLocations.length} sample locations across India
-        </p>
+        <h2 className="text-lg font-bold mb-2">Locations Heatmap</h2>
         <p className="text-xs text-gray-400">
-          Zoom in to see individual points. Heatmap intensity based on student count.
+          Zoom in to see individual points. Heatmap intensity based.
         </p>
       </div>
     </div>

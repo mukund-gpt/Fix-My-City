@@ -13,7 +13,7 @@ const complaintSchema = new mongoose.Schema(
     location: { type: String },
     longitude: { type: Number },
     latitude: { type: Number },
-    photo: { type: String },
+    photos: [{ type: String }],
     status: {
       type: String,
       enum: ["OPEN", "IN_PROGRESS", "RESOLVED"],
@@ -26,7 +26,6 @@ const complaintSchema = new mongoose.Schema(
     },
 
     assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
 
     deadline: {
       type: Date,
@@ -62,7 +61,6 @@ complaintSchema.pre("save", function (next) {
     }
   }
 
-
   if (this.status !== "RESOLVED" && this.deadline) {
     this.isOverdue = new Date() > this.deadline;
   }
@@ -72,7 +70,7 @@ complaintSchema.pre("save", function (next) {
 
 complaintSchema.methods.updateStatus = function (newStatus, userId) {
   const now = new Date();
-  
+
   this.status = newStatus;
 
   if (newStatus === "RESOLVED") {
@@ -98,7 +96,6 @@ complaintSchema.statics.getOverdueComplaints = function () {
 };
 
 complaintSchema.methods.getSlaTimeLines = async function () {
-
   await this.populate({
     path: "commentList",
     populate: {
@@ -134,7 +131,7 @@ complaintSchema.methods.getSlaTimeLines = async function () {
       comment: {
         id: comment._id,
         text: comment.commentText,
-        hoursSpentWorking: comment.hoursSpent || 0, 
+        hoursSpentWorking: comment.hoursSpent || 0,
       },
       timestamp: {
         from: previousTimestamp,
@@ -169,10 +166,6 @@ complaintSchema.methods.getSlaTimeLines = async function () {
     timelines,
     summary,
   };
-
-}
+};
 
 export default mongoose.model("Complaint", complaintSchema);
-
-
-

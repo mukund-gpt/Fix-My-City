@@ -6,7 +6,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
-} from "../controllers/auth.contoller.js";
+} from "../controllers/auth.controller.js";
 import { getAllUsers } from "../controllers/user.controller.js";
 import User from "../models/user.model.js";
 

@@ -53,7 +53,7 @@ export default function MapComponent() {
       container: mapContainer.current,
       zoom: 4,
       center: [78.9629, 20.5937], 
-      style: MapStyle.DATAVIZ.DARK
+      style: MapStyle.DATAVIZ.LIGHT
     });
 
     map.current.on('load', function () {

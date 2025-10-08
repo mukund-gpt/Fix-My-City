@@ -55,7 +55,10 @@ const NavBar = ({ tabs }) => {
   };
 
   return (
-    <AppBar position="sticky" className="bg-gray-900 shadow-lg z-50" elevation={4}>
+    <AppBar position="sticky" 
+        // Use a deeper background color and a subtle shadow for a premium feel
+        className="bg-gray-800 shadow-xl z-50 border-b border-indigo-700/50" 
+        elevation={4}>
       <Toolbar className="max-w-7xl mx-auto w-full flex justify-between">
         {/* Logo */}
         <Link

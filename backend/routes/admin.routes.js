@@ -1,9 +1,9 @@
 import express from "express";
 import {
     assignComplaint,
+    getAllUser,
     getanalyatics,
     getComplaints,
-    getStaffByDepartment,
     updateComplaintByAdmin
 } from "../controllers/admin.controller.js";
 import {
@@ -13,7 +13,8 @@ import {
 import { protect } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
-router.get("/staff", getStaffByDepartment);
+
+router.get("/users", getAllUser);
 router.get("/complaints", protect, getComplaints);
 router.put("/complaints/assign", protect, assignComplaint); // For admin to assign complaints
 router.get("/complaints/unresolved", protect, getUnresolvedComplaints);

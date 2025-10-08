@@ -1,104 +1,196 @@
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import UnresolvedComplaints from "./admin/UnresolvedComplaints";
-import ResolvedComplaints from "./admin/ResolvedComplaints";
-import ConfigureSLA from "./admin/ConfigureSLA";
-import ViewAnalytics from "./admin/ViewAnalytics";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+
+// Importing icons for better visual differentiation
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import SendIcon from "@mui/icons-material/Send";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { useSelector } from "react-redux";
+import ConfigureSLA from "./admin/ConfigureSLA";
+import ResolvedComplaints from "./admin/ResolvedComplaints";
+import UnresolvedComplaints from "./admin/UnresolvedComplaints";
+import ViewAnalytics from "./admin/ViewAnalytics";
 import ViewAssignedComplaints from "./staff/ViewAssignedComplaints";
 
-const Dashboard = () => {
-  // console.log(user);
-  const { user } = useSelector((state) => state.auth);
 
-  // console.log(user);
-  // const user = {name: "John Doe", role: "citizen"}; // Mock user data for demonstration
+
+const Dashboard = () => {
+  
+  const { user } = useSelector((state) => state.auth); 
+
+  const [activeView, setActiveView] = useState(null);
+
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">Please login to access your dashboard.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p className="text-xl p-8 bg-gray-800 rounded-xl shadow-lg border border-yellow-400/50">
+          Please login to access your dashboard.
+        </p>
       </div>
     );
   }
-  const [activeView, setActiveView] = useState(null);
+
+  // Helper component for creating interactive cards/buttons
+  const DashboardCard = ({ title, icon, color, onClick, isActive, path }) => {
+    const baseClasses = `
+      flex flex-col items-center justify-center p-6 sm:p-8 
+      rounded-xl shadow-xl transition-all duration-300 transform 
+      cursor-pointer border-2 font-bold text-center h-full
+    `;
+    
+    // Determine specific styling based on role/type
+    let typeClasses = `bg-gray-800 text-white border-gray-700 hover:scale-[1.03] hover:ring-2 hover:ring-yellow-400`;
+    let iconColor = color;
+    
+    if (path) {
+        // This is a Link for Citizen
+        typeClasses = `${color} text-white border-transparent hover:scale-[1.03] hover:shadow-yellow-500/50`;
+    } else if (isActive) {
+        // This is an active Admin button
+        typeClasses = `bg-yellow-400 text-gray-900 border-yellow-500 shadow-2xl shadow-yellow-500/30 ring-4 ring-yellow-400/50`;
+        iconColor = "text-gray-900"; // Black icon on yellow background
+    }
+    
+    const content = (
+      <div className={`${baseClasses} ${typeClasses}`}>
+        <div className={`text-4xl mb-3 ${iconColor}`}>{icon}</div>
+        <span className="text-lg">{title}</span>
+      </div>
+    );
+
+    if (path) {
+      return (
+        <Link to={path} className="block">
+          {content}
+        </Link>
+      );
+    }
+    
+    return (
+      <button onClick={onClick} className="block w-full">
+        {content}
+      </button>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold mb-6">Welcome, {user.name}</h1>
-      <p className="mb-8 text-gray-700">
-        You are logged in as <span className="font-semibold">{user.role}</span>.
-      </p>
+    // CHANGE: Dark background and padding for aesthetic
+    <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-white">
+      <div className="max-w-6xl mx-auto">
+        {/* Title Section */}
+        <h1 className="text-4xl font-extrabold mb-2 text-yellow-400 drop-shadow-md">
+          Welcome, {user.name}
+        </h1>
+        <p className="mb-10 text-lg text-gray-300">
+          Your role: <span className="font-bold uppercase text-yellow-400">{user.role}</span>
+        </p>
 
-      <div>
+        {/* --- Dashboard Layouts --- */}
+
         {/* Citizen Dashboard */}
         {user.role === "citizen" && (
           <div className="grid md:grid-cols-3 gap-6">
-            <Link
-              to="/citizen/submit-complaint"
-              className="bg-blue-600 text-white p-6 rounded-lg shadow hover:bg-blue-700 transition text-center"
-            >
-              Submit Complaint
-            </Link>
-            <Link
-              to="/citizen/my-complaints"
-              className="bg-green-600 text-white p-6 rounded-lg shadow hover:bg-green-700 transition text-center"
-            >
-              My Complaints
-            </Link>
-            <Link
-              to="/citizen/notifications"
-              className="bg-purple-600 text-white p-6 rounded-lg shadow hover:bg-purple-700 transition text-center"
-            >
-              Notifications
-            </Link>
+            <DashboardCard
+              title="Submit New Complaint"
+              icon={<SendIcon fontSize="inherit" />}
+              path="/citizen/submit-complaint"
+              color="bg-red-700 hover:bg-red-600"
+            />
+            <DashboardCard
+              title="View My Complaints"
+              icon={<ListAltIcon fontSize="inherit" />}
+              path="/citizen/my-complaints"
+              color="bg-green-700 hover:bg-green-600"
+            />
+            <DashboardCard
+              title="Notifications"
+              icon={<NotificationsActiveIcon fontSize="inherit" />}
+              path="/citizen/notifications"
+              color="bg-purple-700 hover:bg-purple-600"
+            />
           </div>
         )}
 
         {/* Staff Dashboard */}
-        {user.role === "staff" && <ViewAssignedComplaints />}
+        {user.role === "staff" && (
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 border-indigo-700 text-indigo-400 flex items-center">
+                <AssignmentIcon className="mr-3 text-3xl" />
+                Assigned Complaint Queue
+            </h2>
+            {/* Staff view is always visible and doesn't use the sub-view area */}
+            <ViewAssignedComplaints /> 
+          </div>
+        )}
 
         {/* Admin Dashboard */}
         {user.role === "admin" && (
-          <div className="grid md:grid-cols-4 gap-3">
-            <button
-              onClick={() => setActiveView("unresolved")}
-              className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
-            >
-              Unresolved Complaints
-            </button>
-            <button
-              onClick={() => setActiveView("resolved")}
-              className="bg-indigo-600 text-white p-6 rounded-lg shadow hover:bg-indigo-700 transition text-center"
-            >
-              Resolved Complaints
-            </button>
-            <button
-              onClick={() => setActiveView("analytics")}
-              className="bg-teal-600 text-white p-6 rounded-lg shadow hover:bg-teal-700 transition text-center"
-            >
-              View Analytics
-            </button>
-            <button
-              onClick={() => setActiveView("sla")}
-              className="bg-pink-600 text-white p-6 rounded-lg shadow hover:bg-pink-700 transition text-center"
-            >
-              Configure SLAs
-            </button>
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6 border-b pb-2 border-indigo-700 text-indigo-400 flex items-center">
+                <AssignmentTurnedInIcon className="mr-3 text-3xl" />
+                Admin Command Center
+            </h2>
+            <div className="grid md:grid-cols-4 gap-4 mb-10">
+              <DashboardCard
+                title="Unresolved Complaints"
+                icon={<PendingActionsIcon fontSize="inherit" />}
+                onClick={() => setActiveView("unresolved")}
+                isActive={activeView === "unresolved"}
+                color="text-red-400"
+              />
+              <DashboardCard
+                title="Resolved Complaints"
+                icon={<CheckCircleIcon fontSize="inherit" />}
+                onClick={() => setActiveView("resolved")}
+                isActive={activeView === "resolved"}
+                color="text-green-400"
+              />
+              <DashboardCard
+                title="View Analytics"
+                icon={<AnalyticsIcon fontSize="inherit" />}
+                onClick={() => setActiveView("analytics")}
+                isActive={activeView === "analytics"}
+                color="text-teal-400"
+              />
+              <DashboardCard
+                title="Configure SLAs"
+                icon={<SettingsIcon fontSize="inherit" />}
+                onClick={() => setActiveView("sla")}
+                isActive={activeView === "sla"}
+                color="text-pink-400"
+              />
+            </div>
+
+            {/* Sub-view Area */}
+            {activeView && (
+                <div className="mt-8 p-6 bg-gray-800 rounded-xl shadow-inner shadow-indigo-900/50 border border-gray-700">
+                    {/* The onBack prop now allows sub-components to dismiss themselves */}
+                    {activeView === "unresolved" && (
+                        <UnresolvedComplaints onBack={() => setActiveView(null)} />
+                    )}
+                    {activeView === "resolved" && (
+                        <ResolvedComplaints onBack={() => setActiveView(null)} />
+                    )}
+                    {activeView === "analytics" && (
+                        <ViewAnalytics onBack={() => setActiveView(null)} />
+                    )}
+                    {activeView === "sla" && (
+                        <ConfigureSLA onBack={() => setActiveView(null)} />
+                    )}
+                </div>
+            )}
+             {!activeView && (
+                <div className="mt-8 p-12 text-center text-gray-400 border border-gray-700 rounded-xl">
+                    <p className="text-lg">Select a command from above to manage the system.</p>
+                </div>
+            )}
           </div>
-        )}
-      </div>
-      <div>
-        {activeView === "unresolved" && (
-          <UnresolvedComplaints onBack={() => setActiveView(null)} />
-        )}
-        {activeView === "resolved" && (
-          <ResolvedComplaints onBack={() => setActiveView(null)} />
-        )}
-        {activeView === "analytics" && (
-          <ViewAnalytics onBack={() => setActiveView(null)} />
-        )}
-        {activeView === "sla" && (
-          <ConfigureSLA onBack={() => setActiveView(null)} />
         )}
       </div>
     </div>

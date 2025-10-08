@@ -48,7 +48,7 @@ export default function SubmitComplaint() {
     const filesToAdd = files.slice(0, remainingSlots);
 
     if (files.length > remainingSlots) {
-      alert(
+      toast.error(
         `You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`
       );
     }
@@ -72,7 +72,7 @@ export default function SubmitComplaint() {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation not supported by your browser.");
+      toast.error("Geolocation not supported by your browser.");
       return;
     }
 
@@ -84,7 +84,7 @@ export default function SubmitComplaint() {
       },
       (err) => {
         console.error("Geolocation error:", err);
-        alert("Unable to fetch location. Please allow location access.");
+        toast.error(err.message);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
@@ -177,7 +177,7 @@ export default function SubmitComplaint() {
     e.preventDefault();
 
     if (!title || !description || photos.length === 0) {
-      alert("Please fill all fields and upload at least one photo.");
+      toast.error("Please fill all fields and upload at least one photo.");
       return;
     }
 
@@ -199,7 +199,14 @@ export default function SubmitComplaint() {
       // const res = await axiosInstance.post("/complaints", formData, {
       //   headers: { Authorization: `Bearer ${token}` },
       // });
-      await createComplaint({ data: formData, token }).unwrap();
+      // console.log(photos);
+
+      const res = await createComplaint({ data: formData, token });
+      if (res.data.success !== true) {
+        throw new Error(
+          res.error?.data?.message || "Failed to submit complaint"
+        );
+      }
       toast.success("Complaint submitted successfully!");
       resetForm();
     } catch (err) {

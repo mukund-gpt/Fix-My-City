@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
-// Assuming MUI Icons are available if you want to use them (e.g., '@mui/icons-material/MapOutlined')
-// For now, sticking with native HTML/SVG for maximum Tailwind compatibility
-
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();

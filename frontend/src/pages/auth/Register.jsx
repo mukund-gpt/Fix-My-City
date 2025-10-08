@@ -43,30 +43,25 @@ export default function Register() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const { data } = await axiosInstance.post("/auth/register", {
-        name,
-        email,
-        password,
-        role,
-      });
-      console.log(data);
-      toast.success("Registration successful! Please login.");
-      navigate("/login");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Error registering. Try a different email.");
-    } finally {
-        setIsSubmitting(false);
+    try {
+      const { data } = await axiosInstance.post("/auth/register", {
+        name,
+        email,
+        password,
+        role,
+      });
+     if (data?.success === true) {
+        console.log(data);
+        toast.success("Registration successful! Please login.");
+        navigate("/login");
+      } else {
+        toast.error(data?.message || "Error registering");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Error registering");
     }
-  };
-
-  const roles = [
-    { value: 'citizen', label: 'Citizen', icon: User, color: 'text-indigo-500' },
-    { value: 'staff', label: 'Staff', icon: Shield, color: 'text-teal-500' },
-    { value: 'admin', label: 'Admin', icon: LogIn, color: 'text-red-500' },
-  ];
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">

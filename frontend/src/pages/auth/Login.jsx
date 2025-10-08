@@ -40,28 +40,30 @@ export default function Login() {
   // Note: Redux state variables are destructured here but mocked below for runnability.
   let { user, userRole, loader, isAdmin } = useSelector((state) => state.auth); 
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+        role,
+      });
+      if (data?.success === true) {
+        dispatch(userExist(data));
+        dispatch(userExist(data));
+      }
+      // Store user data and token in localStorage
+      console.log(data?.role);
 
-    try {
-      const { data } = await axiosInstance.post("/auth/login", {
-        email,
-        password,
-        role,
-      });
-      
-      // Dispatch user data and navigate
-      dispatch(userExist(data));
-      toast.success("Login successful!");
-      navigate("/dashboard");
-
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Login failed. Check your email, password, and role.");
-    } finally {
-        setIsSubmitting(false);
+      // userRole = data?.role;
+      // user = data.user;
+      // loader = false;
+      // isAdmin = data.role=='admin'?true:false;
+      toast.success("Login successful!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Error logging in");
     }
   };
 

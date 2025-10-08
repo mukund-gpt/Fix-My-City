@@ -1,12 +1,11 @@
 import { Parser } from "json2csv"; // for CSV
 import pdfkit from "pdfkit"; // for PDF
-import Complaint from "../models/Complaint.js";
+import Complaint from "../models/complaint.model.js";
 
 export const getReports = async (req, res) => {
   try {
     const { startDate, endDate, format } = req.query;
 
-    // Fetch complaints within date range
     const filter = {};
     if (startDate && endDate) {
       filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
@@ -17,13 +16,11 @@ export const getReports = async (req, res) => {
     // Analytics
     const totalComplaints = complaints.length;
 
-    // Complaint volume by category
     const volumeByCategory = complaints.reduce((acc, c) => {
       acc[c.category] = (acc[c.category] || 0) + 1;
       return acc;
     }, {});
 
-    // Average resolution time
     const resolvedComplaints = complaints.filter(c => c.status === "resolved");
     const avgResolutionTime =
       resolvedComplaints.reduce((acc, c) => {

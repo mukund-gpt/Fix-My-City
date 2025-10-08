@@ -1,5 +1,7 @@
 import {
   Assignment,
+  Dashboard,
+  DashboardCustomize,
   Home,
   Notifications,
   People,
@@ -21,7 +23,7 @@ const SubmitComplaintPage = lazy(()=> import ("../pages/complaints/SubmitComplai
 // Tabs with elements
 export const adminTabs = [
   { name: "Home", path: "/", icon: <Home />, element: <HomePage /> },
-  { name: "Complaints", path: "/admin/complaints", icon: <ReportProblem />, element: <ComplaintsPage role="admin" /> },
+  { name: "Dashboard", path: "/dashboard", icon: <DashboardCustomize />, element: <DashboardPage role="admin" /> },
   { name: "Users", path: "/admin/users", icon: <People />, element: <UsersPage /> },
   { name: "Reports", path: "/admin/reports", icon: <Assignment />, element: <ReportsPage /> },
   { name: "Settings", path: "/admin/settings", icon: <Settings />, element: <SettingsPage role="admin" /> },

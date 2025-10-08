@@ -1,10 +1,10 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import axiosInstance from "../api/axiosinstance";
-import { useNavigate } from "react-router-dom";
-import { userExist } from "../redux/reducers/auth";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosinstance";
+import { userExist } from "../redux/reducers/auth";
 
 export default function GoogleLoginButton({ role }) {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function GoogleLoginButton({ role }) {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center ">
       <GoogleLogin onSuccess={handleLoginSuccess} onError={handleLoginError} />
     </div>
   );

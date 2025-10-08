@@ -13,7 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   let { user, userRole, loader, isAdmin } = useSelector((state) => state.auth);
-  
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -25,7 +25,7 @@ export default function Login() {
       dispatch(userExist(data));
       // Store user data and token in localStorage
       console.log(data?.role);
-      
+
       // userRole = data?.role;
       // user = data.user;
       // loader = false;
@@ -34,7 +34,7 @@ export default function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Error logging in");
+      toast.error(error.message || "Error logging in");
     }
   };
 

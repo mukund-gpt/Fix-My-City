@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
+
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();

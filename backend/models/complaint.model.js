@@ -29,7 +29,6 @@ const complaintSchema = new mongoose.Schema(
 
     deadline: {
       type: Date,
-      required: true,
     },
     isOverdue: {
       type: Boolean,

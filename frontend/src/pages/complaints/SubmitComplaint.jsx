@@ -199,7 +199,14 @@ export default function SubmitComplaint() {
       // const res = await axiosInstance.post("/complaints", formData, {
       //   headers: { Authorization: `Bearer ${token}` },
       // });
-      await createComplaint({ data: formData, token }).unwrap();
+      // console.log(photos);
+
+      const res = await createComplaint({ data: formData, token });
+      if (res.data.success !== true) {
+        throw new Error(
+          res.error?.data?.message || "Failed to submit complaint"
+        );
+      }
       toast.success("Complaint submitted successfully!");
       resetForm();
     } catch (err) {

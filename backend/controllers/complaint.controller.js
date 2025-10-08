@@ -1,27 +1,44 @@
 import Complaint from "../models/complaint.model.js";
+import cloudinary from "../utills/cloudinary.js";
 
 export const createComplaint = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    console.log(req?.file);
 
-    const { title, description, location } = req.body;
+    // console.log("Files received:", req.files);
+    // console.log("Body:", req.body);
+
+    const { title, description, latitude, longitude } = req.body;
+
+    let photoUrls = [];
+
+    // Upload each image to Cloudinary in the "fixmycity" folder
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "fixmycity",
+        });
+        photoUrls.push(result.secure_url); // Store the Cloudinary URL
+      }
+    }
 
     const complaint = new Complaint({
       citizen: req.user.id,
       title,
       description,
-      location,
-      photos: req.files ? req.files.map((file) => file.path) : [],
+      latitude,
+      longitude,
+      photos: photoUrls,
       status: "OPEN",
       assignedTo: null,
     });
 
     const createdComplaint = await complaint.save();
-    res.status(201).json(createdComplaint);
+    res.status(201).json({ success: true });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -62,7 +79,7 @@ export const getmyComplaints = async (req, res) => {
       "citizen",
       "name email"
     );
-    console.log("complaints", complaints);
+    // console.log("complaints", complaints);
 
     res.json(complaints);
   } catch (error) {

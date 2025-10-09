@@ -1,10 +1,15 @@
 import { useState } from "react";
 // Import icons for visual enhancement
 import GoogleLoginButton from "@/components/GoogleLoginButton";
-import { ArrowRight, Lock, LogIn, Mail, Shield, User } from 'lucide-react';
+import { ArrowRight, Lock, Mail, Shield, User } from 'lucide-react';
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+const roles = [
+    { value: 'citizen', label: 'Citizen', icon: User, color: 'text-indigo-500' },
+    { value: 'staff', label: 'Staff', icon: Shield, color: 'text-teal-500' },
+    { value: 'admin', label: 'Admin', icon: Lock, color: 'text-red-500' },
+  ];
 
 // Component for reusable, styled input fields
 const FormInput = ({ icon: Icon, label, type, value, onChange, placeholder, required = true }) => (

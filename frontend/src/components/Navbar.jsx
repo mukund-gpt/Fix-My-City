@@ -1,3 +1,4 @@
+import { persistor } from "@/redux/store";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -50,6 +51,7 @@ const NavBar = ({ tabs }) => {
   const handleLogout = () => {
     setProfileAnchor(null);
     dispatch(userNotExist());
+    persistor.purge();
     toast.success("Logged out successfully");
     navigate("/login");
   };

@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
 import staffroutes from "./routes/staff.routes.js";
+import maproutes from "./routes/map.routes.js";
 import connectDB from "./utills/db.js";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminroutes);
 app.use("/api/staff", staffroutes);
+app.use("/api/map", maproutes);
 
 app.get("/", (req, res) => {
   return res.send("Backend is working fine");

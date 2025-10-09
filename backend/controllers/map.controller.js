@@ -1,26 +1,26 @@
-import Complaint from "../models/Complaint.js";
+import Complaint from "../models/complaint.model.js";
 
 export const getLocations = async (req, res) => {
   try {
     // Fetch all complaints with necessary fields
     const complaints = await Complaint.find({
       latitude: { $exists: true, $ne: null },
-      longitude: { $exists: true, $ne: null }
-    }).select('latitude longitude status title location');
+      longitude: { $exists: true, $ne: null },
+    }).select("latitude longitude status location");
 
     // Separate complaints by status
     const openComplaints = [];
     const inProgressComplaints = [];
     const resolvedComplaints = [];
 
-    complaints.forEach(complaint => {
+    complaints.forEach((complaint) => {
       const locationData = {
         id: complaint._id,
         latitude: complaint.latitude,
         longitude: complaint.longitude,
         title: complaint.title,
         location: complaint.location,
-        status: complaint.status
+        status: complaint.status,
       };
 
       switch (complaint.status) {
@@ -49,16 +49,16 @@ export const getLocations = async (req, res) => {
           total: complaints.length,
           openCount: openComplaints.length,
           inProgressCount: inProgressComplaints.length,
-          resolvedCount: resolvedComplaints.length
-        }
-      }
+          resolvedCount: resolvedComplaints.length,
+        },
+      },
     });
   } catch (error) {
     console.error("Error fetching locations:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch locations",
-      error: error.message
+      error: error.message,
     });
   }
 };

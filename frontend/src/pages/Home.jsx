@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
@@ -15,9 +15,12 @@ import img10 from "./assets/img10.png";
 import img11 from "./assets/img11.png";
 import img12 from "./assets/img12.png";
 import img13 from "./assets/img13.png";
+
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
+  const vantaRef = useRef(null);
+  const vantaEffect = useRef(null);
 
   useEffect(() => {
     const fetchComplaint = async () => {
@@ -31,6 +34,71 @@ const Home = () => {
     };
 
     fetchComplaint();
+  }, []);
+
+  // Initialize Vanta Birds Effect
+  useEffect(() => {
+    if (!vantaEffect.current && vantaRef.current) {
+      // Load Three.js and Vanta.js scripts
+      const loadScripts = async () => {
+        // Load Three.js
+        if (!window.THREE) {
+          const threeScript = document.createElement('script');
+          threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+          threeScript.async = true;
+          document.body.appendChild(threeScript);
+          
+          await new Promise((resolve) => {
+            threeScript.onload = resolve;
+          });
+        }
+
+        // Load Vanta Birds
+        if (!window.VANTA) {
+          const vantaScript = document.createElement('script');
+          vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js';
+          vantaScript.async = true;
+          document.body.appendChild(vantaScript);
+          
+          await new Promise((resolve) => {
+            vantaScript.onload = resolve;
+          });
+        }
+
+        // Initialize Vanta effect
+        if (window.VANTA && vantaRef.current) {
+          vantaEffect.current = window.VANTA.BIRDS({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            backgroundColor: 0x1e3a8a,
+            color1: 0xff0000,
+            color2: 0x00ffff,
+            colorMode: "variance",
+            birdSize: 1.8,
+            wingSpan: 25.00,
+            speedLimit: 4.00,
+            separation: 50.00,
+            alignment: 50.00,
+            cohesion: 40.00,
+            quantity: 4.00
+          });
+        }
+      };
+
+      loadScripts();
+    }
+
+    return () => {
+      if (vantaEffect.current) {
+        vantaEffect.current.destroy();
+      }
+    };
   }, []);
 
   // Static Data for the "City Pulse" section (made up for dramatic effect)
@@ -59,24 +127,17 @@ const Home = () => {
 
   return (
     <div className="bg-gray-900 min-h-screen font-sans text-white overflow-hidden">
-      {/* Hero Section: The Grand Beacon */}
-      <section className="relative bg-gradient-to-br from-blue-900 to-indigo-900 py-48 shadow-2xl overflow-hidden">
-        {/* Abstract Background Animation */}
-        <div className="absolute inset-0 opacity-20 animate-bg-pulse">
-          <svg className="w-full h-full" viewBox="0 0 1440 320">
-            <path
-              fill="#4f46e5"
-              fillOpacity="0.5"
-              d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,90.7C672,85,768,107,864,122.7C960,139,1056,149,1152,144C1248,139,1344,117,1392,106.7L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            ></path>
-          </svg>
-        </div>
-
+      {/* Hero Section: The Grand Beacon with Vanta Birds */}
+      <section 
+        ref={vantaRef}
+        className="relative py-48 shadow-2xl overflow-hidden"
+      >
+        {/* Content overlay - floating above Vanta background */}
         <div className="container mx-auto px-6 relative z-10 text-center transform translate-y-[-1rem] animate-fadeInDown">
-          <h1 className="text-6xl md:text-7xl font-extrabold mb-4 tracking-tight leading-none drop-shadow-lg">
+          <h1 className="text-6xl md:text-7xl font-extrabold mb-4 tracking-tight leading-none drop-shadow-2xl">
             The <span className="text-yellow-400">Caravan Chronicle</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-12 max-w-4xl mx-auto font-light text-indigo-200">
+          <p className="text-xl md:text-2xl mb-12 max-w-4xl mx-auto font-light text-white drop-shadow-lg">
             <b>Charting a course for civic repair.</b> Your voice is the
             compass, guiding our city's journey to a better future.
           </p>
@@ -96,7 +157,8 @@ const Home = () => {
           </Link>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full translate-y-1.5 overflow-hidden bg-white h-36 flex items-center">
+        {/* Infinite Carousel at the bottom */}
+        <div className="absolute bottom-0 left-0 w-full translate-y-1.5 overflow-hidden bg-white h-36 flex items-center z-20">
           <style>
             {`
       @keyframes scroll {
@@ -207,7 +269,6 @@ const Home = () => {
             ].map((feature, i) => (
               <div
                 key={i}
-                // Elevated card with a diagonal split background and cool hover effect
                 className="bg-gray-800 p-8 rounded-xl shadow-2xl border-2 border-indigo-700/50 hover:border-yellow-500 transition-all duration-500 transform hover:-translate-y-2 group"
               >
                 <div className="text-6xl mb-4 transition-transform duration-500 group-hover:rotate-[10deg]">
@@ -238,7 +299,6 @@ const Home = () => {
                   className="cursor-pointer transform hover:scale-[1.03] transition duration-300 shadow-xl hover:shadow-yellow-500/20 rounded-xl overflow-hidden animate-bounceIn"
                   onClick={() => navigate(`/complaint/${complaint._id}`)}
                 >
-                  {/* Assuming ComplaintCard is visually appealing, it will now inherit the dark theme context */}
                   <ComplaintCard complaint={complaint} />
                 </div>
               ))

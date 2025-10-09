@@ -77,8 +77,8 @@ const Home = () => {
             The <span className="text-yellow-400">Caravan Chronicle</span>
           </h1>
           <p className="text-xl md:text-2xl mb-12 max-w-4xl mx-auto font-light text-indigo-200">
-            **Charting a course for civic repair.** Your voice is the compass,
-            guiding our city's journey to a better future.
+            <b>Charting a course for civic repair.</b> Your voice is the
+            compass, guiding our city's journey to a better future.
           </p>
           <Link
             to="/citizen/submit-complaint"
@@ -274,13 +274,13 @@ const Home = () => {
               to="/register"
               className="bg-yellow-400 text-indigo-900 font-bold px-10 py-4 rounded-full shadow-2xl hover:bg-yellow-300 transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
             >
-              Citizen Sign-up
+              Register
             </Link>
             <Link
               to="/login"
               className="bg-gray-100 text-indigo-800 font-semibold px-10 py-4 rounded-full shadow-lg hover:bg-white transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
             >
-              Staff Portal
+              Login
             </Link>
           </div>
         </div>

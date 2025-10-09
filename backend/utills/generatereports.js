@@ -60,11 +60,12 @@ export const getReports = async (req, res) => {
             // Pre-process data to flatten nested objects and format fields
             const processedData = complaints.map(c => ({
                 ...c,
-                // Combine names of assigned staff into a single string
                 assignedStaff: c.assignedTo?.map(staff => staff.name).join(", ") || "N/A",
-                // Format dates to be more readable
                 createdAt: new Date(c.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
                 resolvedAt: c.resolvedAt ? new Date(c.resolvedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "N/A",
+                comments: c.commentList?.map(
+                    com => `${com.author?.name}: ${com?.commentText}${com?.imageUrl?.length ? " [Image attached]" : ""}`
+                ).join(" | ") || "No comments",
             }));
 
             const parser = new Parser({ fields });

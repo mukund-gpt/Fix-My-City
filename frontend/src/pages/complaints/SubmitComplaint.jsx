@@ -7,16 +7,17 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import SendIcon from '@mui/icons-material/Send';
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  IconButton, // Added for loading state in the form
-  Stack,
-  TextField,
-  Typography,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CircularProgress,
+    IconButton, // Added for loading state in the form
+    Stack,
+    TextField,
+    Typography,
 } from "@mui/material";
+import { ClosedCaptionIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -350,7 +351,7 @@ export default function SubmitComplaint() {
                                                         '&:hover': { backgroundColor: '#ffebee' }
                                                     }}
                                                 >
-                                                    <CloseIcon fontSize="small" />
+                                                    <ClosedCaptionIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
                                         ))}

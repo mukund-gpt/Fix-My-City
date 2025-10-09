@@ -26,5 +26,5 @@ router.get("/complaints/unresolved", protect, getUnresolvedComplaints);
 router.get("/complaints/resolved", protect, getResolvedComplaints);
 router.put("/complaints/:id", protect, updateComplaintByAdmin); // For admin to update complaint status
 router.get("/analytics",getanalyatics);
-router.get("/reports", protect, getReports);
+router.get("/reports", getReports);
 export default router;

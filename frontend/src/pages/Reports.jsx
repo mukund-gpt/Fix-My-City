@@ -1,4 +1,5 @@
 import axiosInstance from '@/api/axiosinstance';
+import { server } from '@/constants/config';
 import { Calendar, CheckCircle, Download, Tally3, Timer } from 'lucide-react';
 import { useState } from "react";
 import { useSelector } from 'react-redux';
@@ -69,7 +70,7 @@ export default function Reports() {
     }
     setError(null);
     // This opens the download URL in a new tab
-    const url = `/api/admin/reports?startDate=${startDate}&endDate=${endDate}&format=${format}`;
+    const url = `${server}/api/admin/reports?startDate=${startDate}&endDate=${endDate}&format=${format}`;
     window.open(url, "_blank");
     console.log(`Simulating download of ${format} report from: ${url}`);
   };

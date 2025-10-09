@@ -327,7 +327,7 @@ const StaffCommentForm = ({ onSubmit, isSubmitting }) => {
 const CommentDisplay = ({ comment }) => {
     // Helper to format date
     const formattedDate = new Date(comment.createdAt).toLocaleDateString() + ' ' + new Date(comment.createdAt).toLocaleTimeString();
-    console.log(comment);
+    // console.log(comment);
     
     return (
         <Box className="p-3 border rounded-lg shadow-sm bg-blue-50">

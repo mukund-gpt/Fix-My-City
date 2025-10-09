@@ -38,35 +38,50 @@ const Home = () => {
 
   // Initialize Vanta Birds Effect
   useEffect(() => {
-    if (!vantaEffect.current && vantaRef.current) {
-      // Load Three.js and Vanta.js scripts
-      const loadScripts = async () => {
+    let mounted = true;
+    
+    const loadScripts = async () => {
+      try {
         // Load Three.js
         if (!window.THREE) {
-          const threeScript = document.createElement('script');
-          threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
-          threeScript.async = true;
-          document.body.appendChild(threeScript);
-          
-          await new Promise((resolve) => {
+          await new Promise((resolve, reject) => {
+            const existingScript = document.querySelector('script[src*="three.min.js"]');
+            if (existingScript) {
+              if (window.THREE) resolve();
+              else existingScript.addEventListener('load', resolve);
+              return;
+            }
+            
+            const threeScript = document.createElement('script');
+            threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+            threeScript.async = true;
             threeScript.onload = resolve;
+            threeScript.onerror = reject;
+            document.head.appendChild(threeScript);
           });
         }
 
         // Load Vanta Birds
-        if (!window.VANTA) {
-          const vantaScript = document.createElement('script');
-          vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js';
-          vantaScript.async = true;
-          document.body.appendChild(vantaScript);
-          
-          await new Promise((resolve) => {
+        if (!window.VANTA?.BIRDS) {
+          await new Promise((resolve, reject) => {
+            const existingScript = document.querySelector('script[src*="vanta.birds"]');
+            if (existingScript) {
+              if (window.VANTA?.BIRDS) resolve();
+              else existingScript.addEventListener('load', resolve);
+              return;
+            }
+            
+            const vantaScript = document.createElement('script');
+            vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js';
+            vantaScript.async = true;
             vantaScript.onload = resolve;
+            vantaScript.onerror = reject;
+            document.head.appendChild(vantaScript);
           });
         }
 
-        // Initialize Vanta effect
-        if (window.VANTA && vantaRef.current) {
+        // Initialize Vanta effect only if component is still mounted
+        if (mounted && window.VANTA?.BIRDS && vantaRef.current && !vantaEffect.current) {
           vantaEffect.current = window.VANTA.BIRDS({
             el: vantaRef.current,
             mouseControls: true,
@@ -89,14 +104,22 @@ const Home = () => {
             quantity: 4.00
           });
         }
-      };
+      } catch (error) {
+        console.error('Error loading Vanta scripts:', error);
+      }
+    };
 
-      loadScripts();
-    }
+    loadScripts();
 
     return () => {
+      mounted = false;
       if (vantaEffect.current) {
-        vantaEffect.current.destroy();
+        try {
+          vantaEffect.current.destroy();
+          vantaEffect.current = null;
+        } catch (error) {
+          console.error('Error destroying Vanta effect:', error);
+        }
       }
     };
   }, []);

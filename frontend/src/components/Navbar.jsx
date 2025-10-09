@@ -17,7 +17,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState , useEffect} from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -28,6 +28,8 @@ const NavBar = ({ tabs }) => {
   const [profileAnchor, setProfileAnchor] = useState(null); // for profile dropdown
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(null);
+    const vantaRef = useRef(null);
+    const vantaEffect = useRef(null);
 
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -56,14 +58,188 @@ const NavBar = ({ tabs }) => {
     navigate("/login");
   };
 
+
+    // useEffect(() => {
+    //   let mounted = true;
+  
+    //   const loadScripts = async () => {
+    //     try {
+    //       // Load Three.js
+    //       if (!window.THREE) {
+    //         await new Promise((resolve, reject) => {
+    //           const existingScript = document.querySelector(
+    //             'script[src*="three.min.js"]'
+    //           );
+    //           if (existingScript) {
+    //             if (window.THREE) resolve();
+    //             else existingScript.addEventListener("load", resolve);
+    //             return;
+    //           }
+  
+    //           const threeScript = document.createElement("script");
+    //           threeScript.src =
+    //             "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js";
+    //           threeScript.async = true;
+    //           threeScript.onload = resolve;
+    //           threeScript.onerror = reject;
+    //           document.head.appendChild(threeScript);
+    //         });
+    //       }
+  
+    //       // Load Vanta Birds
+    //       if (!window.VANTA?.BIRDS) {
+    //         await new Promise((resolve, reject) => {
+    //           const existingScript = document.querySelector(
+    //             'script[src*="vanta.birds"]'
+    //           );
+    //           if (existingScript) {
+    //             if (window.VANTA?.BIRDS) resolve();
+    //             else existingScript.addEventListener("load", resolve);
+    //             return;
+    //           }
+  
+    //           const vantaScript = document.createElement("script");
+    //           vantaScript.src =
+    //             "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js";
+    //           vantaScript.async = true;
+    //           vantaScript.onload = resolve;
+    //           vantaScript.onerror = reject;
+    //           document.head.appendChild(vantaScript);
+    //         });
+    //       }
+  
+    //       // Initialize Vanta effect only if component is still mounted
+    //       if (
+    //         mounted &&
+    //         window.VANTA?.BIRDS &&
+    //         vantaRef.current &&
+    //         !vantaEffect.current
+    //       ) {
+    //         vantaEffect.current = window.VANTA.BIRDS({
+    //           el: vantaRef.current,
+    //           mouseControls: true,
+    //           touchControls: true,
+    //           gyroControls: false,
+    //           minHeight: 200.0,
+    //           minWidth: 200.0,
+    //           scale: 1.0,
+    //           scaleMobile: 1.0,
+    //           backgroundColor: 0x1e3a8a,
+    //           color1: 0xff0000,
+    //           color2: 0x00ffff,
+    //           colorMode: "variance",
+    //           birdSize: 1.8,
+    //           wingSpan: 25.0,
+    //           speedLimit: 4.0,
+    //           separation: 50.0,
+    //           alignment: 50.0,
+    //           cohesion: 40.0,
+    //           quantity: 4.0,
+    //         });
+    //       }
+    //     } catch (error) {
+    //       console.error("Error loading Vanta scripts:", error);
+    //     }
+    //   };
+  
+    //   loadScripts();
+  
+    //   return () => {
+    //     mounted = false;
+    //     if (vantaEffect.current) {
+    //       try {
+    //         vantaEffect.current.destroy();
+    //         vantaEffect.current = null;
+    //       } catch (error) {
+    //         console.error("Error destroying Vanta effect:", error);
+    //       }
+    //     }
+    //   };
+    // }, []);
+
+useEffect(() => {
+  let mounted = true;
+
+  async function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        if (existing.dataset.loaded) return resolve();
+        existing.addEventListener("load", resolve);
+        existing.addEventListener("error", reject);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.onload = () => {
+        script.dataset.loaded = "true";
+        resolve();
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  const initFog = async () => {
+    try {
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js");
+      await loadScript("https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js");
+
+      // Clean up old effect
+      if (vantaEffect.current) {
+        vantaEffect.current.destroy();
+        vantaEffect.current = null;
+      }
+
+      if (mounted && window.VANTA?.FOG && vantaRef.current) {
+        vantaEffect.current = window.VANTA.FOG({
+          el: vantaRef.current,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 64.0,
+          minWidth: 200.0,
+          highlightColor: 0x4aff,
+          midtoneColor: 0xff0000,
+          lowlightColor: 0x2d00ff,
+          baseColor: 0xedebff,
+          blurFactor: 0.6,
+          zoom: 0.1,
+          speed: 5,
+        });
+        console.log("✅ VANTA.FOG initialized!");
+      } else {
+        console.error("⚠️ VANTA.FOG or target element not ready!");
+      }
+    } catch (err) {
+      console.error("VANTA.FOG load failed:", err);
+    }
+  };
+
+  initFog();
+
+  return () => {
+    mounted = false;
+    if (vantaEffect.current) {
+      vantaEffect.current.destroy();
+      vantaEffect.current = null;
+    }
+  };
+}, []);
+
+
+
   return (
-    <AppBar
+    
+      <AppBar
+        ref={vantaRef}
       position="sticky"
       // Use a deeper background color and a subtle shadow for a premium feel
-      className="bg-gray-800 shadow-xl z-50 border-b border-indigo-700/50"
+      className="bg-gray-800 shadow-xl z-0 border-b border-indigo-700/50 "
       elevation={4}
     >
-      <Toolbar className="max-w-7xl mx-auto w-full flex justify-between">
+      <Toolbar className="max-w-8xl mx-auto mr-0 w-full flex justify-between">
         {/* Logo */}
         <Link
           to="/"
@@ -128,7 +304,7 @@ const NavBar = ({ tabs }) => {
                 alt={user?.name || "User"}
                 className="bg-yellow-400 text-black"
               />
-              <Typography className="ml-5 text-white">
+              <Typography className="px-5 text-white">
                 {user?.name || "User"}
               </Typography>
             </IconButton>
@@ -252,7 +428,8 @@ const NavBar = ({ tabs }) => {
           ))}
         </List>
       </Drawer>
-    </AppBar>
+      </AppBar>
+  
   );
 };
 

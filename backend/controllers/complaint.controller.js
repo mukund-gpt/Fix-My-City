@@ -182,3 +182,31 @@ export const getFilteredComplaints = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch complaints" });
   }
 };
+
+
+export const getComplaintSlaTimeline = async (req, res) => {
+  try {
+    const complaintId = req.params.id;
+    console.log(complaintId)
+
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) {
+      return res.status(404).json({ success: false, message: "Complaint not found" });
+    }
+
+    const timelineData = await complaint.getSlaTimeLines();
+
+    return res.status(200).json({
+      success: true,
+      message: "SLA timelines fetched successfully",
+      data: timelineData,
+    });
+  } catch (error) {
+    console.error("Error fetching SLA timeline:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};

@@ -6,6 +6,7 @@ import {
   getComplaintsById,
   getFilteredComplaints,
   getmyComplaints,
+  getComplaintSlaTimeline,
 } from "../controllers/complaint.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get("/", getFilteredComplaints);
 router.get("/my", protect, getmyComplaints);
 router.get("/", getComplaints);
 router.get("/:id", getComplaintsById); // Assuming this is for getting a specific complaint
+router.get("/:id/sla-timeline", getComplaintSlaTimeline);
 
 router.post("/new", protect, upload.array("photos", 5), createComplaint); // For users to submit a new complaint);
 

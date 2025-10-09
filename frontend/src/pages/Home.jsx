@@ -2,7 +2,19 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
-
+import img1 from "./assets/img1.svg";
+import img2 from "./assets/img2.svg";
+import img3 from "./assets/img3.png";
+import img4 from "./assets/img4.png";
+import img5 from "./assets/img5.png";
+import img6 from "./assets/img6.png";
+import img7 from "./assets/img7.png";
+import img8 from "./assets/img8.png";
+import img9 from "./assets/img9.png";
+import img10 from "./assets/img10.png";
+import img11 from "./assets/img11.png";
+import img12 from "./assets/img12.png";
+import img13 from "./assets/img13.png";
 const Home = () => {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
@@ -28,6 +40,22 @@ const Home = () => {
   const resolutionRate = Math.round(
     (totalResolved / (totalResolved + totalOpen)) * 100
   );
+
+  const images = [
+    img1,
+    img2,
+    img3,
+    img4,
+    img5,
+    img6,
+    img7,
+    img8,
+    img9,
+    img10,
+    img11,
+    img12,
+    img13,
+  ];
 
   return (
     <div className="bg-gray-900 min-h-screen font-sans text-white overflow-hidden">
@@ -67,10 +95,53 @@ const Home = () => {
             </svg>
           </Link>
         </div>
+
+        <div className="absolute bottom-0 left-0 w-full translate-y-1.5 overflow-hidden bg-white h-36 flex items-center">
+          <style>
+            {`
+      @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-scroll {
+        animation: scroll 25s linear infinite;
+        display: flex;
+      }
+      .animate-scroll:hover {
+        animation-play-state: paused;
+      }
+    `}
+          </style>
+
+          <div className="animate-scroll">
+            <div className="flex shrink-0">
+              {images.map((img, i) => (
+                <img
+                  key={`original-${i}`}
+                  src={img}
+                  alt="city-icon"
+                  className="h-16 w-auto object-contain select-none mx-6"
+                  draggable="false"
+                />
+              ))}
+            </div>
+            <div className="flex shrink-0">
+              {images.map((img, i) => (
+                <img
+                  key={`duplicate-${i}`}
+                  src={img}
+                  alt="city-icon"
+                  className="h-16 w-auto object-contain select-none mx-6"
+                  draggable="false"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* City Pulse (The Creative Centerpiece) */}
-      <section className="py-16 bg-gray-800 border-t-8 border-yellow-500/50">
+      <section className="py-16 bg-gray-800  border-yellow-500/50">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
             The City Pulse: Real-Time Impact

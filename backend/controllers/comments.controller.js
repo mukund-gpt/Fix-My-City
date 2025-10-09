@@ -1,12 +1,17 @@
-import Comment from "../models/Comment.js";
-import Complaint from "../models/Complaint.js";
+import Comment from '../models/comment.model.js';
+import Complaint from '../models/complaint.model.js';
 
 export const createComment = async (req, res) => {
-  const { commentText, imageUrl } = req.body;
-  const { complaintId } = req.params;
-
+  console.log(req.user);
+  
   try {
-    // verify that the complaint exists
+    let { text: commentText, image: imageUrl, complaintId } = req.body;
+
+    if (!commentText) {
+      commentText = "Done";
+    }
+
+    // Verify that the complaint exists
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });
@@ -15,19 +20,22 @@ export const createComment = async (req, res) => {
     // Create the new comment
     const comment = new Comment({
       complaint: complaintId,
-      author: req.user._id,
+      author: req.user.id,
       commentText,
       imageUrl: imageUrl || [], // Ensure imageUrl is an array
     });
 
     const createdComment = await comment.save();
 
-    //Populate author details before sending back for better frontend display
-    const populatedComment = await Comment.findById(
-      createdComment._id
-    ).populate("author");
+    // Push the comment to complaint.commentList
+    complaint.commentList.push(createdComment._id);
+    await complaint.save();
+
+    // Populate author details before sending back
+    const populatedComment = await Comment.findById(createdComment._id).populate("author");
 
     res.status(201).json(populatedComment);
+
   } catch (error) {
     console.error("Error creating comment:", error);
     res.status(500).json({ message: "Server error while creating comment" });

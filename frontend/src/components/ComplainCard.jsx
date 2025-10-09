@@ -175,7 +175,7 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             <span>SLA VIOLATION - OVERDUE</span>
           </span>
         ) : (
-          `Status: ${status.replace('_', ' ')}`
+          `Status: ${status?.replace('_', ' ')}`
         )}
       </div>
 

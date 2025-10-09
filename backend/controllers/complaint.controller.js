@@ -90,7 +90,11 @@ export const getComplaintsById = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id)
       .populate("citizen", "name email")
-      .populate("assignedTo", "name email");
+      .populate("assignedTo", "name email")
+      .populate({
+        path: "commentList",                      // Populate comments
+        populate: { path: "author", select: "name email" } // Populate comment authors
+      })
     if (!complaint)
       return res.status(404).json({ message: "Complaint not found" });
     res.json(complaint);

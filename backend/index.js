@@ -5,8 +5,8 @@ import adminroutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
-import staffroutes from "./routes/staff.routes.js";
 import maproutes from "./routes/map.routes.js";
+import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
 
 dotenv.config();

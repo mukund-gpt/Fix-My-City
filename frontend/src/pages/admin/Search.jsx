@@ -1,11 +1,28 @@
-import { Checkbox, CircularProgress } from "@mui/material";
+import {
+  Checkbox,
+  CircularProgress,
+  Paper, // New: For the search input
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer, // New: To wrap the scrollable table
+  TableHead,
+  TableRow,
+  TextField, // New: For the search input
+} from "@mui/material";
 import { useEffect, useState } from "react";
+// NOTE: Ensure this path is correct for your project
 import axiosInstance from "../../api/axiosinstance";
+
+// Sets the fixed height and enables vertical scrolling (Tailwind CSS classes)
+// h-48 is approx 12rem/192px, fitting 3-4 rows
+const SCROLL_CONTAINER_CLASSES = "h-105 overflow-y-auto";
 
 export default function StaffSearch({ selectedStaff = [], onChange }) {
   const [query, setQuery] = useState("");
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(false);
+  // selected holds the full staff objects
   const [selected, setSelected] = useState(selectedStaff || []);
 
   // Fetch staff from backend
@@ -35,61 +52,99 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
   // Handle staff selection toggle
   const handleToggle = (staff) => {
     let updated;
-    if (selected.find((s) => s._id === staff._id)) {
+    if (selected.some((s) => s._id === staff._id)) {
+      // Deselect
       updated = selected.filter((s) => s._id !== staff._id);
     } else {
+      // Select
       updated = [...selected, staff];
     }
     setSelected(updated);
-    onChange && onChange(updated.map((s) => s._id)); // pass _id array back
+    // Pass only the array of IDs back to the parent component
+    onChange && onChange(updated.map((s) => s._id)); 
   };
 
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Search department..."
+    <div className="p-4 bg-white rounded-lg shadow-xl">
+      {/* 1. Enhanced Search Input (MUI TextField) */}
+      <TextField
+        fullWidth
+        label="Search Staff by Department, Name, or Email"
+        variant="outlined"
+        size="small"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="border p-2 rounded w-full mb-4"
+        className="mb-4" // Tailwind margin bottom
       />
 
+      {/* 2. Loading State */}
       {loading ? (
-        <div className="flex justify-center py-4">
-          <CircularProgress />
+        <div className="flex justify-center items-center h-48">
+          <CircularProgress color="primary" />
         </div>
       ) : (
-        <table className="w-full border">
-          <thead>
-            <tr>
-              <th className="border p-2">Select</th>
-              <th className="border p-2">Department Name</th>
-              <th className="border p-2">Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staffList.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-center p-4">
-                  No staff found
-                </td>
-              </tr>
-            ) : (
-              staffList.map((staff) => (
-                <tr key={staff._id}>
-                  <td className="border p-2 text-center">
-                    <Checkbox
-                      checked={!!selected.find((s) => s._id === staff._id)}
-                      onChange={() => handleToggle(staff)}
-                    />
-                  </td>
-                  <td className="border p-2">{staff.department}</td>
-                  <td className="border p-2">{staff.email}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        // 3. Scrollable Table Container
+        // Paper adds an elevated look, className handles the fixed height and scroll
+        <TableContainer component={Paper} className={SCROLL_CONTAINER_CLASSES}>
+          <Table stickyHeader size="small">
+            
+            {/* Table Header (Sticky) */}
+            <TableHead>
+              <TableRow className="bg-gray-100"> {/* Tailwind background color */}
+                <TableCell style={{ width: 50 }}>
+                    <span className="font-semibold text-gray-700">Select</span>
+                </TableCell>
+                <TableCell>
+                    <span className="font-semibold text-gray-700">Department Name</span>
+                </TableCell>
+                <TableCell>
+                    <span className="font-semibold text-gray-700">Email</span>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            {/* Table Body */}
+            <TableBody>
+              {staffList.length === 0 && query !== "" ? (
+                // No search results found
+                <TableRow>
+                  <TableCell colSpan={3} align="center" className="py-4 text-gray-500">
+                    No staff found matching "{query}"
+                  </TableCell>
+                </TableRow>
+              ) : staffList.length === 0 ? (
+                // No staff available (e.g., initial empty load)
+                <TableRow>
+                    <TableCell colSpan={3} align="center" className="py-4 text-gray-500">
+                        No staff available.
+                    </TableCell>
+                </TableRow>
+              ) : (
+                // Staff List Rows
+                staffList.map((staff) => (
+                  <TableRow 
+                    key={staff._id} 
+                    hover 
+                    role="checkbox" 
+                    tabIndex={-1} 
+                    onClick={() => handleToggle(staff)}
+                    className="cursor-pointer" // Tailwind for hover hint
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selected.some((s) => s._id === staff._id)}
+                        onChange={() => handleToggle(staff)}
+                        color="primary"
+                      />
+                    </TableCell>
+                    <TableCell>{staff.department}</TableCell>
+                    <TableCell>{staff.email}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </div>
   );

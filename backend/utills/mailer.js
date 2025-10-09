@@ -1,39 +1,31 @@
 import nodemailer from "nodemailer";
 
-export async function sendOtpEmail(recipientEmail, otp) {
-  if (!recipientEmail) {
-    throw new Error("Recipient email is required");
-  }
-
-  
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error("Missing email credentials in environment variables");
-    throw new Error("Email configuration error");
-  }
-
-  
-  const transporter = nodemailer.createTransport({
-    service: "Gmail", // Replace with your email service if different
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: recipientEmail,
-    subject: "Your OTP for Email Verification",
-    text: `Your OTP for verification is: ${otp}`,
-    html: `<p>Your OTP for verification is: <strong>${otp}</strong></p>`,
-  };
-
+export const sendMail = async (emails, subject, message) => {
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`OTP email sent to ${recipientEmail}`);
-    
+    // Create transporter using your email service or SMTP
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // or use 'smtp.mailtrap.io' / custom SMTP
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Prepare mail options
+    const mailOptions = {
+      from: `"FixMyCity" <${process.env.EMAIL_USER}>`,
+      to: emails.join(","), // Convert list of emails to comma-separated string
+      subject,
+      html: `<p>${message}</p>`, // You can also use plain text
+    };
+
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log("Emails sent:", info.accepted);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("Error sending OTP email:", error);
-    throw new Error("Failed to send OTP email");
+    console.error("Error sending email:", error);
+    return { success: false, error: error.message };
   }
-}
+};

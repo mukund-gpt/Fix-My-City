@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import axiosInstance from "../../api/axiosinstance";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosinstance";
 import ComplaintCard from "../../components/ComplainCard";
 
 const ResolvedComplaints = () => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // --- Mock MUI Components and Hooks for standalone execution ---
 // Note: These mock components use Tailwind classes for styling.
@@ -24,7 +25,6 @@ const Typography = ({ variant, children, className }) => {
   return <p className={`${getStyle(variant)} ${className}`}>{children}</p>;
 };
 
-const useNavigate = () => (path) => console.log(`Navigating to ${path}`);
 
 
 // --- Mock Complaint Data for demonstration ---

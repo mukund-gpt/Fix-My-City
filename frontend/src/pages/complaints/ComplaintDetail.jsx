@@ -1,6 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'; // Added for the Drawer close button
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Button, CircularProgress, Divider, Drawer, IconButton, Toolbar, Typography } from "@mui/material"; // Imported Drawer
+import { Box, Button, CircularProgress, Divider, Drawer, IconButton, Typography } from "@mui/material"; // Imported Drawer
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -86,21 +85,7 @@ const ComplaintDetail = () => {
     return (
         <Box sx={{ flexGrow: 1 }} className="bg-gray-100 min-h-screen">
             
-            {/* --- Menu Bar (Full Width) --- */}
-            <AppBar position="static" className="shadow-lg bg-indigo-600">
-                <Toolbar className="max-w-7xl mx-auto w-full">
-                    <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Complaint ID: #{id.substring(0, 8)}...
-                    </Typography>
-                    <Button color="inherit" className="font-semibold">Dashboard</Button>
-                </Toolbar>
-            </AppBar>
-            {/* ----------------------------- */}
-
-            <div className="p-6 max-w-7xl mx-auto mt-6">
+            <div className="p-6 max-w-7xl mx-auto ">
                 <h1 className="text-3xl font-extrabold text-indigo-800 mb-6 border-b pb-2">Complaint Resolution Hub</h1>
                 
                 {/* --- Two-Column Layout (Adjusted to a 2/1 split for better Complaint Card visibility) --- */}

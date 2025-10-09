@@ -1,15 +1,15 @@
 import Complaint from "../models/complaint.model.js";
+import User from "../models/user.model.js";
 import cloudinary from "../utills/cloudinary.js";
+import { notifyCreateComplaint } from "../utills/emails.js";
 
 export const createComplaint = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
     // console.log("Files received:", req.files);
     // console.log("Body:", req.body);
-
     const { title, description, latitude, longitude } = req.body;
 
     let photoUrls = [];
@@ -36,6 +36,8 @@ export const createComplaint = async (req, res) => {
     });
 
     const createdComplaint = await complaint.save();
+    const citizen = await User.findById(req.user.id);
+    notifyCreateComplaint(citizen.name, citizen.email, title);
     res.status(201).json({ success: true });
   } catch (error) {
     console.error(error);
@@ -94,19 +96,6 @@ export const getComplaintsById = async (req, res) => {
     if (!complaint)
       return res.status(404).json({ message: "Complaint not found" });
     res.json(complaint);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-export const assignComplaint = async (req, res) => {
-  try {
-    const { complaintId, staffId } = req.body;
-    const complaint = await Complaint.findById(complaintId);
-    if (!complaint)
-      return res.status(404).json({ message: "Complaint not found" });
-    complaint.assignedTo = staffId; // Assign the complaint to a staff member
-    const updatedComplaint = await complaint.save();
-    res.json(updatedComplaint);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

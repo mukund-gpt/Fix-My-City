@@ -326,7 +326,7 @@ const ComplaintDetail = () => {
   const isResolved = complaint.status === "Resolved";
 
   return (
-    <Box sx={{ flexGrow: 1 }} className="bg-gray-100 min-h-screen">
+    <Box sx={{ flexGrow: 1 }} className="bg-gray-800 min-h-screen">
       <div className="p-6 max-w-6xl mx-auto ">
         <h1 className="text-3xl font-extrabold text-indigo-800 mb-6 border-b pb-2">
           Complaint Resolution Hub

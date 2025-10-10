@@ -1,10 +1,25 @@
-
-
-
-import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
-import { Activity, AlertCircle, CheckCircle, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
+import {
+  Activity,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const LiveStat = () => {
   const [stats, setStats] = useState({
@@ -18,45 +33,45 @@ const LiveStat = () => {
       resolutionRate: 0,
     },
     performance: {
-      averageResolutionTime: { hours: 0, days: 0 }
+      averageResolutionTime: { hours: 0, days: 0 },
     },
     distribution: {
-      urgency: { HIGH: 0, MEDIUM: 0, LOW: 0 }
+      urgency: { HIGH: 0, MEDIUM: 0, LOW: 0 },
     },
     trends: {
       last7Days: [],
-      statusTrend: []
-    }
+      statusTrend: [],
+    },
   });
-  
+
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', {
-      transports: ['websocket'],
+    const socket = io("http://localhost:5000", {
+      transports: ["websocket"],
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: 5,
     });
 
-    socket.on('connect', () => {
-      console.log('Connected to server');
+    socket.on("connect", () => {
+      console.log("Connected to server");
       setIsConnected(true);
     });
 
-    socket.on('dashboard-update', (data) => {
-      console.log('Received dashboard update:', data);
+    socket.on("dashboard-update", (data) => {
+      console.log("Received dashboard update:", data);
       setStats(data);
       setLastUpdate(new Date());
     });
 
-    socket.on('dashboard-error', (error) => {
-      console.error('Dashboard error:', error);
+    socket.on("dashboard-error", (error) => {
+      console.error("Dashboard error:", error);
     });
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server');
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
       setIsConnected(false);
     });
 
@@ -66,7 +81,9 @@ const LiveStat = () => {
   }, []);
 
   const StatCard = ({ icon: Icon, label, value, color, subtext }) => (
-    <div className={`bg-gradient-to-br ${color} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+    <div
+      className={`bg-gradient-to-br ${color} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-white/80 text-sm font-medium mb-2">{label}</p>
@@ -88,22 +105,26 @@ const LiveStat = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Complaint Dashboard
+                Real-time monitoring and analytics
               </h1>
-              <p className="text-gray-400">Real-time monitoring and analytics</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></div>
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+                  isConnected
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                }`}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-400" : "bg-red-400"
+                  } animate-pulse`}
+                ></div>
                 <span className="text-sm font-medium">
-                  {isConnected ? 'Live' : 'Disconnected'}
+                  {isConnected ? "Live" : "Disconnected"}
                 </span>
               </div>
-              {lastUpdate && (
-                <span className="text-gray-500 text-sm">
-                  Updated {lastUpdate.toLocaleTimeString()}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -162,7 +183,9 @@ const LiveStat = () => {
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
             <div className="flex items-center gap-3 mb-4">
               <Clock className="text-green-400" size={24} />
-              <h3 className="text-white text-lg font-semibold">Avg Resolution</h3>
+              <h3 className="text-white text-lg font-semibold">
+                Avg Resolution
+              </h3>
             </div>
             <p className="text-4xl font-bold text-white">
               {stats.performance.averageResolutionTime.days}
@@ -176,7 +199,9 @@ const LiveStat = () => {
 
         {/* Urgency Distribution */}
         <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700 mb-8">
-          <h3 className="text-white text-xl font-semibold mb-4">Urgency Distribution</h3>
+          <h3 className="text-white text-xl font-semibold mb-4">
+            Urgency Distribution
+          </h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
@@ -209,22 +234,28 @@ const LiveStat = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Last 7 Days Trend */}
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-            <h3 className="text-white text-xl font-semibold mb-4">Last 7 Days Trend</h3>
+            <h3 className="text-white text-xl font-semibold mb-4">
+              Last 7 Days Trend
+            </h3>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={stats.trends.last7Days}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="date" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                  labelStyle={{ color: '#F3F4F6' }}
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "none",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#F3F4F6" }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="complaints" 
-                  stroke="#3B82F6" 
+                <Line
+                  type="monotone"
+                  dataKey="complaints"
+                  stroke="#3B82F6"
                   strokeWidth={2}
-                  dot={{ fill: '#3B82F6', r: 4 }}
+                  dot={{ fill: "#3B82F6", r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -232,15 +263,21 @@ const LiveStat = () => {
 
           {/* Status Trend */}
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-            <h3 className="text-white text-xl font-semibold mb-4">Status Distribution</h3>
+            <h3 className="text-white text-xl font-semibold mb-4">
+              Status Distribution
+            </h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={stats.trends.statusTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="date" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
-                  labelStyle={{ color: '#F3F4F6' }}
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "none",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#F3F4F6" }}
                 />
                 <Legend />
                 <Bar dataKey="OPEN" fill="#F59E0B" />

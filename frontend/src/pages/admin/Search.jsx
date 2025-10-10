@@ -59,6 +59,8 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
       // Select
       updated = [...selected, staff];
     }
+    console.log(selected);
+    
     setSelected(updated);
     // Pass only the array of IDs back to the parent component
     onChange && onChange(updated.map((s) => s._id)); 
@@ -132,7 +134,7 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
-                        checked={selected.some((s) => s._id === staff._id)}
+                        checked={selected.some((s) => s?._id === staff._id)}
                         onChange={() => handleToggle(staff)}
                         color="primary"
                       />

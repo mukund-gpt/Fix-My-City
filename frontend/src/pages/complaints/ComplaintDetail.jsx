@@ -522,7 +522,7 @@ const ComplaintDetail = () => {
                 Search and Select Staff:
               </Typography>
               <StaffSearch
-                selectedStaff={selectedStaffIds}
+                selectedStaff={complaint.assignedTo}
                 onChange={setSelectedStaffIds}
               />
             </Box>

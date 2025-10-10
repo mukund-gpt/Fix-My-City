@@ -6,7 +6,7 @@ import { Box, Button, CircularProgress, Divider, IconButton, List, ListItem, Lis
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from 'react-redux';
-import io from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
 
 
 // --- MOCK DATA (Replaces samplenotification) ---
@@ -59,7 +59,10 @@ const fetchNotificationChunk = (offset, limit) => {
 
 // --- Sub-Component for a Single Notification Item ---
 const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
-    const { id, title, description, isRead, timestamp } = notification;
+    // console.log(notification);
+    
+    const { id, title, message, isRead, createdAt:timestamp ,referenceId} = notification;
+        const navigate = useNavigate();
 
     const timeAgo = useMemo(() => {
         const seconds = Math.floor((new Date() - timestamp) / 1000);
@@ -83,12 +86,13 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
     return (
         <ListItem 
             className={`transition duration-300 ease-in-out rounded-lg mb-2 p-4 ${statusClasses}`}
+            
             secondaryAction={
                 <ListItemSecondaryAction className="flex space-x-2 mr-2">
                     <IconButton 
                         edge="end" 
                         aria-label={isRead ? "Mark Unread" : "Mark Read"} 
-                        onClick={() => onMarkAsRead(id)}
+                        onClick={() => onMarkAsRead(referenceId)}
                         size="small"
                         color={isRead ? "default" : "primary"}
                     >
@@ -107,6 +111,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
             }
         >
             <ListItemText
+                onClick={()=>navigate(`/complaint/${referenceId}`)}
                 primary={
                     <Box className="flex items-center space-x-2">
                         {!isRead && (
@@ -120,7 +125,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
                         </Typography>
                     </Box>
                 }
-                secondary={description}
+                secondary={message}
                 classes={{ secondary: 'text-sm mt-1' }}
             />
         </ListItem>
@@ -138,7 +143,7 @@ const Notifications = () => {
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate();
     // Fetch notifications function
     const fetchNotifications = useCallback(async (isLoadMore = false) => {
         if (!hasMore && isLoadMore) {

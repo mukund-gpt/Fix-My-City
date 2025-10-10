@@ -89,7 +89,7 @@ export const assignComplaint = async (req, res) => {
     }).select("name email department");
 
     await createNotification({
-      userIds,
+    recipientIds:userIds,
       title: "New Complaint Assigned",
       message: `A new complaint (${complaint.title || complaint._id}) has been assigned to you.`,
       type: "ASSIGNMENT",

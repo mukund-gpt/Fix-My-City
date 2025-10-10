@@ -15,7 +15,7 @@ import Notification from "../models/notification.model.js";
  */
 
 export const createNotification = async ({
-    recipientId,
+    recipientIds,
     title,
     message,
     type,
@@ -24,9 +24,7 @@ export const createNotification = async ({
 }) => {
     try {
         const newNotification = new Notification({
-            recipient: Array.isArray(recipientId)
-                ? recipientId.map((id) => new mongoose.Types.ObjectId(id))
-                : [new mongoose.Types.ObjectId(recipientId)], // always stored as array
+            recipient: recipientIds, // always stored as array
             title,
             message,
             type,

@@ -14,6 +14,7 @@ import { sendNotificationToUser } from "../utills/socket.js";
  * @param {string | null} referenceId Optional ID of the related document (e.g., complaint).
  * @param {string | null} senderId Optional ID of the user who triggered the event.
  */
+
 export const createNotification = async ({
     recipientId,
     title,

@@ -229,7 +229,7 @@ export default function SubmitComplaint() {
                 // Handle RTK Query errors
                 throw new Error(res.error?.data?.message || "Failed to submit complaint");
             }
-            // console.log(res);
+            console.log(res);
             
             toast.success(res?.data?.message);
             resetForm();

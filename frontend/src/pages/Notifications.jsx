@@ -6,7 +6,7 @@ import { Box, Button, CircularProgress, Divider, IconButton, List, ListItem, Lis
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from 'react-redux';
-// import io from 'socket.io-client'; 
+import io from 'socket.io-client';
 // import { socketConnection } from '../';
 // --- MOCK DATA (Replaces samplenotification) ---
 const mockNotifications = [
@@ -130,9 +130,15 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
 // --- Main Notifications Component ---
 const Notifications = () => {
     const NOTIFICATIONS_PER_LOAD = 5;
-    const socket = useMemo(() => io(process.env.VITE_BACKEND_URL || 'http://localhost:5000'), []);
     const {  userRole,user } = useSelector((state)=>state.auth);
-    
+    const socket = io(`${import.meta.env.VITE_SERVER}`, {
+        transports: ["websocket"],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+    });
+
+    socket.emit("register-user", user.id); 
     const [notifications, setNotifications] = useState([]);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -190,9 +196,10 @@ const Notifications = () => {
     }, [fetchNotifications]);
 
     useEffect(() => {
+        
         if (!user || !user.id || !socket) return;
 
-        socket.emit("register-user", user.id); 
+        
 
         const handleNewNotification = (newNotification) => {
             toast.success(newNotification.title, {
@@ -222,7 +229,7 @@ const Notifications = () => {
         return () => {
             socket.off('new-notification', handleNewNotification);
             // Optionally, disconnect or unregister user
-            // socket.emit("unregister-user", user.id); 
+            socket.emit("unregister-user", user.id); 
         };
     }, [socket, user]); 
 

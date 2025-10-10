@@ -48,7 +48,7 @@ const LiveStat = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000", {
+    const socket = io(`${import.meta.env.VITE_SERVER}`, {
       transports: ["websocket"],
       reconnection: true,
       reconnectionDelay: 1000,

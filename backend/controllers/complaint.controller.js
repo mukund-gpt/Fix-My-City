@@ -16,25 +16,25 @@ export const createComplaint = async (req, res) => {
     // console.log("Body:", req.body);
     const { title, description, latitude, longitude } = req.body;
 
-    const flaskURL = `${process.env.FLASK_SERVER}/api/check-duplicate`; 
-        const duplicateResponse = await axios.post(flaskURL, {
-          target: {
-            title,
-            description,
-            latitude,
-            longitude,
-            created_at: new Date().toISOString()
-          }
-        });
-        console.log(duplicateResponse);
+    const flaskURL = `${process.env.FLASK_SERVER}/api/check-duplicate`;
+    const duplicateResponse = await axios.post(flaskURL, {
+      target: {
+        title,
+        description,
+        latitude,
+        longitude,
+        created_at: new Date().toISOString()
+      }
+    });
+    // console.log(duplicateResponse);
         
-        if (duplicateResponse) {
-          console.log('duplicate comment found');
+    // if (duplicateResponse ) {
+    //       console.log('duplicate comment found');
           
-          return res.status(200).json({
-            message:"Similar complaint is alredy registered"
-          })
-    }
+    //       return res.status(200).json({
+    //         message:"Similar complaint is alredy registered"
+    //       })
+    // }
     
     let photoUrls = [];
 
@@ -74,7 +74,7 @@ export const createComplaint = async (req, res) => {
             senderId: SYSTEM_USER_ID,
         });
     });
-
+    await Promise.all(notificationPromises);
     const createdComplaint = await complaint.save();
     await broadcastDashboardUpdate();// live stat update
     const citizen = await User.findById(req.user.id);

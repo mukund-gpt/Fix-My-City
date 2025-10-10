@@ -1,5 +1,7 @@
+import axiosInstance from '@/api/axiosinstance';
 import { ArrowLeft, CalendarDays, CheckCircle, Clock, Save, Settings, Watch, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from "react";
+import toast from 'react-hot-toast';
 
 // --- MOCK API CALLS for SLA Configuration (Updated to handle TTA and TTR) ---
 
@@ -12,16 +14,27 @@ const initialSLAConfig = {
 
 // Mock function to simulate fetching the current configuration
 const fetchSLAConfig = async () => {
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-    // In a real app, this would fetch the full config object: { HIGH: { TTA, TTR }, ... }
-    return { data: initialSLAConfig };
+
+   try {
+     const res = await axiosInstance.get('/slaconfig');
+     const data = res.data;
+     return {  data };
+   } catch (error) {
+       console.log(error);
+       
+    toast.error("Unable to load sla values")
+   }
 };
 
 // Mock function to simulate saving the new configuration
 const saveSLAConfig = async (newConfig) => {
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-    console.log("SLA Config Saved:", newConfig);
-    return { success: true, message: "SLA configuration saved successfully!" };
+   try {
+     const res = await axiosInstance.post('/slaconfig', { newConfig });
+     // await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+     return { success: true, message: "SLA configuration saved successfully!" };
+   } catch (error) {
+        toast.error("Unable to save new config ")
+   }
 };
 
 // Mock CircularProgress Component for loading states
@@ -44,6 +57,7 @@ const ConfigureSLA = ({ onBack }) => {
             setLoading(true);
             try {
                 const res = await fetchSLAConfig();
+                // console.log(res);
                 setConfig(res.data);
             } catch (error) {
                 setMessage({ type: 'error', text: 'Failed to load current SLA settings.' });
@@ -81,6 +95,8 @@ const ConfigureSLA = ({ onBack }) => {
 
         try {
             const res = await saveSLAConfig(config);
+            // console.log(res);
+            
             if (res.success) {
                 setMessage({ type: 'success', text: res.message });
             } else {
@@ -117,7 +133,7 @@ const ConfigureSLA = ({ onBack }) => {
                         value={displayValue}
                         onChange={(e) => handleChange(urgency, type, e.target.value)}
                         disabled={saving || loading}
-                        className="w-full py-2 pl-4 pr-16 text-xl font-mono border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition duration-150"
+                        className="w-full py-2 pl-4 pr-16 text-xl text-black font-mono border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition duration-150"
                     />
                     <span className="absolute right-0 top-0 h-full flex items-center pr-4 text-gray-500 font-semibold text-sm">
                         {timeUnit}
@@ -186,7 +202,7 @@ const ConfigureSLA = ({ onBack }) => {
             </div>
 
             <p className="text-gray-300 mb-6">
-                Define the service level agreement deadlines for how quickly staff must **acknowledge** and **resolve** complaints based on their urgency.
+                Define the service level agreement deadlines for how quickly staff must acknowledge and resolve complaints based on their urgency.
             </p>
             
             {/* Time Unit Selector */}
@@ -195,15 +211,15 @@ const ConfigureSLA = ({ onBack }) => {
                     <button
                         onClick={() => setTimeUnit('Hours')}
                         className={`px-4 py-2 text-sm font-semibold rounded-full transition duration-200 flex items-center ${
-                            timeUnit === 'Hours' ? 'bg-indigo-500 text-white shadow-md' : 'text-gray-300 hover:bg-gray-600'
+                            timeUnit === 'Hours' ? 'bg-indigo-500 text-black shadow-md' : 'text-gray-300 hover:bg-gray-600'
                         }`}
                     >
                         <Clock className="w-4 h-4 mr-1" /> Hours
                     </button>
                     <button
                         onClick={() => setTimeUnit('Days')}
-                        className={`px-4 py-2 text-sm font-semibold rounded-full transition duration-200 flex items-center ${
-                            timeUnit === 'Days' ? 'bg-indigo-500 text-white shadow-md' : 'text-gray-300 hover:bg-gray-600'
+                        className={` px-4 py-2 text-sm font-semibold rounded-full transition duration-200 flex items-center ${
+                            timeUnit === 'Days' ? 'bg-indigo-500 text-black shadow-md' : 'text-gray-300 hover:bg-gray-600'
                         }`}
                     >
                         <CalendarDays className="w-4 h-4 mr-1" /> Days

@@ -2,49 +2,109 @@ import { Parser } from "json2csv"; // for CSV
 import pdfkit from "pdfkit"; // for PDF
 import Complaint from "../models/complaint.model.js";
 
+// Define the SLA in milliseconds (e.g., 48 hours)
+const SLA_HOURS = 48;
+const SLA_MILLIS = SLA_HOURS * 60 * 60 * 1000;
+ const departmentCategories = [
+  "Electricity",
+  "Sanitation",
+  "Animal Welfare",
+  "Waste Management",
+  "Agriculture",
+  "Road & Transport",
+  "Environment",
+  "Parks & Gardens",
+  "Housing",
+  "Disaster Management"
+];
+
 export const getReports = async (req, res) => {
     try {
         const { startDate, endDate, format } = req.query;
 
-        // --- 1. Data Fetching (No changes here) ---
+        // --- 1. Data Fetching ---
         const filter = {};
         if (startDate && endDate) {
-            // Ensure end date includes the entire day
             const endOfDay = new Date(endDate);
             endOfDay.setHours(23, 59, 59, 999);
             filter.createdAt = { $gte: new Date(startDate), $lte: endOfDay };
         }
 
         const complaints = await Complaint.find(filter)
-            .populate("citizen", "name email") // Populate user details
-          .populate("assignedTo", "name") // Populate assigned staff names
-          .populate({
-        path: "commentList",                      // Populate comments
-        populate: { path: "author", select: "name email" } // Populate comment authors
-      })
+            .populate("citizen", "name email")
+            .populate("assignedTo", "name")
+            .populate({
+                path: "commentList",
+                populate: { path: "author", select: "name email" }
+            })
             .lean();
 
-        // --- 2. Analytics Calculation (No changes here) ---
+        // --- 2. Analytics Calculation (UPDATED) ---
         const totalComplaints = complaints.length;
+        const resolvedComplaints = complaints.filter(c => c.status === "RESOLVED" && c.resolvedAt);
 
-        const volumeByCategory = complaints.reduce((acc, c) => {
-            acc[c.category] = (acc[c.category] || 0) + 1;
+        const categoryCounts = await Complaint.aggregate([
+            {
+                $lookup: {
+                from: "users", // matches User collection
+                localField: "assignedTo",
+                foreignField: "_id",
+                as: "assignedStaff",
+                },
+            },
+            {
+                $unwind: {
+                path: "$assignedStaff",
+                preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $group: {
+                _id: { $ifNull: ["$assignedStaff.name", "Unassigned"] },
+                count: { $sum: 1 },
+                },
+            },
+            ]);
+
+            // Convert the array into an object like { "Electrical": 5, "Plumbing": 3 }
+            const volumeByCategory = categoryCounts.reduce((acc, curr) => {
+            acc[curr._id || "Uncategorized"] = curr.count;
             return acc;
-        }, {});
+            }, {});
+            
 
-        const resolvedComplaints = complaints.filter(c => c.status === "resolved" && c.resolvedAt);
-        const avgResolutionTimeInMillis =
-            resolvedComplaints.reduce((acc, c) => {
-                const time = new Date(c.resolvedAt) - new Date(c.createdAt);
-                return acc + time;
-            }, 0) / resolvedComplaints.length || 0;
+        const filteredVolumeByCategory = Object.fromEntries(
+        Object.entries(volumeByCategory).filter(([category]) =>
+            departmentCategories.includes(category)
+        )
+        );
+
+        // --- Average Resolution Time Calculation ---
+        const totalResolutionTimeInMillis = resolvedComplaints.reduce((acc, c) => {
+            const time = new Date(c.resolvedAt) - new Date(c.createdAt);
+            return acc + time;
+        }, 0);
         
-        // Convert average time to a more readable format (days, hours, minutes)
-        const avgTimeInHours = avgResolutionTimeInMillis / (1000 * 60 * 60);
+        const avgResolutionTimeInMillis = totalResolutionTimeInMillis / resolvedComplaints.length || 0;
+        const avgResolutionTimeInHours = avgResolutionTimeInMillis / (1000 * 60 * 60);
 
-        // --- 3. Better CSV Export ---
+        // --- SLA Compliance Calculation (NEW) ---
+        const slaCompliantCount = resolvedComplaints.filter(c => {
+            const timeTaken = new Date(c.resolvedAt) - new Date(c.createdAt);
+            return timeTaken <= SLA_MILLIS;
+        }).length;
+
+        const slaCompliance = totalComplaints > 0 
+            ? (slaCompliantCount / resolvedComplaints.length) * 100 || 0 // % of RESOLVED complaints that met SLA
+            : 0;
+        
+        // --- If you want % of TOTAL complaints that met SLA, use:
+        // const slaCompliance = totalComplaints > 0 ? (slaCompliantCount / totalComplaints) * 100 : 0;
+        // I'll stick with the first definition (% of resolved complaints) as it's more standard for SLA.
+        // If there are no resolved complaints, it defaults to 0.
+
+        // --- 3. Better CSV Export (No change needed) ---
         if (format === "csv") {
-            // Define the columns and their headers for the CSV
             const fields = [
                 { label: "ID", value: "_id" },
                 { label: "Title", value: "title" },
@@ -52,12 +112,11 @@ export const getReports = async (req, res) => {
                 { label: "Status", value: "status" },
                 { label: "Submitted By", value: "citizen.name" },
                 { label: "Submitter Email", value: "citizen.email" },
-                { label: "Assigned To", value: "assignedStaff" }, // Custom field
+                { label: "Assigned To", value: "assignedStaff" },
                 { label: "Submitted On", value: "createdAt" },
                 { label: "Resolved On", value: "resolvedAt" },
             ];
 
-            // Pre-process data to flatten nested objects and format fields
             const processedData = complaints.map(c => ({
                 ...c,
                 assignedStaff: c.assignedTo?.map(staff => staff.name).join(", ") || "N/A",
@@ -76,7 +135,7 @@ export const getReports = async (req, res) => {
             return res.send(csv);
         }
 
-        // --- 4. Better PDF Export ---
+        // --- 4. Better PDF Export (Updated to include SLA) ---
         if (format === "pdf") {
             const doc = new pdfkit({ margin: 50 });
 
@@ -98,21 +157,23 @@ export const getReports = async (req, res) => {
             doc.fontSize(12).font("Helvetica");
             doc.text(`Total Complaints: ${totalComplaints}`);
             doc.text(`Resolved Complaints: ${resolvedComplaints.length}`);
-            doc.text(`Average Resolution Time: ${avgTimeInHours.toFixed(2)} hours`);
+            doc.text(`Average Resolution Time: ${avgResolutionTimeInHours.toFixed(2)} hours`);
+            doc.text(`SLA Compliance (Target ${SLA_HOURS}h): ${slaCompliance.toFixed(1)}%`);
             doc.moveDown();
 
             doc.font("Helvetica-Bold").text("Volume by Category:");
             doc.font("Helvetica");
             for (const category in volumeByCategory) {
-                doc.text(`  - ${category}: ${volumeByCategory[category]}`);
+                doc.text(`  - ${category}: ${volumeByCategory[category]}`);
             }
             doc.moveDown(2);
 
-            // Detailed Complaints Table
+            // Detailed Complaints Table (PDF content below is fine)
+            // ... (rest of the PDF generation code)
+
             doc.fontSize(16).font("Helvetica-Bold").text("Detailed Complaints List", { underline: true });
             doc.moveDown();
 
-            // Table Header
             const tableTop = doc.y;
             const itemX = 50;
             const titleX = 150;
@@ -126,27 +187,24 @@ export const getReports = async (req, res) => {
             doc.text("Category", categoryX, tableTop);
             doc.text("Status", statusX, tableTop);
             doc.text("Date", dateX, tableTop, { width: 100, align: 'right' });
-            doc.moveTo(itemX - 5, doc.y + 5).lineTo(560, doc.y + 5).stroke(); // Underline
+            doc.moveTo(itemX - 5, doc.y + 5).lineTo(560, doc.y + 5).stroke();
             doc.moveDown();
             
-            // Table Rows
             doc.font("Helvetica").fontSize(9);
             complaints.forEach((c) => {
                 const rowY = doc.y;
-                doc.text(c._id.toString().slice(-6), itemX, rowY, { width: 90 }); // Show last 6 chars of ID
+                doc.text(c._id.toString().slice(-6), itemX, rowY, { width: 90 });
                 doc.text(c.title, titleX, rowY, { width: 140 });
                 doc.text(c.category, categoryX, rowY, { width: 90 });
                 doc.text(c.status, statusX, rowY, { width: 70 });
                 doc.text(new Date(c.createdAt).toLocaleDateString("en-IN"), dateX, rowY, { width: 100, align: 'right' });
                 
-                // Calculate max height for the row and move down
                 const maxHeight = Math.max(
                     doc.heightOfString(c.title, { width: 140 }),
                     doc.heightOfString(c._id.toString().slice(-6), { width: 90 })
                 );
-                doc.y = rowY + maxHeight + 10; // 10 is padding
+                doc.y = rowY + maxHeight + 10;
 
-                // Add page break if content overflows
                 if (doc.y > 700) {
                     doc.addPage();
                 }
@@ -156,11 +214,12 @@ export const getReports = async (req, res) => {
             return;
         }
 
-        // --- 5. Default JSON Response (No changes here) ---
+        // --- 5. Default JSON Response (UPDATED to match frontend keys) ---
         res.json({
             totalComplaints,
-            volumeByCategory,
-            avgResolutionTimeInHours: avgTimeInHours.toFixed(2), // in hours
+            filteredVolumeByCategory,
+            avgResolutionTimeInHours: avgResolutionTimeInHours.toFixed(2),
+            slaCompliance: slaCompliance.toFixed(1),
             resolvedComplaints: resolvedComplaints.length,
         });
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Notification from "../models/notificationModel.js"; // Adjust path as needed
+import Notification from "../models/notification.model.js"; // Adjust path as needed
 
 // --- Utility function for creating new notifications (to be used elsewhere) ---
 

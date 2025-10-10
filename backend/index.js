@@ -7,9 +7,9 @@ import complaintRoutes from "./routes/complaint.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
 import maproutes from "./routes/map.routes.js";
 import notificationRoutes from './routes/notification.routes.js';
+import slaroutes from './routes/sla.routes.js';
 import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
-
 dotenv.config();
 const app = express();
 
@@ -35,6 +35,8 @@ app.use("/api/admin", adminroutes);
 app.use("/api/staff", staffroutes);
 app.use("/api/map", maproutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/slaconfig', slaroutes);
+
 app.get("/", (req, res) => {
   return res.send("Backend is working fine");
 });

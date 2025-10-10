@@ -4,16 +4,13 @@ import express from "express";
 import adminroutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
+import liveStat from "./routes/liveStat.routes.js";
 import maproutes from "./routes/map.routes.js";
 import notificationRoutes from './routes/notification.routes.js';
 import slaroutes from './routes/sla.routes.js';
 import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
-<<<<<<< HEAD
-=======
-import liveStat from "./routes/liveStat.routes.js";
 
->>>>>>> d7650bce4904708a191f0271abc1ab189a850c9e
 dotenv.config();
 const app = express();
 

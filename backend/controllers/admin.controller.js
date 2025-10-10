@@ -149,8 +149,11 @@ export const updateComplaintByAdmin = async (req, res) => {
 
     try {
         // 2. Fetch the original complaint to get 'createdAt' for time calculation
-        const originalComplaint = await Complaint.findById(complaintId);
-
+      const originalComplaint = await Complaint.findById(complaintId).
+        populate(
+      "assignedTo",
+      "name email"
+    );
         if (!originalComplaint) {
             return res.status(404).json({ message: "Complaint not found." });
         }
@@ -194,6 +197,10 @@ export const updateComplaintByAdmin = async (req, res) => {
                 ? `${hours} hour(s) and ${remainingMinutes} minute(s)` 
                 : `${remainingMinutes} minute(s)`;
 
+            // 5.1. Generate the Assigned Staff List
+            const assignedStaffList = updatedComplaint?.assignedTo
+                .map(staff => `* ${staff.name || staff.email}`) // Use name, or fallback to email
+                .join('\n');
             const emailSubject = `Resolution Confirmation: Complaint #${updatedComplaint._id.toString().slice(-5)}`;
 
             const emailBody = `
@@ -208,6 +215,9 @@ We are pleased to inform you that your complaint, titled **"${updatedComplaint.t
 * **Resolved By:** ${resolver?.name || resolver?.email || 'A team member'}
 * **Date Resolved:** ${resolvedAt.toLocaleDateString()}
 ---
+
+**Assigned Team:**
+${assignedStaffList}
 
 Thank you for your patience and for helping us improve our community services.
 

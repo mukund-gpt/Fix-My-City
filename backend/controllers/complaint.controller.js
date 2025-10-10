@@ -3,6 +3,7 @@ import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../utills/cloudinary.js";
 import { notifyCreateComplaint } from "../utills/emails.js";
+import { broadcastDashboardUpdate } from "../utills/socket.js";
 
 export const createComplaint = async (req, res) => {
   try {
@@ -56,7 +57,10 @@ export const createComplaint = async (req, res) => {
       assignedTo: null,
     });
 
+    
+
     const createdComplaint = await complaint.save();
+    await broadcastDashboardUpdate();// live stat update
     const citizen = await User.findById(req.user.id);
     notifyCreateComplaint(citizen.name, citizen.email, title);
     res.status(201).json({ success: true });

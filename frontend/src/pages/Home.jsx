@@ -183,7 +183,7 @@ const Home = () => {
         </div>
 
         {/* Infinite Carousel */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden bg-transparent h-36 flex items-center z-30">
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden bg-white h-24 flex items-center z-30">
           <style>{`
             @keyframes scroll {
               0% { transform: translateX(0); }

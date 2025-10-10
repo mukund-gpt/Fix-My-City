@@ -1,25 +1,10 @@
-import React, { useEffect, useState } from "react";
-import {
-  Activity,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  TrendingUp,
-  AlertTriangle,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import axiosInstance from "@/api/axiosinstance";
+
+
+
+import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+import { Activity, AlertCircle, CheckCircle, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const LiveStat = () => {
   const [stats, setStats] = useState({
@@ -33,50 +18,55 @@ const LiveStat = () => {
       resolutionRate: 0,
     },
     performance: {
-      averageResolutionTime: { hours: 0, days: 0 },
+      averageResolutionTime: { hours: 0, days: 0 }
     },
     distribution: {
-      urgency: { HIGH: 0, MEDIUM: 0, LOW: 0 },
+      urgency: { HIGH: 0, MEDIUM: 0, LOW: 0 }
     },
     trends: {
       last7Days: [],
-      statusTrend: [],
-    },
+      statusTrend: []
+    }
   });
-
-  // Socket-related states kept for UI, but no actual connection
+  
   const [isConnected, setIsConnected] = useState(false);
-    const [lastUpdate, setLastUpdate] = useState(null);
-    
-    useEffect(() => {
-        const fetchStats = async () => {
-        try {
-            const res = await axiosInstance.get("/stats", {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`, // remove if not needed
-            },
-            });
-            setStats(res.data.data);
-            setIsConnected(true); // just for UI
-            setLastUpdate(new Date());
-            // console.log("Stats updated:", res.data);
-        } catch (error) {
-            console.error("Error fetching stats:", error);
-            setIsConnected(false);
-        }
-        };
+  const [lastUpdate, setLastUpdate] = useState(null);
 
-        fetchStats();
+  useEffect(() => {
+    const socket = io('http://localhost:5000', {
+      transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5
+    });
 
-        // OPTIONAL: auto refresh every X ms (if needed)
-        const interval = setInterval(fetchStats, 30000); // 30 sec
-        return () => clearInterval(interval);
-    }, []);
+    socket.on('connect', () => {
+      console.log('Connected to server');
+      setIsConnected(true);
+    });
+
+    socket.on('dashboard-update', (data) => {
+      console.log('Received dashboard update:', data);
+      setStats(data);
+      setLastUpdate(new Date());
+    });
+
+    socket.on('dashboard-error', (error) => {
+      console.error('Dashboard error:', error);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+      setIsConnected(false);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const StatCard = ({ icon: Icon, label, value, color, subtext }) => (
-    <div
-      className={`bg-gradient-to-br ${color} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
-    >
+    <div className={`bg-gradient-to-br ${color} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-white/80 text-sm font-medium mb-2">{label}</p>
@@ -90,8 +80,7 @@ const LiveStat = () => {
     </div>
   );
 
-  
-return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -99,8 +88,9 @@ return (
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Real-time monitoring and analytics
+                Complaint Dashboard
               </h1>
+              <p className="text-gray-400">Real-time monitoring and analytics</p>
             </div>
             <div className="flex items-center gap-3">
               <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -123,26 +113,26 @@ return (
           <StatCard
             icon={Activity}
             label="Total Complaints"
-            value={stats?.overview?.totalComplaints}
+            value={stats.overview.totalComplaints}
             color="from-blue-500 to-blue-600"
           />
           <StatCard
             icon={AlertCircle}
             label="Open Complaints"
-            value={stats?.overview?.openComplaints}
+            value={stats.overview.openComplaints}
             color="from-yellow-500 to-orange-500"
           />
           <StatCard
             icon={CheckCircle}
             label="Resolved"
-            value={stats?.overview?.resolvedComplaints}
+            value={stats.overview.resolvedComplaints}
             color="from-green-500 to-emerald-600"
-            subtext={`${stats?.overview?.resolutionRate}% resolution rate`}
+            subtext={`${stats.overview.resolutionRate}% resolution rate`}
           />
           <StatCard
             icon={Clock}
             label="New Today"
-            value={stats?.overview?.todayComplaints}
+            value={stats.overview.todayComplaints}
             color="from-purple-500 to-pink-600"
           />
         </div>
@@ -155,7 +145,7 @@ return (
               <h3 className="text-white text-lg font-semibold">In Progress</h3>
             </div>
             <p className="text-4xl font-bold text-white">
-              {stats?.overview?.inProgressComplaints}
+              {stats.overview.inProgressComplaints}
             </p>
           </div>
 
@@ -165,7 +155,7 @@ return (
               <h3 className="text-white text-lg font-semibold">Overdue</h3>
             </div>
             <p className="text-4xl font-bold text-red-400">
-              {stats?.overview?.overdueComplaints}
+              {stats.overview.overdueComplaints}
             </p>
           </div>
 
@@ -175,11 +165,11 @@ return (
               <h3 className="text-white text-lg font-semibold">Avg Resolution</h3>
             </div>
             <p className="text-4xl font-bold text-white">
-              {stats?.performance?.averageResolutionTime?.days}
+              {stats.performance.averageResolutionTime.days}
               <span className="text-lg text-gray-400 ml-2">days</span>
             </p>
             <p className="text-gray-500 text-sm mt-1">
-              {stats?.performance?.averageResolutionTime?.hours} hours
+              {stats.performance.averageResolutionTime.hours} hours
             </p>
           </div>
         </div>
@@ -191,7 +181,7 @@ return (
             <div className="text-center">
               <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
                 <p className="text-red-400 text-3xl font-bold">
-                  {stats?.distribution?.urgency?.HIGH}
+                  {stats.distribution.urgency.HIGH}
                 </p>
               </div>
               <p className="text-gray-400 text-sm">High Priority</p>
@@ -199,7 +189,7 @@ return (
             <div className="text-center">
               <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
                 <p className="text-yellow-400 text-3xl font-bold">
-                  {stats?.distribution?.urgency?.MEDIUM}
+                  {stats.distribution.urgency.MEDIUM}
                 </p>
               </div>
               <p className="text-gray-400 text-sm">Medium Priority</p>
@@ -207,7 +197,7 @@ return (
             <div className="text-center">
               <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
                 <p className="text-green-400 text-3xl font-bold">
-                  {stats?.distribution?.urgency?.LOW}
+                  {stats.distribution.urgency.LOW}
                 </p>
               </div>
               <p className="text-gray-400 text-sm">Low Priority</p>
@@ -221,7 +211,7 @@ return (
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
             <h3 className="text-white text-xl font-semibold mb-4">Last 7 Days Trend</h3>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={stats?.trends?.last7Days}>
+              <LineChart data={stats.trends.last7Days}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="date" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
@@ -244,7 +234,7 @@ return (
           <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
             <h3 className="text-white text-xl font-semibold mb-4">Status Distribution</h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats?.trends?.statusTrend}>
+              <BarChart data={stats.trends.statusTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="date" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />

@@ -1,3 +1,6 @@
+
+
+
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -9,14 +12,19 @@ import notificationRoutes from './routes/notification.routes.js';
 import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
 import liveStat from "./routes/liveStat.routes.js";
+import { initializeSocket } from "./utills/socket.js";
+import http from "http";
 
 dotenv.config();
 const app = express();
 
-// Middleware
+const server = http.createServer(app);
+
+const io = initializeSocket(server);
+
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL, "*"],
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173", "*"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -24,7 +32,6 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// Routes
 app.use("/api/test", (req, res) => {
   res.send("API is working");
 });
@@ -34,12 +41,17 @@ app.use("/api/admin", adminroutes);
 app.use("/api/staff", staffroutes);
 app.use("/api/map", maproutes);
 app.use('/api/notifications', notificationRoutes);
-app.use("/api/stats", liveStat)
+app.use("/api/stats", liveStat);
 app.get("/", (req, res) => {
   return res.send("Backend is working fine");
 });
 
 const PORT = process.env.PORT || 5000;
+
 connectDB().then(() =>
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  server.listen(PORT, () => {
+    console.log(`✅ Server + Socket.IO running on port ${PORT}`);
+  })
 );
+
+export { io };

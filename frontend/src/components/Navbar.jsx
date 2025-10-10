@@ -243,7 +243,7 @@ useEffect(() => {
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-yellow-400 tracking-wide hover:scale-105 transition-transform"
+          className="text-2xl font-bold text-yellow-950 tracking-wide hover:scale-105 transition-transform"
         >
           FixMyCity
         </Link>

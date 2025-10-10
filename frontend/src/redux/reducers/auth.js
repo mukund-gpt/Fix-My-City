@@ -22,6 +22,8 @@ const authSlice = createSlice({
         },
         userNotExist: (state, action) => {
             state.user = null;
+            state.userRole = "citizen";
+            state.isAdmin = false;
             state.loader = false;
         },
     },

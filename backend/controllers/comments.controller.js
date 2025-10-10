@@ -34,7 +34,7 @@ export const createComment = async (req, res) => {
     // Populate author details before sending back
     const populatedComment = await Comment.findById(createdComment._id).populate("author");
 
-    res.status(201).json(populatedComment);
+    res.status(201).json(complaint);
 
   } catch (error) {
     console.error("Error creating comment:", error);

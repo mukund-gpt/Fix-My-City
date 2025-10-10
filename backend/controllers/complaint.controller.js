@@ -1,3 +1,4 @@
+import axios from "axios";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../utills/cloudinary.js";
@@ -8,10 +9,30 @@ export const createComplaint = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+
     // console.log("Files received:", req.files);
     // console.log("Body:", req.body);
     const { title, description, latitude, longitude } = req.body;
 
+    const flaskURL = `${process.env.FLASK_SERVER}/api/check-duplicate`; 
+        const duplicateResponse = await axios.post(flaskURL, {
+          target: {
+            title,
+            description,
+            latitude,
+            longitude,
+            created_at: new Date().toISOString()
+          }
+        });
+        console.log(duplicateResponse);
+        
+        if (duplicateResponse) {
+          console.log('duplicate comment found');
+          
+          res.status(200).json({
+            message:"similar complaint is alredy registered"
+          })
+        }
     let photoUrls = [];
 
     // Upload each image to Cloudinary in the "fixmycity" folder

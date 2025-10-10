@@ -2,10 +2,13 @@
 import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from datetime import datetime
-import os
+from datetime import timezone,datetime
 from complaint_detector import ComplaintDuplicateDetector, calculate_duplicate_probability
 from pymongo import MongoClient # <-- New Import
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # <-- this reads the .env file and loads variables into os.environ
 
 # Configure basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,6 +20,7 @@ CORS(app)
 # The URL must be provided via the MONGO_URI environment variable.
 # Example format: mongodb://user:password@cluster-url:port/
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/') 
+print(MONGO_URI)
 DB_NAME = os.getenv('DB_NAME', 'city_complaints') # Default database name
 
 try:
@@ -42,20 +46,28 @@ detector = ComplaintDuplicateDetector(use_sentence_transformer=USE_SENTENCE_TRAN
 
 
 def parse_complaint(complaint_data):
-    """Parse complaint data and handle date conversion"""
+    """Parse complaint data and handle date conversion & lat/lng as float"""
     if 'created_at' in complaint_data:
         if isinstance(complaint_data['created_at'], str):
             try:
-                # Handle ISO format with or without 'Z'
+                # Convert ISO string to aware datetime
                 complaint_data['created_at'] = datetime.fromisoformat(
                     complaint_data['created_at'].replace('Z', '+00:00')
                 )
             except:
-                complaint_data['created_at'] = datetime.now()
+                # fallback: use current UTC time as aware datetime
+                complaint_data['created_at'] = datetime.now(timezone.utc)
     else:
-        complaint_data['created_at'] = datetime.now()
+        complaint_data['created_at'] = datetime.now(timezone.utc)
+    
+    # Convert lat/lng to float if they exist
+    if 'latitude' in complaint_data:
+        complaint_data['latitude'] = float(complaint_data['latitude'])
+    if 'longitude' in complaint_data:
+        complaint_data['longitude'] = float(complaint_data['longitude'])
     
     return complaint_data
+
 
 
 @app.route('/health', methods=['GET'])
@@ -68,6 +80,19 @@ def health_check():
         'model': 'sentence-transformer' if USE_SENTENCE_TRANSFORMER else 'tfidf',
         'version': '1.0.1'
     })
+
+def serialize_complaint(c):
+    """Convert ObjectId and datetime fields to JSON-serializable values"""
+    c = dict(c)  # Make a shallow copy if needed
+    if '_id' in c:
+        c['_id'] = str(c['_id'])
+    if 'complaint' in c and isinstance(c['complaint'], ObjectId):
+        c['complaint'] = str(c['complaint'])
+    if 'created_at' in c and c['created_at']:
+        c['created_at'] = c['created_at'].isoformat()
+    if 'resolved_at' in c and c['resolved_at']:
+        c['resolved_at'] = c['resolved_at'].isoformat()
+    return c
 
 
 @app.route('/api/check-duplicate', methods=['POST'])
@@ -98,10 +123,12 @@ def check_duplicate():
          }
     }
     """
-    if not db:
+    print("somtone is dean to check complaint duplicacy ")
+    if db is None:
         return jsonify({
             'error': 'Database connection failed. Cannot fetch historical complaints.'
         }), 503
+
 
     try:
         data = request.get_json()
@@ -143,6 +170,13 @@ def check_duplicate():
         results = detector.find_duplicates(target, complaints_to_check, config)
         
         # Add probability scores
+        for result in results:
+        # Convert ObjectId to string
+            if '_id' in result:
+                result['_id'] = str(result['_id'])
+            if 'complaint_id' in result:
+                result['complaint_id'] = str(result['complaint_id'])
+        
         for result in results:
             result['duplicate_probability'] = round(
                 calculate_duplicate_probability(result['similarity_scores']),

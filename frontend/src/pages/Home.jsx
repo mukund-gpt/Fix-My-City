@@ -1,9 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
 
+import { useSelector } from "react-redux";
 import img1 from "./assets/img1.svg";
+import img10 from "./assets/img10.png";
+import img11 from "./assets/img11.png";
+import img12 from "./assets/img12.png";
+import img13 from "./assets/img13.png";
 import img2 from "./assets/img2.svg";
 import img3 from "./assets/img3.png";
 import img4 from "./assets/img4.png";
@@ -12,11 +17,6 @@ import img6 from "./assets/img6.png";
 import img7 from "./assets/img7.png";
 import img8 from "./assets/img8.png";
 import img9 from "./assets/img9.png";
-import img10 from "./assets/img10.png";
-import img11 from "./assets/img11.png";
-import img12 from "./assets/img12.png";
-import img13 from "./assets/img13.png";
-import { useSelector } from "react-redux";
 
 const Home = () => {
   const { user } = useSelector((state) => state.auth);
@@ -139,6 +139,7 @@ const Home = () => {
   }, []);
 
   // Static Data for the "City Pulse" section (made up for dramatic effect)
+
   const totalOpen = 312;
   const totalResolved = 1890;
   const totalSubmissionsToday = 45;
@@ -281,9 +282,9 @@ const Home = () => {
       </section>
 
       {/* Features Section: The Compass Points */}
-      <section className="py-20 bg-gray-900">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-16 text-white border-b-2 border-yellow-500 pb-3">
+      <section className="py-10 bg-gray-900">
+        <div className="container mx-auto px-6 ">
+          <h2 className="text-4xl font-bold text-center mb-16 text-white border-b-4 border-yellow-500 pb-8">
             The Compass Points: Key Features
           </h2>
           <div className="grid lg:grid-cols-3 gap-12">
@@ -345,7 +346,7 @@ const Home = () => {
                   The ledger is quiet. Be the first to file a new chronicle! ✍️
                 </p>
                 <Link
-                  to="/submit"
+                  to="/citizen/submit-complaint"
                   className="mt-4 inline-block text-yellow-500 hover:text-yellow-400 font-bold transition duration-300"
                 >
                   Submit a Report &rarr;

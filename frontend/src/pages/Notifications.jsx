@@ -1,3 +1,4 @@
+import axiosInstance from '@/api/axiosinstance';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
@@ -5,7 +6,6 @@ import { Box, Button, CircularProgress, Divider, IconButton, List, ListItem, Lis
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from 'react-redux';
-
 // --- MOCK DATA (Replaces samplenotification) ---
 const mockNotifications = [
     { id: 1, title: "Complaint Assigned", description: "Complaint #CP1092 has been assigned to your department (Maintenance).", type: "assignment", isRead: false, timestamp: new Date(Date.now() - 3600000) },
@@ -16,6 +16,26 @@ const mockNotifications = [
     { id: 6, title: "Test Notification 1", description: "This is a past notification item.", type: "update", isRead: true, timestamp: new Date(Date.now() - 21600000) },
     { id: 7, title: "Test Notification 2", description: "This is another past notification item.", type: "update", isRead: true, timestamp: new Date(Date.now() - 25200000) },
 ];
+
+const useTimeAgo = (timestamp) => {
+    return useMemo(() => {
+        if (!timestamp) return 'N/A';
+        const date = new Date(timestamp);
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hours ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " minutes ago";
+        return Math.floor(seconds) + " seconds ago";
+    }, [timestamp]);
+};
 
 // Function to simulate fetching a chunk of data
 const fetchNotificationChunk = (offset, limit) => {
@@ -122,22 +142,37 @@ const Notifications = () => {
             toast.info("No more notifications to load.");
             return;
         }
-
+        
         setLoading(true);
         const currentOffset = isLoadMore ? offset : 0;
+        const url = `/notifications?limit=${NOTIFICATIONS_PER_LOAD}&offset=${currentOffset}`;
 
         try {
-            const { data, hasMore: more } = await fetchNotificationChunk(currentOffset, NOTIFICATIONS_PER_LOAD);
+            const response = await axiosInstance(url,
+                {
+                    headers:
+                        {
+                            Authorization:`Bearer ${user?.token}`
+                        }
+                });
             
+            if (!response.ok) {
+                toast.error("Error Occured during Notification loading")
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            const { data, meta } = result;
+
             setNotifications(prev => 
                 isLoadMore ? [...prev, ...data] : data
             );
             setOffset(currentOffset + data.length);
-            setHasMore(more);
+            setHasMore(meta.hasMore);
             
             if (data.length === 0 && !isLoadMore) {
                 toast.info("Your notification inbox is empty.");
-            } else if (isLoadMore) {
+            } else if (isLoadMore && data.length > 0) {
                 toast.success(`Loaded ${data.length} new notifications.`);
             }
         } catch (error) {

@@ -1,95 +1,71 @@
-﻿# The-Caravan-Chronicle 🚀
+﻿# The Caravan Chronicle (FixMyCity) 🚀🏙️
 
-## Project Overview 🌟
-The Caravan Chronicle is a MERN stack-based project aimed at empowering citizens to address and resolve issues within their city. This platform facilitates complaint submission, tracking, and resolution while fostering transparency and accountability.
+A full‑stack civic‑complaint platform (React + Vite frontend, Express + MongoDB backend). Citizens can submit geo‑tagged complaints with media, comment, track progress, and admins/staff can moderate and analyze issues. 🌐📝
 
-## Features ✨
+---
 
-- **User Authentication 🔒**: Secure login and registration system.
-- **Complaint Management 📝**: Submit, track, and resolve complaints.
-- **Admin Dashboard 🛠️**: Tools for administrators to manage complaints and users.
-- **Staff Portal 👷**: Dedicated interface for staff to handle assigned complaints.
-- **Interactive Map 🗺️**: Visualize complaints and their locations.
-- **Notifications 🔔**: Stay updated with real-time notifications.
-- **Reports 📊**: Generate and view detailed reports.
+## Key features ✨
 
-## Feature Details 🔍
+- 🔒 User authentication (signup / login / JWT / Google OAuth)
+- 📝 Create / Read / Update / Delete complaints with image/file uploads
+- 🗺️ Interactive map with geolocation and filters
+- 💬 Commenting and discussion on complaints
+- 🛠️ Admin dashboard: moderation, assignment, analytics
+- 👷 Staff portal: assigned tasks, status updates
+- 🔔 Notifications (real‑time / status updates)
+- 📊 Live statistics and reports (exportable)
+- 🧩 Flask ML microservice for duplicate complaint detection
+- 📁 Uploaded media stored in backend/uploads
 
-### User Authentication 🔒
-The platform provides a secure authentication system that includes:
-- **Registration 🖊️**: Users can create accounts with unique credentials.
-- **Login 🔑**: Secure login using encrypted passwords.
-- **Session Management 🕒**: Ensures users remain logged in securely.
-- **Role-Based Access Control 🎭**: Different roles (e.g., admin, staff, user) have specific permissions.
+---
 
-### Complaint Management 📝
-- **Submission 📥**: Users can submit complaints with detailed descriptions and optional attachments.
-- **Tracking 📍**: Complaints can be tracked in real-time, showing their current status.
-- **Resolution ✅**: Once resolved, users are notified, and the complaint is archived for future reference.
+## Functionality — detailed 🔍
 
-### Admin Dashboard 🛠️
-- **User Management 👤**: Admins can view, edit, and manage user accounts.
-- **Complaint Oversight 👁️**: Admins can monitor all complaints and assign them to staff members.
-- **Analytics 📈**: Provides insights into complaint trends and resolution times.
+- Registration & Login 🔑
 
-### Staff Portal 👷
-- **Assigned Complaints 📋**: Staff members can view complaints assigned to them.
-- **Status Updates 🔄**: Staff can update the status of complaints as they work on them.
-- **Communication 💬**: Allows staff to communicate with users for additional details.
+  - Role-based access (user, staff, admin) 🎭
+  - JWT tokens for auth and protected APIs 🔐
 
-### Interactive Map 🗺️
-- **Visualization 🌍**: Displays complaints on a map for better spatial understanding.
-- **Filters 🔎**: Users can filter complaints by type, status, or date.
-- **Integration 🔗**: Powered by Maptiler API for seamless map rendering.
+- Complaint lifecycle 🧭
 
-### Notifications 🔔
-- **Real-Time Updates ⏰**: Users receive notifications for status changes, new messages, and more.
-- **Customizable ⚙️**: Users can choose which notifications they want to receive.
+  - Submit complaint with title, description, category, location, attachments 📥📸
+  - View complaints on a list or map with filters (type, status, date) 🔎
+  - Staff assignment & progress updates 🔄
+  - Resolution, user notifications, and archival ✅
 
-### Reports 📊
-- **Generation 🖨️**: Users and admins can generate detailed reports on complaints.
-- **Export 📤**: Reports can be exported in various formats (e.g., PDF, Excel).
-- **Insights 💡**: Provides data-driven insights to improve city management.
+- Comments & Communication 💬
 
-## Technologies Used 🛠️
-- **Frontend 🎨**: React, Vite
-- **Backend ⚙️**: Node.js, Express.js
-- **Database 🗄️**: MongoDB
-- **State Management 🧠**: Redux
-- **Other Tools 🛠️**: Axios, Maptiler API
+  - Users and staff can comment on complaints
+  - Notifications on replies and status changes 🔔
 
-## Folder Structure
-- **backend/**: Contains server-side code, including routes, controllers, models, and utilities.
-- **frontend/**: Contains client-side code, including components, pages, and Redux setup.
+- Map & Geo features 🗺️
 
-## Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/shreyanshgangwar1509/The-Caravan-Chronicle.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd The-Caravan-Chronicle
-   ```
-3. Install dependencies for both frontend and backend:
-   ```bash
-   cd backend
-   npm install
-   cd ../frontend
-   npm install
-   ```
-4. Start the development servers:
-   - Backend:
-     ```bash
-     cd backend
-     npm start
-     ```
-   - Frontend:
-     ```bash
-     cd frontend
-     npm run dev
-     ```
+  - Display complaints as map markers
+  - Click marker → view complaint details and media 📍
 
+- Admin & Analytics 📈
 
+  - View complaint trends, resolution times, top categories
+  - Export reports (CSV / PDF) for insights 📤
 
+- File uploads & media 📂
+  - Images/attachments handled via multer (saved to backend/uploads) 🖼️
+- Flask ML microservice for duplicate complaint detection 🧠
+  - Uses a pre-trained NLP model to analyze complaint text similarity
+  - REST API endpoint to check if a new complaint matches existing ones
+  - Integrated with the backend for real-time duplicate detection
 
+---
+
+## API overview 🔗
+
+Primary routes in backend/routes — key controllers:
+
+- complaint.controller.js — complaint CRUD, file uploads
+- auth.controller.js — registration/login, token issuance
+- comments.controller.js — add/list comments
+- admin.controller.js — admin actions & analytics
+- liveStat.controller.js — live statistics endpoints
+- map.controller.js — geo queries / clustering
+
+Auth uses JWT tokens from utills/generatetoken.js and DB connection is in utills/db.js.

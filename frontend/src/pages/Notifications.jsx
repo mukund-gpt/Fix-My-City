@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useSelector } from 'react-redux';
 import io from 'socket.io-client';
 
-// import { socketConnection } from '../';
+
 // --- MOCK DATA (Replaces samplenotification) ---
 const mockNotifications = [
     { id: 1, title: "Complaint Assigned", description: "Complaint #CP1092 has been assigned to your department (Maintenance).", type: "assignment", isRead: false, timestamp: new Date(Date.now() - 3600000) },
@@ -132,14 +132,8 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
 const Notifications = () => {
     const NOTIFICATIONS_PER_LOAD = 5;
     const {  userRole,user } = useSelector((state)=>state.auth);
-    const socket = io(`${import.meta.env.VITE_SERVER}`, {
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
-    });
+    
 
-    socket.emit("register-user", user.id); 
     const [notifications, setNotifications] = useState([]);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
@@ -196,43 +190,7 @@ const Notifications = () => {
         fetchNotifications(false);
     }, [fetchNotifications]);
 
-    useEffect(() => {
-        
-        if (!user || !user.id || !socket) return;
-
-        
-
-        const handleNewNotification = (newNotification) => {
-            toast.success(newNotification.title, {
-                duration: 5000,
-                icon: '🔔',
-                style: {
-                    background: '#6366f1', // indigo-500
-                    color: '#fff',
-                }
-            });
-
-            setNotifications(prev => [
-                {
-                    ...newNotification,
-                    // Ensure timestamp is a Date object for your helper component
-                    timestamp: new Date(newNotification.createdAt) 
-                }, 
-                ...prev
-            ]);
-            
-        };
-
-        // 2. Set up the listener for the real-time event
-        socket.on('new-notification', handleNewNotification);
-
-        // 3. Cleanup function: runs on unmount or dependency change
-        return () => {
-            socket.off('new-notification', handleNewNotification);
-            // Optionally, disconnect or unregister user
-            socket.emit("unregister-user", user.id); 
-        };
-    }, [socket, user]); 
+   
 
     // Handle marking a notification as read/unread
     const handleMarkAsRead = (notificationId) => {

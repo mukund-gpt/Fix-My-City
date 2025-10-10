@@ -26,15 +26,15 @@ export const createComplaint = async (req, res) => {
         created_at: new Date().toISOString()
       }
     });
-    // console.log(duplicateResponse);
+    console.log(duplicateResponse);
         
-    // if (duplicateResponse ) {
-    //       console.log('duplicate comment found');
+    if (duplicateResponse.data.has_duplicates ) {
+          console.log('duplicate comment found');
           
-    //       return res.status(200).json({
-    //         message:"Similar complaint is alredy registered"
-    //       })
-    // }
+          return res.status(200).json({
+            message:"Similar complaint is alredy registered"
+          })
+    }
     
     let photoUrls = [];
 

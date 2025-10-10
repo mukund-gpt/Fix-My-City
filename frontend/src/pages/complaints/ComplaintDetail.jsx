@@ -254,6 +254,8 @@ const StaffCommentForm = ({ onSubmit, isSubmitting }) => {
         setImagePreview(null);
     };
 
+    
+    
     return (
         <Box component="form" onSubmit={handleSubmit} className="space-y-4">
             <TextField
@@ -372,6 +374,7 @@ const ComplaintDetail = () => {
     const [selectedStaffIds, setSelectedStaffIds] = useState([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false); // NEW State for comment loading
+    const [isMarkingResolved, setIsMarkingResolved] = useState(false);
     const token = user?.token;
 
     // Fetch complaint
@@ -468,6 +471,32 @@ const ComplaintDetail = () => {
         }
     };
 
+    const handleMarkResolved = async () => {
+        if (complaint.status === 'Resolved') {
+            toast("This complaint is already marked as Resolved.", { icon: 'ℹ️' });
+            return;
+        }
+
+        setIsMarkingResolved(true);
+        try {
+            // Assume the API endpoint is /admin/complaints/resolve/:id and uses a PUT request
+            const res = await axiosInstance.put(
+                `/admin/complaints/${complaint._id}`,
+                {}, // Empty body is fine if the status is updated based on the ID
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const updatedComplaint = res?.data?.complaint;
+            setComplaint(updatedComplaint);
+            
+            toast.success(`Complaint #${complaint.complaintId} successfully marked as Resolved! 🎉`);
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || "Failed to mark complaint as resolved.");
+        } finally {
+            setIsMarkingResolved(false);
+        }
+    };
 
     if (!complaint)
         return (
@@ -476,6 +505,8 @@ const ComplaintDetail = () => {
                 <p className="ml-4 text-xl text-gray-700">Loading complaint details...</p>
             </div>
         );
+
+    const isResolved = complaint.status === 'Resolved';
 
     return (
         <Box sx={{ flexGrow: 1 }} className="bg-gray-100 min-h-screen">
@@ -541,6 +572,23 @@ const ComplaintDetail = () => {
                                 {/* --- ADMIN ACTIONS SECTION --- */}
                                 {userRole === "admin" && (
                                     <>
+                                        {/* making complaint as resolved */}
+                                        <Button
+                                            variant="contained"
+                                            color="error" // Use a striking color for a major action
+                                            fullWidth
+                                            onClick={handleMarkResolved}
+                                            disabled={isMarkingResolved || isResolved}
+                                            startIcon={isMarkingResolved ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlineIcon />}
+                                            className="mb-4"
+                                            sx={{ 
+                                                // Change color for resolved state
+                                                backgroundColor: isResolved ? '#4CAF50' : null,
+                                                '&:hover': { backgroundColor: isResolved ? '#4CAF50' : null },
+                                            }}
+                                        >
+                                            {isResolved ? 'ALREADY RESOLVED' : 'MARK AS RESOLVED'}
+                                        </Button>
                                         {/* Currently Assigned Staff */}
                                         <Box className="mb-6">
                                             <Typography variant="subtitle1" className="font-bold text-gray-700 mb-2">

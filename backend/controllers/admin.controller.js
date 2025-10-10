@@ -122,22 +122,119 @@ export const getComplaints = async (req, res) => {
 };
 
 export const updateComplaintByAdmin = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  try {
-    const complaint = await Complaint.findById(id);
-    if (!complaint) {
-      return res.status(404).json({ message: "Complaint not found" });
+  // 1. Get IDs and Sender Info
+  // mainly for resolved 
+    const { complaintId } = req.params;
+    // Assuming authentication middleware attaches the current user (the resolver) to req.user
+    const resolver = req.user; 
+
+    if (!complaintId) {
+        return res.status(400).json({ message: "Complaint ID is required." });
     }
-    complaint.status = status;
-    await complaint.save();
-    res
-      .status(200)
-      .json({ message: "Complaint updated successfully", complaint });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+
+    try {
+        // 2. Fetch the original complaint to get 'createdAt' for time calculation
+        const originalComplaint = await Complaint.findById(complaintId);
+
+        if (!originalComplaint) {
+            return res.status(404).json({ message: "Complaint not found." });
+        }
+        
+        if (originalComplaint.status === "RESOLVED") {
+            return res.status(400).json({ message: "Complaint is already resolved." });
+      }
+      
+        // 3. Calculate time metrics
+        const resolvedAt = new Date();
+        const createdAt = originalComplaint.createdAt;
+        // Calculate total time elapsed since creation in milliseconds
+        const totalTimeToResolve = resolvedAt.getTime() - createdAt.getTime(); 
+
+        // 4. Update the complaint document
+        const updatedComplaint = await Complaint.findByIdAndUpdate(
+            complaintId,
+            {
+                status: "RESOLVED",
+                resolvedAt,
+                totalTimeToResolve,
+            },
+            { new: true } 
+        ).populate("citizen", "email name");
+
+        if (!updatedComplaint) {
+            return res.status(500).json({ message: "Failed to update complaint status." });
+        }
+
+
+        // 5. Prepare and Send Email Notification
+        const citizenEmail = updatedComplaint.citizen?.email;
+        const citizenName = updatedComplaint.citizen?.name || "Valued Citizen";
+
+        if (citizenEmail) {
+            // Convert milliseconds to a human-readable format (e.g., hours and minutes)
+            const minutes = Math.floor(totalTimeToResolve / (1000 * 60));
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            const timeString = hours > 0 
+                ? `${hours} hour(s) and ${remainingMinutes} minute(s)` 
+                : `${remainingMinutes} minute(s)`;
+
+            const emailSubject = `Resolution Confirmation: Complaint #${updatedComplaint._id.toString().slice(-5)}`;
+
+            const emailBody = `
+Dear ${citizenName},
+
+We are pleased to inform you that your complaint, titled **"${updatedComplaint.title}"**, has been **RESOLVED** by our team.
+
+---
+**Resolution Details:**
+* **Status:** RESOLVED
+* **Time to Resolve:** ${timeString}
+* **Resolved By:** ${resolver?.name || resolver?.email || 'A team member'}
+* **Date Resolved:** ${resolvedAt.toLocaleDateString()}
+---
+
+Thank you for your patience and for helping us improve our community services.
+
+Sincerely,
+The City Management Team
+`;
+
+            await sendMail(citizenEmail, emailSubject, emailBody);
+        } else {
+            console.warn(`Citizen email not found for complaint ID: ${complaintId}. Skipping email.`);
+        }
+        // 6. Send success response
+        res.status(200).json({
+            message: "Complaint successfully resolved and citizen notified.",
+            data: updatedComplaint,
+        });
+
+    } catch (error) {
+        console.error("Error resolving complaint:", error);
+        res.status(500).json({ message: "An unexpected error occurred while resolving the complaint.", error: error.message });
+    }
 };
+// export const updateComplaintByAdmin = async (req, res) => {
+//   const { id } = req.params;
+//   const { status } = req.body;
+//   try {
+//     const complaint = await Complaint.findById(id);
+//     if (!complaint) {
+//       return res.status(404).json({ message: "Complaint not found" });
+//     }
+//     complaint.status = status;
+//     await complaint.save();
+    
+//     await sendMail(sender?.email, "Complaint Resolved ", `${sender.name} you complaint is resolved `);
+
+//     res
+//       .status(200)
+//       .json({ message: "Complaint updated successfully", complaint });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 export const getStaffByDepartment = async (req, res) => {
   try {

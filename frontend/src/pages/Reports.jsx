@@ -53,6 +53,7 @@ export default function Reports() {
         }
       );
       setAnalytics(res.data);
+      console.log("Analytics Response:", analytics);
 
     } catch (err) {
       console.error("Failed to fetch analytics:", err);
@@ -179,21 +180,21 @@ export default function Reports() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <MetricCard
                 title="Total Complaints"
-                value={analytics.totalComplaints.toLocaleString()}
+                value={analytics?.totalComplaints.toLocaleString()}
                 unit=""
                 icon={Tally3}
                 color="bg-indigo-600"
               />
               <MetricCard
                 title="Avg. Resolution Time"
-                value={analytics.avgResolutionTime.toFixed(2)}
+                value={analytics?.avgResolutionTimeInHours}
                 unit="hrs"
                 icon={Timer}
                 color="bg-teal-600"
               />
               <MetricCard
                 title="SLA Compliance"
-                value={analytics.slaCompliance.toFixed(1)}
+                value={analytics?.slaCompliance}
                 unit="%"
                 icon={CheckCircle}
                 color="bg-amber-600"
@@ -203,17 +204,23 @@ export default function Reports() {
             {/* Volume by Category Section */}
             <div className="mt-8 bg-white p-6 rounded-2xl shadow-2xl border border-gray-100">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Volume by Category</h3>
-              <ul className="space-y-3">
-                {Object.entries(analytics.volumeByCategory)
-                  .sort(([, countA], [, countB]) => countB - countA) // Sort by count descending
-                  .map(([category, count]) => {
-                    // Calculate percentage of total complaints
-                    const total = analytics.totalComplaints;
+             <ul className="space-y-3">
+              {analytics?.filteredVolumeByCategory &&
+                Object.entries(analytics.filteredVolumeByCategory) // [[category, count], ...]
+                  .map(([category, count]) => ({ category, count })) // convert to array of objects
+                  .sort((a, b) => b.count - a.count) // sort descending
+                  .map(({ category, count }) => {
+                    const total = analytics?.totalComplaints || 0;
                     const percentage = total > 0 ? (count / total) * 100 : 0;
 
                     return (
-                      <li key={category} className="p-4 bg-gray-50 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-150 hover:bg-gray-100 border-l-4 border-blue-500">
-                        <span className="font-medium text-gray-700 flex-1 mb-2 sm:mb-0">{category}</span>
+                      <li
+                        key={category}
+                        className="p-4 bg-gray-50 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-150 hover:bg-gray-100 border-l-4 border-blue-500"
+                      >
+                        <span className="font-medium text-gray-700 flex-1 mb-2 sm:mb-0">
+                          {category}
+                        </span>
                         <div className="flex-1 w-full sm:w-auto h-2 bg-gray-200 rounded-full mx-0 sm:mx-4 my-2 sm:my-0">
                           <div
                             className="h-full bg-blue-500 rounded-full transition-all duration-700 ease-out"
@@ -227,7 +234,7 @@ export default function Reports() {
                       </li>
                     );
                   })}
-              </ul>
+            </ul>
             </div>
           </div>
         )}

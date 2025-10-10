@@ -7,11 +7,12 @@ import express from "express";
 import adminroutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
+import liveStat from "./routes/liveStat.routes.js";
 import maproutes from "./routes/map.routes.js";
 import notificationRoutes from './routes/notification.routes.js';
+import slaroutes from './routes/sla.routes.js';
 import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
-import liveStat from "./routes/liveStat.routes.js";
 import { initializeSocket } from "./utills/socket.js";
 import http from "http";
 
@@ -42,6 +43,8 @@ app.use("/api/staff", staffroutes);
 app.use("/api/map", maproutes);
 app.use('/api/notifications', notificationRoutes);
 app.use("/api/stats", liveStat);
+app.use('/api/slaconfig', slaroutes);
+
 app.get("/", (req, res) => {
   return res.send("Backend is working fine");
 });

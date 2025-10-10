@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
-
 import { useSelector } from "react-redux";
+
+// Images
 import img1 from "./assets/img1.svg";
 import img10 from "./assets/img10.png";
 import img11 from "./assets/img11.png";
@@ -22,9 +23,14 @@ const Home = () => {
   const { user } = useSelector((state) => state.auth);
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
 
+  // Two refs for Fog (bottom) and Birds (top)
+  const fogRef = useRef(null);
+  const birdsRef = useRef(null);
+  const fogEffect = useRef(null);
+  const birdsEffect = useRef(null);
+
+  // Fetch latest complaints
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
@@ -32,72 +38,58 @@ const Home = () => {
         setComplaints(res.data);
       } catch (error) {
         console.error(error);
-        console.log("Error fetching the latest chronicles.");
+        console.log("Error fetching the latest complaints.");
       }
     };
-
     fetchComplaint();
   }, []);
 
-  // Initialize Vanta Birds Effect
+  // Initialize layered VANTA background (Fog + Birds)
   useEffect(() => {
-    let mounted = true;
+    const loadScript = (src) =>
+      new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
+        const s = document.createElement("script");
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
 
-    const loadScripts = async () => {
+    const initVanta = async () => {
       try {
-        // Load Three.js
-        if (!window.THREE) {
-          await new Promise((resolve, reject) => {
-            const existingScript = document.querySelector(
-              'script[src*="three.min.js"]'
-            );
-            if (existingScript) {
-              if (window.THREE) resolve();
-              else existingScript.addEventListener("load", resolve);
-              return;
-            }
+        await loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+        );
+        await loadScript(
+          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"
+        );
+        await loadScript(
+          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"
+        );
 
-            const threeScript = document.createElement("script");
-            threeScript.src =
-              "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js";
-            threeScript.async = true;
-            threeScript.onload = resolve;
-            threeScript.onerror = reject;
-            document.head.appendChild(threeScript);
+        // Initialize Fog (bottom layer)
+        if (!fogEffect.current && window.VANTA?.FOG && fogRef.current) {
+          fogEffect.current = window.VANTA.FOG({
+            el: fogRef.current,
+            mouseControls: false,
+            touchControls: false,
+            gyroControls: false,
+            highlightColor: 0x4aff,
+            midtoneColor: 0xff0000,
+            lowlightColor: 0x2d00ff,
+            baseColor: 0xedebff,
+            blurFactor: 0.6,
+            zoom: 0.5,
+            speed: 1,
           });
         }
 
-        // Load Vanta Birds
-        if (!window.VANTA?.BIRDS) {
-          await new Promise((resolve, reject) => {
-            const existingScript = document.querySelector(
-              'script[src*="vanta.birds"]'
-            );
-            if (existingScript) {
-              if (window.VANTA?.BIRDS) resolve();
-              else existingScript.addEventListener("load", resolve);
-              return;
-            }
-
-            const vantaScript = document.createElement("script");
-            vantaScript.src =
-              "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js";
-            vantaScript.async = true;
-            vantaScript.onload = resolve;
-            vantaScript.onerror = reject;
-            document.head.appendChild(vantaScript);
-          });
-        }
-
-        // Initialize Vanta effect only if component is still mounted
-        if (
-          mounted &&
-          window.VANTA?.BIRDS &&
-          vantaRef.current &&
-          !vantaEffect.current
-        ) {
-          vantaEffect.current = window.VANTA.BIRDS({
-            el: vantaRef.current,
+        // Initialize Birds (top layer)
+        if (!birdsEffect.current && window.VANTA?.BIRDS && birdsRef.current) {
+          birdsEffect.current = window.VANTA.BIRDS({
+            el: birdsRef.current,
             mouseControls: true,
             touchControls: true,
             gyroControls: false,
@@ -105,10 +97,9 @@ const Home = () => {
             minWidth: 200.0,
             scale: 1.0,
             scaleMobile: 1.0,
-            backgroundColor: 0x1e3a8a,
+            backgroundAlpha: 0.0, // transparent background so fog shows through
             color1: 0xff0000,
             color2: 0x00ffff,
-            colorMode: "variance",
             birdSize: 1.8,
             wingSpan: 25.0,
             speedLimit: 4.0,
@@ -119,27 +110,19 @@ const Home = () => {
           });
         }
       } catch (error) {
-        console.error("Error loading Vanta scripts:", error);
+        console.error("Error initializing Vanta:", error);
       }
     };
 
-    loadScripts();
+    initVanta();
 
     return () => {
-      mounted = false;
-      if (vantaEffect.current) {
-        try {
-          vantaEffect.current.destroy();
-          vantaEffect.current = null;
-        } catch (error) {
-          console.error("Error destroying Vanta effect:", error);
-        }
-      }
+      if (fogEffect.current) fogEffect.current.destroy();
+      if (birdsEffect.current) birdsEffect.current.destroy();
     };
   }, []);
 
-  // Static Data for the "City Pulse" section (made up for dramatic effect)
-
+  // Static city stats
   const totalOpen = 312;
   const totalResolved = 1890;
   const totalSubmissionsToday = 45;
@@ -164,14 +147,16 @@ const Home = () => {
   ];
 
   return (
-    <div className="bg-gray-900 z-10 min-h-screen font-sans text-white overflow-hidden">
-      {/* Hero Section: The Grand Beacon with Vanta Birds */}
-      <section
-        ref={vantaRef}
-        className="relative py-48 shadow-2xl overflow-hidden"
-      >
-        {/* Content overlay - floating above Vanta background */}
-        <div className="container mx-auto px-6 relative z-10 text-center transform translate-y-[-1rem] animate-fadeInDown">
+    <div className="bg-gray-900 min-h-screen font-sans text-white overflow-hidden">
+      {/* 🌫️🕊️ Hero Section with layered Vanta effects */}
+      <section className="relative py-48 overflow-hidden shadow-2xl">
+        {/* Fog background (bottom) */}
+        <div ref={fogRef} className="absolute inset-0 z-0" />
+        {/* Birds overlay (top) */}
+        <div ref={birdsRef} className="absolute inset-0 z-10" />
+
+        {/* Hero content (over both effects) */}
+        <div className="relative z-20 text-center container mx-auto px-6">
           <h1 className="text-6xl md:text-7xl font-extrabold mb-4 tracking-tight leading-none drop-shadow-2xl">
             The <span className="text-yellow-400">Caravan Chronicle</span>
           </h1>
@@ -195,74 +180,55 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* Infinite Carousel at the bottom */}
-        <div className="absolute bottom-0 left-0 w-full translate-y-1.5 overflow-hidden bg-white h-36 flex items-center z-20">
-          <style>
-            {`
-      @keyframes scroll {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-      }
-      .animate-scroll {
-        animation: scroll 25s linear infinite;
-        display: flex;
-      }
-      .animate-scroll:hover {
-        animation-play-state: paused;
-      }
-    `}
-          </style>
-
+        {/* Infinite Carousel */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden bg-transparent h-36 flex items-center z-30">
+          <style>{`
+            @keyframes scroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-scroll {
+              animation: scroll 25s linear infinite;
+              display: flex;
+            }
+            .animate-scroll:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
           <div className="animate-scroll">
-            <div className="flex shrink-0">
-              {images.map((img, i) => (
-                <img
-                  key={`original-${i}`}
-                  src={img}
-                  alt="city-icon"
-                  className="h-16 w-auto object-contain select-none mx-6"
-                  draggable="false"
-                />
-              ))}
-            </div>
-            <div className="flex shrink-0">
-              {images.map((img, i) => (
-                <img
-                  key={`duplicate-${i}`}
-                  src={img}
-                  alt="city-icon"
-                  className="h-16 w-auto object-contain select-none mx-6"
-                  draggable="false"
-                />
-              ))}
-            </div>
+            {[...images, ...images].map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt="city-icon"
+                className="h-16 w-auto object-contain select-none mx-6"
+                draggable="false"
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* City Pulse (The Creative Centerpiece) */}
-      <section className="py-16 bg-gray-800  border-yellow-500/50">
+      {/* City Pulse Section */}
+      <section className="py-16 bg-gray-800 border-yellow-500/50">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
             The City Pulse: Real-Time Impact
           </h2>
           <div className="grid md:grid-cols-4 gap-8">
-            {/* Card 1: Resolved */}
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-green-400 text-center transform hover:scale-[1.05] transition duration-300 animate-slideInLeft">
+            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-green-400 text-center hover:scale-[1.05] transition">
               <p className="text-4xl font-black text-green-400">
                 {totalResolved}
               </p>
               <p className="text-lg text-indigo-200 mt-2">Completed Journeys</p>
             </div>
-            {/* Card 2: Open */}
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-red-400 text-center transform hover:scale-[1.05] transition duration-300 animate-slideInUp">
+            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-red-400 text-center hover:scale-[1.05] transition">
               <p className="text-4xl font-black text-red-400">{totalOpen}</p>
               <p className="text-lg text-indigo-200 mt-2">
                 Tickets Awaiting Crew
               </p>
             </div>
-            {/* Card 3: Rate */}
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-yellow-400 text-center transform hover:scale-[1.05] transition duration-300 animate-slideInUp">
+            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-yellow-400 text-center hover:scale-[1.05] transition">
               <p className="text-4xl font-black text-yellow-400">
                 {resolutionRate}%
               </p>
@@ -270,8 +236,7 @@ const Home = () => {
                 Current Resolution Rate
               </p>
             </div>
-            {/* Card 4: Daily Submissions (New Creative Stat) */}
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-purple-400 text-center transform hover:scale-[1.05] transition duration-300 animate-slideInRight">
+            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-purple-400 text-center hover:scale-[1.05] transition">
               <p className="text-4xl font-black text-purple-400">
                 {totalSubmissionsToday}
               </p>
@@ -281,9 +246,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section: The Compass Points */}
+      {/* Features */}
       <section className="py-10 bg-gray-900">
-        <div className="container mx-auto px-6 ">
+        <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 text-white border-b-4 border-yellow-500 pb-8">
             The Compass Points: Key Features
           </h2>
@@ -307,23 +272,22 @@ const Home = () => {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-gray-800 p-8 rounded-xl shadow-2xl border-2 border-indigo-700/50 hover:border-yellow-500 transition-all duration-500 transform hover:-translate-y-2 group"
+                className="bg-gray-800 p-8 rounded-xl shadow-2xl border-2 border-indigo-700/50 hover:border-yellow-500 transition transform hover:-translate-y-2 group"
               >
-                <div className="text-6xl mb-4 transition-transform duration-500 group-hover:rotate-[10deg]">
+                <div className="text-6xl mb-4 transition-transform group-hover:rotate-[10deg]">
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-yellow-400">
                   {feature.title}
                 </h3>
                 <p className="text-gray-300 leading-relaxed">{feature.desc}</p>
-                <div className="h-1 w-1/4 mt-4 bg-yellow-500 group-hover:w-full transition-all duration-500"></div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Recent Complaints: The Live Feed */}
+      {/* Latest Complaints */}
       <section className="py-20 bg-gray-900 border-t border-gray-700">
         <div className="container mx-auto px-6">
           <h1 className="text-4xl font-bold mb-12 text-center text-white">
@@ -334,7 +298,7 @@ const Home = () => {
               complaints.map((complaint) => (
                 <div
                   key={complaint._id}
-                  className="cursor-pointer transform hover:scale-[1.03] transition duration-300 shadow-xl hover:shadow-yellow-500/20 rounded-xl overflow-hidden animate-bounceIn"
+                  className="cursor-pointer hover:scale-[1.03] transition duration-300 shadow-xl hover:shadow-yellow-500/20 rounded-xl overflow-hidden"
                   onClick={() => navigate(`/complaint/${complaint._id}`)}
                 >
                   <ComplaintCard complaint={complaint} />
@@ -357,7 +321,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Call to Action: The Final Destination */}
+      {/* Call to Action */}
       {!user && (
         <section className="py-20 bg-indigo-800 border-t-8 border-indigo-900">
           <div className="container mx-auto px-6 text-center">

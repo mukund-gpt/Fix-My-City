@@ -45,3 +45,55 @@ export const staffComplaintTemplate = (staff, complaint) => {
     </div>
   `;
 };
+
+export const citizenInProgressTemplate = (citizen, complaint, staffList) => {
+  const staffNames =
+    staffList.map((s) => s.department).join(", ") || "our support team";
+
+  return `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h2>🚧 Your Complaint Is Now In Progress</h2>
+      <p>Dear ${citizen.name} 👋,</p>
+      <p>Your complaint titled <strong>“${complaint.title}”</strong> is now being handled by our team.</p>
+
+      <h3>🧾 Complaint Details</h3>
+      <ul style="line-height:1.6;">
+        <li><b>Title:</b> ${complaint.title}</li>
+        <li><b>Description:</b> ${complaint.description}</li>
+        <li><b>Location:</b> ${complaint.location}</li>
+        <li><b>Status:</b> <span style="color:#e67e22;">In Progress</span></li>
+      </ul>
+
+      <h3>👷 Assigned Staff</h3>
+      <p>${staffNames}</p>
+
+      <p>Our staff are actively reviewing and working on your issue. We’ll keep you updated once it’s resolved. ✅</p>
+      <br>
+      <p>Thank you for helping make our city better! 🌆</p>
+      <p><b>– FixMyCity Team ⚙️</b></p>
+    </div>
+  `;
+};
+
+export const citizenResolvedTemplate = (citizen, complaint) => {
+  return `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h2>🎉 Your Complaint Has Been Resolved!</h2>
+      <p>Dear ${citizen.name} 👋,</p>
+      <p>We’re happy to inform you that your complaint titled <strong>“${complaint.title}”</strong> has been resolved.</p>
+
+      <h3>🧾 Complaint Summary</h3>
+      <ul style="line-height:1.6;">
+        <li><b>Title:</b> ${complaint.title}</li>
+        <li><b>Description:</b> ${complaint.description}</li>
+        <li><b>Location:</b> ${complaint.location}</li>
+        <li><b>Status:</b> <span style="color:#27ae60;">Resolved</span></li>
+      </ul>
+
+      <p>✅ Thank you for reporting this issue. Your feedback helps us make the city a better place to live.</p>
+      <p>If you notice any further problems, please don’t hesitate to raise another complaint via the FixMyCity portal.</p>
+      <br>
+      <p>Best regards,<br><b>FixMyCity Team 🌇</b></p>
+    </div>
+  `;
+};

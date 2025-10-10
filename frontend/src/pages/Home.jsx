@@ -19,6 +19,8 @@ import img7 from "./assets/img7.png";
 import img8 from "./assets/img8.png";
 import img9 from "./assets/img9.png";
 
+import LiveStat from "./LiveStat.jsx";
+
 const Home = () => {
   const { user } = useSelector((state) => state.auth);
   const [complaints, setComplaints] = useState([]);
@@ -209,42 +211,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* City Pulse Section */}
-      <section className="py-16 bg-gray-800 border-yellow-500/50">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
-            The City Pulse: Real-Time Impact
-          </h2>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-green-400 text-center hover:scale-[1.05] transition">
-              <p className="text-4xl font-black text-green-400">
-                {totalResolved}
-              </p>
-              <p className="text-lg text-indigo-200 mt-2">Completed Journeys</p>
-            </div>
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-red-400 text-center hover:scale-[1.05] transition">
-              <p className="text-4xl font-black text-red-400">{totalOpen}</p>
-              <p className="text-lg text-indigo-200 mt-2">
-                Tickets Awaiting Crew
-              </p>
-            </div>
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-yellow-400 text-center hover:scale-[1.05] transition">
-              <p className="text-4xl font-black text-yellow-400">
-                {resolutionRate}%
-              </p>
-              <p className="text-lg text-indigo-200 mt-2">
-                Current Resolution Rate
-              </p>
-            </div>
-            <div className="p-8 bg-blue-800 rounded-3xl shadow-xl border-b-4 border-purple-400 text-center hover:scale-[1.05] transition">
-              <p className="text-4xl font-black text-purple-400">
-                {totalSubmissionsToday}
-              </p>
-              <p className="text-lg text-indigo-200 mt-2">New Reports Today</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <LiveStat/>
+
 
       {/* Features */}
       <section className="py-10 bg-gray-900">
@@ -320,6 +288,10 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+
+      
+
 
       {/* Call to Action */}
       {!user && (

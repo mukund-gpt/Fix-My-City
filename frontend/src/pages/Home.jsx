@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
+
 import img1 from "./assets/img1.svg";
 import img2 from "./assets/img2.svg";
 import img3 from "./assets/img3.png";
@@ -15,8 +16,10 @@ import img10 from "./assets/img10.png";
 import img11 from "./assets/img11.png";
 import img12 from "./assets/img12.png";
 import img13 from "./assets/img13.png";
+import { useSelector } from "react-redux";
 
 const Home = () => {
+  const { user } = useSelector((state) => state.auth);
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
   const vantaRef = useRef(null);
@@ -39,21 +42,24 @@ const Home = () => {
   // Initialize Vanta Birds Effect
   useEffect(() => {
     let mounted = true;
-    
+
     const loadScripts = async () => {
       try {
         // Load Three.js
         if (!window.THREE) {
           await new Promise((resolve, reject) => {
-            const existingScript = document.querySelector('script[src*="three.min.js"]');
+            const existingScript = document.querySelector(
+              'script[src*="three.min.js"]'
+            );
             if (existingScript) {
               if (window.THREE) resolve();
-              else existingScript.addEventListener('load', resolve);
+              else existingScript.addEventListener("load", resolve);
               return;
             }
-            
-            const threeScript = document.createElement('script');
-            threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+
+            const threeScript = document.createElement("script");
+            threeScript.src =
+              "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js";
             threeScript.async = true;
             threeScript.onload = resolve;
             threeScript.onerror = reject;
@@ -64,15 +70,18 @@ const Home = () => {
         // Load Vanta Birds
         if (!window.VANTA?.BIRDS) {
           await new Promise((resolve, reject) => {
-            const existingScript = document.querySelector('script[src*="vanta.birds"]');
+            const existingScript = document.querySelector(
+              'script[src*="vanta.birds"]'
+            );
             if (existingScript) {
               if (window.VANTA?.BIRDS) resolve();
-              else existingScript.addEventListener('load', resolve);
+              else existingScript.addEventListener("load", resolve);
               return;
             }
-            
-            const vantaScript = document.createElement('script');
-            vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js';
+
+            const vantaScript = document.createElement("script");
+            vantaScript.src =
+              "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js";
             vantaScript.async = true;
             vantaScript.onload = resolve;
             vantaScript.onerror = reject;
@@ -81,31 +90,36 @@ const Home = () => {
         }
 
         // Initialize Vanta effect only if component is still mounted
-        if (mounted && window.VANTA?.BIRDS && vantaRef.current && !vantaEffect.current) {
+        if (
+          mounted &&
+          window.VANTA?.BIRDS &&
+          vantaRef.current &&
+          !vantaEffect.current
+        ) {
           vantaEffect.current = window.VANTA.BIRDS({
             el: vantaRef.current,
             mouseControls: true,
             touchControls: true,
             gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
             backgroundColor: 0x1e3a8a,
             color1: 0xff0000,
             color2: 0x00ffff,
             colorMode: "variance",
             birdSize: 1.8,
-            wingSpan: 25.00,
-            speedLimit: 4.00,
-            separation: 50.00,
-            alignment: 50.00,
-            cohesion: 40.00,
-            quantity: 4.00
+            wingSpan: 25.0,
+            speedLimit: 4.0,
+            separation: 50.0,
+            alignment: 50.0,
+            cohesion: 40.0,
+            quantity: 4.0,
           });
         }
       } catch (error) {
-        console.error('Error loading Vanta scripts:', error);
+        console.error("Error loading Vanta scripts:", error);
       }
     };
 
@@ -118,7 +132,7 @@ const Home = () => {
           vantaEffect.current.destroy();
           vantaEffect.current = null;
         } catch (error) {
-          console.error('Error destroying Vanta effect:', error);
+          console.error("Error destroying Vanta effect:", error);
         }
       }
     };
@@ -149,9 +163,9 @@ const Home = () => {
   ];
 
   return (
-    <div className="bg-gray-900 min-h-screen font-sans text-white overflow-hidden">
+    <div className="bg-gray-900 z-10 min-h-screen font-sans text-white overflow-hidden">
       {/* Hero Section: The Grand Beacon with Vanta Birds */}
-      <section 
+      <section
         ref={vantaRef}
         className="relative py-48 shadow-2xl overflow-hidden"
       >
@@ -343,31 +357,33 @@ const Home = () => {
       </section>
 
       {/* Call to Action: The Final Destination */}
-      <section className="py-20 bg-indigo-800 border-t-8 border-indigo-900">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-extrabold text-white mb-4">
-            Ready to embark?
-          </h2>
-          <p className="text-xl text-indigo-200 mb-10 max-w-2xl mx-auto">
-            Your credentials are your ticket to ride. Find your place in The
-            Caravan Chronicle today.
-          </p>
-          <div className="space-x-6">
-            <Link
-              to="/register"
-              className="bg-yellow-400 text-indigo-900 font-bold px-10 py-4 rounded-full shadow-2xl hover:bg-yellow-300 transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
-            >
-              Register
-            </Link>
-            <Link
-              to="/login"
-              className="bg-gray-100 text-indigo-800 font-semibold px-10 py-4 rounded-full shadow-lg hover:bg-white transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
-            >
-              Login
-            </Link>
+      {!user && (
+        <section className="py-20 bg-indigo-800 border-t-8 border-indigo-900">
+          <div className="container mx-auto px-6 text-center">
+            <h2 className="text-4xl font-extrabold text-white mb-4">
+              Ready to embark?
+            </h2>
+            <p className="text-xl text-indigo-200 mb-10 max-w-2xl mx-auto">
+              Your credentials are your ticket to ride. Find your place in The
+              Caravan Chronicle today.
+            </p>
+            <div className="space-x-6">
+              <Link
+                to="/register"
+                className="bg-yellow-400 text-indigo-900 font-bold px-10 py-4 rounded-full shadow-2xl hover:bg-yellow-300 transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
+              >
+                Register
+              </Link>
+              <Link
+                to="/login"
+                className="bg-gray-100 text-indigo-800 font-semibold px-10 py-4 rounded-full shadow-lg hover:bg-white transform hover:scale-110 transition duration-300 text-lg uppercase tracking-wider"
+              >
+                Login
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 };

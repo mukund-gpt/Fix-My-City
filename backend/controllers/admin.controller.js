@@ -331,3 +331,45 @@ export const getAllUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const runSlaEscalationJob = async (req, res) => {
+    try {
+        console.log("Starting SLA Escalation Job...");
+        
+        const count = await Complaint.escalateOverdueComplaints(); 
+        
+        const message = `SLA Escalation Job finished. ${count} complaints were escalated.`;
+        console.log(message);
+
+        // For a true cron job, you wouldn't send a response, but for testing:
+        return res.status(200).json({ success: true, message, escalatedCount: count });
+
+    } catch (error) {
+        console.error("Error running SLA Escalation Job:", error);
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+};
+
+export const manuallyEscalateComplaint = async (req, res) => {
+    const { id } = req.params;
+    const { targetStaffId, reason, currentStaffRole } = req.body; // e.g., reason: "FUNCTIONAL_NEED"
+
+    try {
+        const complaint = await Complaint.findById(id);
+        if (!complaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+        let newLevel = complaint.escalationLevel + 1;
+        
+        await complaint.escalate(reason, targetStaffId, newLevel);
+
+        return res.status(200).json({ 
+            message: `Complaint ${id} manually escalated and reassigned.`,
+            complaint: complaint 
+        });
+
+    } catch (error) {
+        console.error("Error during manual escalation:", error);
+        return res.status(500).json({ message: "Internal server error during escalation" });
+    }
+};

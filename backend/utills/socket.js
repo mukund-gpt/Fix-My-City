@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import { calculateDashboardStats } from "../controllers/liveStat.controller.js";
 
 let io;  
+const connectedUsers = new Map();
 
 export const initializeSocket = (server) => {
   io = new Server(server, {
@@ -20,6 +21,13 @@ export const initializeSocket = (server) => {
     // Send initial dashboard data
     sendInitialData(socket);
 
+    socket.on("register-user", (userId) => {
+            if (userId) {
+                // Ensure the key is a string for consistent lookups
+                connectedUsers.set(userId.toString(), socket.id); 
+                console.log(`User registered: ${userId} -> ${socket.id}`);
+            }
+        });
     // Refresh data on request
     socket.on("request-dashboard-update", async () => {
       try {
@@ -34,9 +42,17 @@ export const initializeSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`Client disconnected: ${socket.id}`);
+              console.log(`Client disconnected: ${socket.id}`);
+              // Find and remove the user ID associated with this socket ID
+              for (const [userId, sId] of connectedUsers.entries()) {
+                  if (sId === socket.id) {
+                      connectedUsers.delete(userId);
+                      console.log(`User unregistered: ${userId}`);
+                      break;
+                  }
+              }
+          });
     });
-  });
 
   return io;
 };
@@ -66,6 +82,51 @@ export const broadcastDashboardUpdate = async () => {
     console.log("✅ Dashboard update broadcasted");
   } catch (error) {
     console.error("Error broadcasting dashboard update:", error);
+  }
+};
+
+export const sendNotificationToUser = (userId, notificationData) => {
+    if (!io) {
+        console.error("Socket.IO not initialized");
+        return;
+    }
+
+    const socketId = connectedUsers.get(userId.toString()); // Ensure key is a string
+
+    if (socketId) {
+        const socket = io.sockets.sockets.get(socketId);
+        if (socket) {
+            socket.emit("new-notification", notificationData);
+            
+            console.log(` Event 'new-notification' sent to user: ${userId}`);
+            return true;
+        }
+    }
+    
+    console.warn(` No active socket found for user: ${userId}`);
+    return false;
+};
+
+
+export const socketEmit = (recipient, event, message) => {
+  if (!io) {
+    console.error("Socket.IO not initialized");
+    return;
+  }
+
+  let socketId = recipient;
+
+  // If recipient is userId, map to socket.id
+  if (connectedUsers.has(recipient)) {
+    socketId = connectedUsers.get(recipient);
+  }
+
+  const socket = io.sockets.sockets.get(socketId);
+  if (socket) {
+    socket.emit(event, message);
+    console.log(`📤 Event '${event}' sent to ${recipient}`);
+  } else {
+    console.warn(`⚠️ No active socket found for recipient: ${recipient}`);
   }
 };
 

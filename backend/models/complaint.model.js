@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+// Assuming a Comment model exists for referencing
+// export default mongoose.model("Comment", commentSchema); 
+
 const complaintSchema = new mongoose.Schema(
   {
     citizen: {
@@ -38,32 +41,68 @@ const complaintSchema = new mongoose.Schema(
     totalTimeToResolve: {
       type: Number, // in milliseconds
     },
+    
+    // --- Escalation Fields ---
+    escalationLevel: { 
+        type: Number, 
+        default: 0, // 0: No Escalation, 1: TTA Missed, 2: TTR Missed, 3: Critical
+        min: 0 
+    },
+    lastEscalatedAt: {
+      type: Date,
+    },
+    escalationReason: { 
+        type: String, 
+        enum: ["TTA_MISSED", "TTR_MISSED", "FUNCTIONAL_NEED", "CITIZEN_REQUEST", null], 
+        default: null
+    },
   },
   { timestamps: true }
 );
 
-complaintSchema.pre("save", function (next) {
+// --- PRE-SAVE HOOK (for Deadline and Overdue Check) ---
+complaintSchema.pre("save", async function (next) {
+    
+  // 1. Dynamic Deadline Calculation (TTR)
   if (this.isNew && !this.deadline) {
-    const now = new Date();
-    switch (this.urgency) {
-      case "HIGH":
-        this.deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
-        break;
-      case "MEDIUM":
-        this.deadline = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days
-        break;
-      case "LOW":
-        this.deadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
-        break;
+    const SLAConfig = mongoose.model('SLAConfig');
+    // Find the latest SLA configuration
+    const slaConfig = await SLAConfig.findOne().sort({ createdAt: -1 });
+
+    if (slaConfig) {
+        const urgencyConfig = slaConfig[this.urgency];
+        if (urgencyConfig && urgencyConfig.TTR) {
+            const ttrHours = urgencyConfig.TTR;
+            const now = new Date();
+            // Set the TTR deadline (which is the current 'deadline' field)
+            this.deadline = new Date(now.getTime() + ttrHours * 60 * 60 * 1000); 
+        }
+    } else {
+        // Fallback to hardcoded if no SLA config is found (or handle error)
+        const now = new Date();
+        switch (this.urgency) {
+            case "HIGH":
+                this.deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+                break;
+            case "MEDIUM":
+                this.deadline = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days
+                break;
+            case "LOW":
+                this.deadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+                break;
+        }
     }
   }
 
+  // 2. Overdue Check
   if (this.status !== "RESOLVED" && this.deadline) {
     this.isOverdue = new Date() > this.deadline;
   }
-
+  
   next();
 });
+
+// --- INSTANCE METHODS ---
 
 complaintSchema.methods.updateStatus = function (newStatus, userId) {
   const now = new Date();
@@ -72,97 +111,163 @@ complaintSchema.methods.updateStatus = function (newStatus, userId) {
 
   if (newStatus === "RESOLVED") {
     this.resolvedAt = now;
-    this.totalTimeToResolve = now - this.createdAt;
+    // Calculate total time to resolve from creation time
+    this.totalTimeToResolve = now.getTime() - this.createdAt.getTime(); 
   }
 
   return this.save();
 };
 
 complaintSchema.methods.assignStaff = function (staffId) {
-  this.assignedTo.push(staffId);
+  if (!this.assignedTo.includes(staffId)) {
+    this.assignedTo.push(staffId);
+  }
   return this.save();
 };
 
-complaintSchema.statics.getOverdueComplaints = function () {
-  return this.find({
-    status: { $ne: "RESOLVED" },
-    deadline: { $lt: new Date() },
-  })
-    .populate("citizen assignedTo", "name email")
-    .sort({ deadline: 1 });
+complaintSchema.methods.escalate = async function (escalationReason, targetStaffId, newEscalationLevel, newUrgency) {
+    
+    // 1. Setup Notification and Assignment Lists
+    const Notification = mongoose.model('Notification'); // Access the new model
+    const staffIdsToNotify = new Set();
+    
+    // Add all currently assigned staff (for update/alert notification)
+    this.assignedTo.forEach(id => staffIdsToNotify.add(id.toString()));
+
+    // 2. Assign to the new staff (e.g., Team Lead or Manager)
+    if (targetStaffId) {
+        const staffIds = this.assignedTo.map(id => id.toString());
+        if (!staffIds.includes(targetStaffId.toString())) {
+             this.assignedTo.push(targetStaffId);
+        }
+        // Add the new target to the notification list
+        staffIdsToNotify.add(targetStaffId.toString());
+    }
+    
+    // 3. Update core fields: escalation tracking and URGENCY
+    this.escalationLevel = newEscalationLevel; 
+    this.lastEscalatedAt = new Date(); 
+    this.escalationReason = escalationReason; 
+    
+    if (newUrgency && newUrgency !== this.urgency) {
+        this.urgency = newUrgency;
+    }
+
+    // 4. Save the changes to the Complaint document
+    await this.save(); 
+
+    // 5. Send Notifications
+    if (Notification) {
+        const title = `🚨 ESCALATED TO LEVEL ${newEscalationLevel} - ${this.urgency} Urgency`;
+        const messageBase = `Complaint: "${this.title}" (${this.urgency}) missed its SLA and has been escalated. Reason: ${escalationReason.replace(/_/g, ' ')}. It requires immediate attention.`;
+        
+        const notificationPromises = Array.from(staffIdsToNotify).map(staffId => {
+            return Notification.create({ 
+                recipient: staffId, 
+                sender: SYSTEM_USER_ID, 
+                title: title,
+                message: messageBase,
+                type: 'ALERT', // Use ALERT for high-priority escalation
+                referenceId: this._id,
+            });
+        });
+        
+        await Promise.all(notificationPromises);
+        console.log(`[Escalation] Notified ${staffIdsToNotify.size} staff members for Complaint ${this._id}.`);
+    } else {
+        console.error("Notification model not available for escalation alerts.");
+    }
+    
+    return this;
 };
 
-complaintSchema.methods.getSlaTimeLines = async function () {
-  await this.populate({
-    path: "commentList",
-    populate: {
-      path: "author",
-      select: "name email role",
-    },
-    options: { sort: { createdAt: 1 } }, // Sort by oldest first
-  });
+// --- STATIC METHODS (MODIFIED) ---
 
-  const timelines = [];
-  let previousTimestamp = this.createdAt;
+complaintSchema.statics.escalateOverdueComplaints = async function () {
+    const SLAConfig = mongoose.model('SLAConfig');
+    const slaConfig = await SLAConfig.findOne().sort({ createdAt: -1 });
 
-  for (let i = 0; i < this.commentList.length; i++) {
-    const comment = this.commentList[i];
-    const currentTimestamp = comment.createdAt;
+    if (!slaConfig) {
+        console.error("SLA configuration not found. Escalation job aborted.");
+        return 0;
+    }
 
-    const timeDiff = currentTimestamp - previousTimestamp;
+    const now = new Date();
+    let escalatedCount = 0;
 
-    const hoursSpent = Math.round((timeDiff / (1000 * 60 * 60)) * 100) / 100;
+    // ... (rest of the initial fetching remains the same) ...
+    const complaints = await this.find({ 
+        status: { $ne: "RESOLVED" } 
+    }).populate("assignedTo", "_id");
 
-    timelines.push({
-      person: {
-        id: comment.author._id,
-        name: comment.author.name,
-        email: comment.author.email,
-        role: comment.author.role,
-      },
-      responseTime: {
-        milliseconds: timeDiff,
-        hours: hoursSpent,
-        days: Math.round((hoursSpent / 24) * 100) / 100,
-      },
-      comment: {
-        id: comment._id,
-        text: comment.commentText,
-        hoursSpentWorking: comment.hoursSpent || 0,
-      },
-      timestamp: {
-        from: previousTimestamp,
-        to: currentTimestamp,
-      },
-      isFirstResponse: i === 0,
-    });
+    // Placeholder function for demonstration 
+    // (Replace with your actual User lookup logic from the previous answer)
+    const findTargetStaffId = async (level, urgency, complaint) => {
+        if (level === 1) return 'TEAM_LEAD_USER_ID_A';
+        if (level === 2) return 'MANAGER_USER_ID_B';
+        return null;
+    };
+    // ------------------------------------------------------------------
 
-    previousTimestamp = currentTimestamp;
-  }
-  const summary = {
-    totalResponseTime: {
-      milliseconds: this.totalTimeToResolve || 0,
-      hours:
-        Math.round(((this.totalTimeToResolve || 0) / (1000 * 60 * 60)) * 100) /
-        100,
-      days:
-        Math.round(
-          ((this.totalTimeToResolve || 0) / (1000 * 60 * 60 * 24)) * 100
-        ) / 100,
-    },
-    firstResponseTime: timelines.length > 0 ? timelines[0].responseTime : null,
-    totalComments: this.commentList.length,
-    status: this.status,
-    isOverdue: this.isOverdue,
-  };
-  return {
-    complaintId: this._id,
-    title: this.title,
-    createdAt: this.createdAt,
-    resolvedAt: this.resolvedAt,
-    timelines,
-    summary,
-  };
+    for (const complaint of complaints) {
+        const urgencyConfig = slaConfig[complaint.urgency];
+        if (!urgencyConfig) continue;
+        
+        let targetEscalationLevel = complaint.escalationLevel;
+        let escalationReason = null;
+        let newUrgency = complaint.urgency; // Default to current urgency
+
+        // --- TTA Check (Escalation Level 1) ---
+        if (complaint.status === "OPEN" && complaint.commentList.length === 0 && urgencyConfig.TTA) {
+            const ttaDeadline = new Date(complaint.createdAt.getTime() + urgencyConfig.TTA * 60 * 60 * 1000);
+            
+            if (now > ttaDeadline && complaint.escalationLevel < 1) {
+                targetEscalationLevel = 1;
+                escalationReason = "TTA_MISSED";
+                // Optional: Slightly raise urgency for TTA failure
+                if (newUrgency === 'LOW') newUrgency = 'MEDIUM'; 
+            }
+        }
+        
+        // --- TTR Check (Escalation Level 2) ---
+        if (complaint.deadline && now > complaint.deadline) {
+            if (complaint.escalationLevel < 2) {
+                targetEscalationLevel = 2;
+                escalationReason = "TTR_MISSED";
+                // CRITICAL: Force urgency to HIGH when the resolution deadline is missed
+                newUrgency = "HIGH"; 
+            }
+        }
+
+        // --- Execute Escalation ---
+        if (targetEscalationLevel > complaint.escalationLevel) {
+            
+            const targetStaffId = await findTargetStaffId(
+                targetEscalationLevel, 
+                complaint.urgency, 
+                complaint 
+            ); 
+
+            if (!targetStaffId) {
+                console.warn(`Could not find a staff member for Level ${targetEscalationLevel} escalation on complaint ${complaint._id}. Skipping.`);
+                continue;
+            }
+            
+            try {
+                // PASS THE NEW URGENCY TO THE ESCALATE METHOD
+                await complaint.escalate(escalationReason, targetStaffId, targetEscalationLevel, newUrgency); 
+                
+                // IMPORTANT: You should update the assignedComplaintCount for the User here
+                // e.g., await User.findByIdAndUpdate(targetStaffId, { $inc: { assignedComplaintCount: 1 } });
+                
+                escalatedCount++;
+            } catch (error) {
+                console.error(`Failed to escalate complaint ${complaint._id}:`, error);
+            }
+        }
+    }
+
+    return escalatedCount;
 };
 
 export default mongoose.model("Complaint", complaintSchema);

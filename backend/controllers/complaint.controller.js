@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import cloudinary from "../utills/cloudinary.js";
 import { notifyCreateComplaint } from "../utills/emails.js";
 import { broadcastDashboardUpdate } from "../utills/socket.js";
+import { createNotification } from "./notification.controller.js";
 
 export const createComplaint = async (req, res) => {
   try {
@@ -30,10 +31,11 @@ export const createComplaint = async (req, res) => {
         if (duplicateResponse) {
           console.log('duplicate comment found');
           
-          res.status(200).json({
-            message:"similar complaint is alredy registered"
+          return res.status(200).json({
+            message:"Similar complaint is alredy registered"
           })
-        }
+    }
+    
     let photoUrls = [];
 
     // Upload each image to Cloudinary in the "fixmycity" folder
@@ -57,13 +59,27 @@ export const createComplaint = async (req, res) => {
       assignedTo: null,
     });
 
-    
+    const recipients = await User.find({ 
+            // Query for users who handle new complaints
+            role: { $in: ['Admin'] } 
+        }).select('_id');
+
+    const notificationPromises = recipients.map(recipient => {
+        return createNotification({
+            recipientId: recipient._id,
+            title: `🚨 NEW Complaint Filed: ${title}`,
+            message: `A new complaint has been filed by ${req.user.name}. It is now ${createdComplaint.status} with Urgency: ${createdComplaint.urgency}.`,
+            type: "NEW_COMPLAINT",
+            referenceId: createdComplaint._id,
+            senderId: SYSTEM_USER_ID,
+        });
+    });
 
     const createdComplaint = await complaint.save();
     await broadcastDashboardUpdate();// live stat update
     const citizen = await User.findById(req.user.id);
     notifyCreateComplaint(citizen.name, citizen.email, title);
-    res.status(201).json({ success: true });
+    res.status(201).json({ success: true, message: "Complaint created successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -228,3 +244,4 @@ export const getComplaintSlaTimeline = async (req, res) => {
     });
   }
 };
+

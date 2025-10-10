@@ -229,7 +229,9 @@ export default function SubmitComplaint() {
                 // Handle RTK Query errors
                 throw new Error(res.error?.data?.message || "Failed to submit complaint");
             }
-            toast.success("✅ Complaint submitted successfully! Thank you for reporting.");
+            // console.log(res);
+            
+            toast.success(res?.data?.message);
             resetForm();
         } catch (err) {
             console.error("Submit error:", err);

@@ -5,6 +5,8 @@ import {
     getanalyatics,
     getComplaints,
     getStaffByDepartment,
+    manuallyEscalateComplaint,
+    runSlaEscalationJob,
     updateComplaintByAdmin
 } from "../controllers/admin.controller.js";
 import {
@@ -25,6 +27,8 @@ router.put("/complaints/assign", protect, assignComplaint); // For admin to assi
 router.get("/complaints/unresolved", protect, getUnresolvedComplaints);
 router.get("/complaints/resolved", protect, getResolvedComplaints);
 router.put("/complaints/:id", protect, updateComplaintByAdmin); // For admin to update complaint status
+router.post('/complaints/:id/escalate', manuallyEscalateComplaint);
+router.post('/job/run-escalation', runSlaEscalationJob);
 router.get("/analytics",getanalyatics);
 router.get("/reports", getReports);
 export default router;

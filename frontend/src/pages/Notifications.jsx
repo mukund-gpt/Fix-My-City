@@ -6,6 +6,8 @@ import { Box, Button, CircularProgress, Divider, IconButton, List, ListItem, Lis
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from 'react-redux';
+// import io from 'socket.io-client'; 
+// import { socketConnection } from '../';
 // --- MOCK DATA (Replaces samplenotification) ---
 const mockNotifications = [
     { id: 1, title: "Complaint Assigned", description: "Complaint #CP1092 has been assigned to your department (Maintenance).", type: "assignment", isRead: false, timestamp: new Date(Date.now() - 3600000) },
@@ -128,7 +130,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
 // --- Main Notifications Component ---
 const Notifications = () => {
     const NOTIFICATIONS_PER_LOAD = 5;
-    
+    const socket = useMemo(() => io(process.env.VITE_BACKEND_URL || 'http://localhost:5000'), []);
     const {  userRole,user } = useSelector((state)=>state.auth);
     
     const [notifications, setNotifications] = useState([]);
@@ -155,15 +157,15 @@ const Notifications = () => {
                             Authorization:`Bearer ${user?.token}`
                         }
                 });
+            console.log(response);
             
-            if (!response.ok) {
+            if (!response.data.ok) {
                 toast.error("Error Occured during Notification loading")
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const result = await response.json();
-            const { data, meta } = result;
-
+            const { data, meta } = response.data;
+            
             setNotifications(prev => 
                 isLoadMore ? [...prev, ...data] : data
             );
@@ -171,7 +173,7 @@ const Notifications = () => {
             setHasMore(meta.hasMore);
             
             if (data.length === 0 && !isLoadMore) {
-                toast.info("Your notification inbox is empty.");
+                toast.success("Your notification inbox is empty.");
             } else if (isLoadMore && data.length > 0) {
                 toast.success(`Loaded ${data.length} new notifications.`);
             }
@@ -186,6 +188,43 @@ const Notifications = () => {
     useEffect(() => {
         fetchNotifications(false);
     }, [fetchNotifications]);
+
+    useEffect(() => {
+        if (!user || !user.id || !socket) return;
+
+        socket.emit("register-user", user.id); 
+
+        const handleNewNotification = (newNotification) => {
+            toast.success(newNotification.title, {
+                duration: 5000,
+                icon: '🔔',
+                style: {
+                    background: '#6366f1', // indigo-500
+                    color: '#fff',
+                }
+            });
+
+            setNotifications(prev => [
+                {
+                    ...newNotification,
+                    // Ensure timestamp is a Date object for your helper component
+                    timestamp: new Date(newNotification.createdAt) 
+                }, 
+                ...prev
+            ]);
+            
+        };
+
+        // 2. Set up the listener for the real-time event
+        socket.on('new-notification', handleNewNotification);
+
+        // 3. Cleanup function: runs on unmount or dependency change
+        return () => {
+            socket.off('new-notification', handleNewNotification);
+            // Optionally, disconnect or unregister user
+            // socket.emit("unregister-user", user.id); 
+        };
+    }, [socket, user]); 
 
     // Handle marking a notification as read/unread
     const handleMarkAsRead = (notificationId) => {

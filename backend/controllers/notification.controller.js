@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Notification from "../models/notification.model.js";
+import { sendNotificationToUser } from "../utills/socket.js";
 // import Notification from "../models/notificationModel.js"; // Adjust path as needed
 
 // --- Utility function for creating new notifications (to be used elsewhere) ---
@@ -33,6 +34,8 @@ export const createNotification = async ({
         });
 
         await newNotification.save();
+
+        sendNotificationToUser(recipientId, newNotification.toObject()); 
         console.log(`Notification created for user ${recipientId}.`);
         return newNotification;
 
@@ -68,6 +71,7 @@ export const getNotifications = async (req, res) => {
         const hasMore = offset + notifications.length < totalCount;
 
         res.status(200).json({
+            ok:true,
             data: notifications,
             meta: {
                 totalCount,

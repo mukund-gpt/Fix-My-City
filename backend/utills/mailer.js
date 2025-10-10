@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 
 export const sendMail = async (emails, subject, message) => {
   try {
+    if (!emails) return;
     // Create transporter using your email service or SMTP
     const transporter = nodemailer.createTransport({
       service: "gmail", // or use 'smtp.mailtrap.io' / custom SMTP

@@ -2,13 +2,12 @@ import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema(
   {
-    // The user who receives the notification (required for filtering)
-    recipient: {
+    recipient: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // Indexing is crucial for fast lookups by recipient
-    },
+      index: true, 
+    }],
     
     // The entity that triggered the notification (e.g., the system or another user)
     sender: {

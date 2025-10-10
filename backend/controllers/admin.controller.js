@@ -7,6 +7,7 @@ import {
 } from "../utills/emails.js";
 import { sendMail } from "../utills/mailer.js";
 import { broadcastDashboardUpdate } from "../utills/socket.js";
+import { createNotification } from "./notification.controller.js";
 export const logoutAdmin = async (req, res) => {
   try {
     req.session.destroy((err) => {
@@ -87,6 +88,15 @@ export const assignComplaint = async (req, res) => {
       role: "staff",
     }).select("name email department");
 
+    await createNotification({
+      userIds,
+      title: "New Complaint Assigned",
+      message: `A new complaint (${complaint.title || complaint._id}) has been assigned to you.`,
+      type: "ASSIGNMENT",
+      referenceId: complaint._id,
+      senderId: req.user.id
+    });
+    
     //send mail to citizen
     const msg = citizenInProgressTemplate(
       complaint.citizen,
@@ -101,12 +111,14 @@ export const assignComplaint = async (req, res) => {
 
     // Send individual emails using template
     for (const staff of assignedStaff) {
+
       const staffMsg = staffComplaintTemplate(staff, complaint);
       sendMail(
         [staff.email],
         "🛠️ New Complaint Assigned – FixMyCity",
         staffMsg
       );
+      
     }
 
     // Get assigned departments
@@ -141,17 +153,17 @@ export const getComplaints = async (req, res) => {
 export const updateComplaintByAdmin = async (req, res) => {
   // 1. Get IDs and Sender Info
   // mainly for resolved 
-    const { complaintId } = req.params;
+    const { id } = req.params;
     // Assuming authentication middleware attaches the current user (the resolver) to req.user
     const resolver = req.user; 
 
-    if (!complaintId) {
+    if (!id) {
         return res.status(400).json({ message: "Complaint ID is required." });
     }
 
     try {
         // 2. Fetch the original complaint to get 'createdAt' for time calculation
-      const originalComplaint = await Complaint.findById(complaintId).
+      const originalComplaint = await Complaint.findById(id).
         populate(
       "assignedTo",
       "name email"
@@ -172,7 +184,7 @@ export const updateComplaintByAdmin = async (req, res) => {
 
         // 4. Update the complaint document
         const updatedComplaint = await Complaint.findByIdAndUpdate(
-            complaintId,
+            id,
             {
                 status: "RESOLVED",
                 resolvedAt,
@@ -200,8 +212,7 @@ export const updateComplaintByAdmin = async (req, res) => {
                 : `${remainingMinutes} minute(s)`;
 
             // 5.1. Generate the Assigned Staff List
-            const assignedStaffList = updatedComplaint?.assignedTo
-                .map(staff => `* ${staff.name || staff.email}`) // Use name, or fallback to email
+            const assignedStaffList = updatedComplaint?.assignedTo?.map(staff => `* ${staff.name || staff.email}`)
                 .join('\n');
             const emailSubject = `Resolution Confirmation: Complaint #${updatedComplaint._id.toString().slice(-5)}`;
 
@@ -226,10 +237,9 @@ Thank you for your patience and for helping us improve our community services.
 Sincerely,
 The City Management Team
 `;
-
             await sendMail(citizenEmail, emailSubject, emailBody);
         } else {
-            console.warn(`Citizen email not found for complaint ID: ${complaintId}. Skipping email.`);
+            console.warn(`Citizen email not found for complaint ID: ${id}. Skipping email.`);
       }
           await broadcastDashboardUpdate();// live stat update
         res.status(200).json({

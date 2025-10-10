@@ -24,14 +24,16 @@ export const createNotification = async ({
 }) => {
     try {
         const newNotification = new Notification({
-            recipient: recipientId,
+            recipient: Array.isArray(recipientId)
+                ? recipientId.map((id) => new mongoose.Types.ObjectId(id))
+                : [new mongoose.Types.ObjectId(recipientId)], // always stored as array
             title,
             message,
             type,
             referenceId: referenceId ? new mongoose.Types.ObjectId(referenceId) : null,
-            sender: senderId,
+            sender: senderId ? new mongoose.Types.ObjectId(senderId) : null,
             isRead: false,
-        });
+            });
 
         await newNotification.save();
 
@@ -57,14 +59,17 @@ export const getNotifications = async (req, res) => {
 
     try {
         // 1. Fetch notifications for the user, sorted by creation date (newest first)
-        const notifications = await Notification.find({ recipient: userId })
+        const notifications = await Notification.find({ recipient: { $in: [new mongoose.Types.ObjectId(userId)] } })
             .sort({ createdAt: -1 })
             .limit(limit)
             .skip(offset)
             .lean(); // Use lean() for performance since we don't need Mongoose documents
 
         // 2. Count total documents for the user
-        const totalCount = await Notification.countDocuments({ recipient: userId });
+        const totalCount = await Notification.countDocuments({
+             
+            recipient: { $in: [new mongoose.Types.ObjectId(userId)] }
+         });
         
         // 3. Determine if more results exist
         const hasMore = offset + notifications.length < totalCount;

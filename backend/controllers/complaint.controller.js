@@ -26,7 +26,7 @@ export const createComplaint = async (req, res) => {
         created_at: new Date().toISOString()
       }
     });
-    console.log(duplicateResponse);
+    // console.log(duplicateResponse);
         
     if (duplicateResponse.data.has_duplicates ) {
           console.log('duplicate comment found');
@@ -61,7 +61,7 @@ export const createComplaint = async (req, res) => {
 
     const recipients = await User.find({ 
             // Query for users who handle new complaints
-            role: { $in: ['Admin'] } 
+            role: { $in: ['admin'] } 
         }).select('_id');
 
     const notificationPromises = recipients.map(recipient => {

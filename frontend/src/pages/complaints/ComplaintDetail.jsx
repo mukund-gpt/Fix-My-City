@@ -1,3 +1,4 @@
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCamera from "@mui/icons-material/PhotoCamera"; // NEW: For image upload icon
 import {
@@ -17,7 +18,6 @@ import { useParams } from "react-router-dom";
 import axiosInstance from "../../api/axiosinstance.js";
 import ComplaintCard from "../../components/ComplainCard.jsx";
 import StaffSearch from "../admin/Search.jsx";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 // 1. StaffCommentForm Component (Handles comment input and image upload)
 const StaffCommentForm = ({ onSubmit, isSubmitting }) => {
@@ -291,13 +291,17 @@ const ComplaintDetail = () => {
     setIsMarkingResolved(true);
     try {
       // Assume the API endpoint is /admin/complaints/resolve/:id and uses a PUT request
+      // console.log(complaint);
+      
       const res = await axiosInstance.put(
         `/admin/complaints/${complaint._id}`,
         {}, // Empty body is fine if the status is updated based on the ID
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const updatedComplaint = res?.data?.complaint;
+      const updatedComplaint = res?.data?.data;
+      // console.log(res.data);
+      
       setComplaint(updatedComplaint);
 
       toast.success(

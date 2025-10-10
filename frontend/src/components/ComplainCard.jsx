@@ -70,7 +70,7 @@ const mockComplaint = {
   longitude: -118.2437,
 };
 
-const ComplaintCard = ({ complaint = mockComplaint }) => {
+const ComplaintCard = ({ complaint = mockComplaint,isShow=false }) => {
   const navigate = useNavigate();
 
   // --- State for Image Carousel ---
@@ -379,7 +379,7 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
         </Box>
         <Divider className="border-gray-300 dark:border-gray-700" />
        
-        {assignedTo?.map((staff, idx) => (
+        {isShow && assignedTo?.map((staff, idx) => (
           <span
             key={staff.id}
             className="ml-6 text-gray-300 dark:text-gray-300 font-normal"

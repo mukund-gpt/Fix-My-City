@@ -342,7 +342,7 @@ const ComplaintDetail = () => {
           <div
             className={userRole === "admin" ? "lg:col-span-2" : "col-span-1"}
           >
-            <ComplaintCard complaint={complaint} />
+            <ComplaintCard isShow complaint={complaint} />
           </div>
 
           {/* RIGHT SIDE: Admin/Staff Actions Panel (1/3 width) */}

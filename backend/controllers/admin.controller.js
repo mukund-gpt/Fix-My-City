@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { staffComplaintTemplate } from "../utills/emails.js";
+import {
+  citizenInProgressTemplate,
+  staffComplaintTemplate,
+} from "../utills/emails.js";
 import { sendMail } from "../utills/mailer.js";
 export const logoutAdmin = async (req, res) => {
   try {
@@ -81,7 +84,19 @@ export const assignComplaint = async (req, res) => {
     const assignedStaff = await User.find({
       _id: { $in: complaint.assignedTo },
       role: "staff",
-    }).select("name email");
+    }).select("name email department");
+
+    //send mail to citizen
+    const msg = citizenInProgressTemplate(
+      complaint.citizen,
+      complaint,
+      assignedStaff
+    );
+    sendMail(
+      [complaint.citizen.email],
+      "🚧 Your Complaint Is In Progress - FixMyCity",
+      msg
+    );
 
     // Send individual emails using template
     for (const staff of assignedStaff) {

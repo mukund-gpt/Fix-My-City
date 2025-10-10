@@ -4,11 +4,11 @@ import express from "express";
 import adminroutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import complaintRoutes from "./routes/complaint.route.js";
-import dashboardRoutes from "./routes/dashboard.route.js";
 import maproutes from "./routes/map.routes.js";
 import notificationRoutes from './routes/notification.routes.js';
 import staffroutes from "./routes/staff.routes.js";
 import connectDB from "./utills/db.js";
+import liveStat from "./routes/liveStat.routes.js";
 
 dotenv.config();
 const app = express();
@@ -30,11 +30,11 @@ app.use("/api/test", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
-app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin", adminroutes);
 app.use("/api/staff", staffroutes);
 app.use("/api/map", maproutes);
 app.use('/api/notifications', notificationRoutes);
+app.use("/api/stats", liveStat)
 app.get("/", (req, res) => {
   return res.send("Backend is working fine");
 });

@@ -6,6 +6,7 @@ import {
   staffComplaintTemplate,
 } from "../utills/emails.js";
 import { sendMail } from "../utills/mailer.js";
+import { broadcastDashboardUpdate } from "../utills/socket.js";
 export const logoutAdmin = async (req, res) => {
   try {
     req.session.destroy((err) => {
@@ -113,6 +114,7 @@ export const assignComplaint = async (req, res) => {
       _id: { $in: complaint.assignedTo },
     }).distinct("department");
 
+    await broadcastDashboardUpdate();// live stat update
     res.status(200).json({
       message: "Complaint assigned successfully",
       complaint,
@@ -228,8 +230,8 @@ The City Management Team
             await sendMail(citizenEmail, emailSubject, emailBody);
         } else {
             console.warn(`Citizen email not found for complaint ID: ${complaintId}. Skipping email.`);
-        }
-        // 6. Send success response
+      }
+          await broadcastDashboardUpdate();// live stat update
         res.status(200).json({
             message: "Complaint successfully resolved and citizen notified.",
             data: updatedComplaint,
@@ -240,26 +242,6 @@ The City Management Team
         res.status(500).json({ message: "An unexpected error occurred while resolving the complaint.", error: error.message });
     }
 };
-// export const updateComplaintByAdmin = async (req, res) => {
-//   const { id } = req.params;
-//   const { status } = req.body;
-//   try {
-//     const complaint = await Complaint.findById(id);
-//     if (!complaint) {
-//       return res.status(404).json({ message: "Complaint not found" });
-//     }
-//     complaint.status = status;
-//     await complaint.save();
-    
-//     await sendMail(sender?.email, "Complaint Resolved ", `${sender.name} you complaint is resolved `);
-
-//     res
-//       .status(200)
-//       .json({ message: "Complaint updated successfully", complaint });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 
 export const getStaffByDepartment = async (req, res) => {
   try {

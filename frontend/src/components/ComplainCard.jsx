@@ -143,11 +143,11 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
   const getUrgencyClasses = (urgency) => {
     switch (urgency) {
       case "HIGH":
-        return "border-red-500 text-red-600 bg-red-50/70 dark:bg-red-900/40 dark:text-red-400";
+        return "border-red-500 text-red-600 bg-white";
       case "MEDIUM":
-        return "border-orange-500 text-orange-600 bg-orange-50/70 dark:bg-orange-900/40 dark:text-orange-400";
+        return "border-orange-500 text-orange-600 bg-white";
       default:
-        return "border-green-500 text-green-600 bg-green-50/70 dark:bg-green-900/40 dark:text-green-400";
+        return "border-green-500 text-green-600 bg-white";
     }
   };
 
@@ -166,16 +166,12 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
   return (
     <Card
       className={`
-        relative bg-white dark:bg-gray-900 rounded-2xl p-0
-        shadow-2xl dark:shadow-black/50 overflow-hidden 
+        relative bg-gray-800/50 rounded-2xl p-0
+        shadow-2xl overflow-hidden 
         transition-all duration-500 transform 
-        ${
-          isOverdue && status !== "RESOLVED"
-            ? "border-4 border-red-500/70 hover:shadow-red-600/60"
-            : "border-t-4 border-purple-600 hover:shadow-purple-600/60"
-        }
-        hover:scale-[1.02] cursor-pointer
+        hover:scale-[1.01] cursor-pointer
         font-opensans
+        border-gray-700 border
       `}
       onClick={() => navigate(`/complaint/${_id}`)}
     >
@@ -214,7 +210,7 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
         <Box className="flex justify-between items-start mb-4">
           <Typography
             variant="h5"
-            className="text-gray-900 dark:text-white leading-tight pr-4 font-poppins"
+            className="text-white dark:text-white leading-tight pr-4 font-poppins"
           >
             {title}
           </Typography>
@@ -225,7 +221,6 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             )} transform hover:scale-105 transition duration-300`}
           />
         </Box>
-
         {/* Photo Carousel Area */}
         {totalMedia > 0 && (
           <Box className="w-full h-80 overflow-hidden rounded-xl mb-4 shadow-xl border border-gray-200 dark:border-gray-700 relative group">
@@ -311,17 +306,14 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             )}
           </Box>
         )}
-
         {/* Description Snippet */}
         <Typography
           variant="body2"
-          className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 text-sm"
+          className="text-gray-300 dark:text-gray-300 mb-4 line-clamp-3 text-sm"
         >
           {description}
         </Typography>
-
         <Divider className="border-gray-300 dark:border-gray-700" />
-
         {/* Metrics & Details Grid */}
         <Box className="grid grid-cols-1 md:grid-cols-2 gap-y-3 text-sm font-medium mt-4">
           {/* Created By / Citizen */}
@@ -340,13 +332,13 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             </svg>
             <Typography
               variant="body2"
-              className="text-gray-500 dark:text-gray-400"
+              className="text-gray-200 dark:text-gray-400"
             >
               Filed by:{" "}
             </Typography>
             <Typography
               variant="body1"
-              className="text-gray-900 dark:text-white font-semibold"
+              className="text-gray-200 dark:text-white font-semibold"
             >
               {citizen?.name || "Anonymous"}
             </Typography>
@@ -369,7 +361,7 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             </svg>
             <Typography
               variant="body2"
-              className="text-gray-500 dark:text-gray-400"
+              className="text-gray-200 dark:text-gray-400"
             >
               Assigned:{" "}
             </Typography>
@@ -385,9 +377,17 @@ const ComplaintCard = ({ complaint = mockComplaint }) => {
             </Typography>
           </Box>
         </Box>
-
         <Divider className="border-gray-300 dark:border-gray-700" />
-
+       
+        {assignedTo?.map((staff, idx) => (
+          <span
+            key={staff.id}
+            className="ml-6 text-gray-300 dark:text-gray-300 font-normal"
+          >
+            🎯{staff.name}
+            <br />
+          </span>
+        ))}
         {/* Deadline and Timestamps */}
         <Box className="flex justify-between items-center text-xs mt-4">
           <Box

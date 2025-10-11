@@ -18,11 +18,8 @@ import UnresolvedComplaints from "./admin/UnresolvedComplaints";
 import ViewAnalytics from "./admin/ViewAnalytics";
 import ViewAssignedComplaints from "./staff/ViewAssignedComplaints";
 
-
-
 const Dashboard = () => {
-  
-  const { user } = useSelector((state) => state.auth); 
+  const { user } = useSelector((state) => state.auth);
 
   const [activeView, setActiveView] = useState(null);
 
@@ -43,20 +40,20 @@ const Dashboard = () => {
       rounded-xl shadow-xl transition-all duration-300 transform 
       cursor-pointer border-2 font-bold text-center h-full
     `;
-    
+
     // Determine specific styling based on role/type
     let typeClasses = `bg-gray-800 text-white border-gray-700 hover:scale-[1.03] hover:ring-2 hover:ring-yellow-400`;
     let iconColor = color;
-    
+
     if (path) {
-        // This is a Link for Citizen
-        typeClasses = `${color} text-white border-transparent hover:scale-[1.03] hover:shadow-yellow-500/50`;
+      // This is a Link for Citizen
+      typeClasses = `${color} text-white border-transparent hover:scale-[1.03] hover:shadow-yellow-500/50`;
     } else if (isActive) {
-        // This is an active Admin button
-        typeClasses = `bg-yellow-400 text-gray-900 border-yellow-500 shadow-2xl shadow-yellow-500/30 ring-4 ring-yellow-400/50`;
-        iconColor = "text-gray-900"; // Black icon on yellow background
+      // This is an active Admin button
+      typeClasses = `bg-yellow-400 text-gray-900 border-yellow-500 shadow-2xl shadow-yellow-500/30 ring-4 ring-yellow-400/50`;
+      iconColor = "text-gray-900"; // Black icon on yellow background
     }
-    
+
     const content = (
       <div className={`${baseClasses} ${typeClasses}`}>
         <div className={`text-4xl mb-3 ${iconColor}`}>{icon}</div>
@@ -71,7 +68,7 @@ const Dashboard = () => {
         </Link>
       );
     }
-    
+
     return (
       <button onClick={onClick} className="block w-full">
         {content}
@@ -83,14 +80,6 @@ const Dashboard = () => {
     // CHANGE: Dark background and padding for aesthetic
     <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-white">
       <div className="max-w-6xl mx-auto">
-        {/* Title Section */}
-        <h1 className="text-4xl font-extrabold mb-2 text-yellow-400 drop-shadow-md">
-          Welcome, {user.name}
-        </h1>
-        <p className="mb-10 text-lg text-gray-300">
-          Your role: <span className="font-bold uppercase text-yellow-400">{user.role}</span>
-        </p>
-
         {/* --- Dashboard Layouts --- */}
 
         {/* Citizen Dashboard */}
@@ -121,11 +110,11 @@ const Dashboard = () => {
         {user.role === "staff" && (
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6 border-b pb-2 border-indigo-700 text-indigo-400 flex items-center">
-                <AssignmentIcon className="mr-3 text-3xl" />
-                Assigned Complaint Queue
+              <AssignmentIcon className="mr-3 text-3xl" />
+              Assigned Complaint Queue
             </h2>
             {/* Staff view is always visible and doesn't use the sub-view area */}
-            <ViewAssignedComplaints /> 
+            <ViewAssignedComplaints />
           </div>
         )}
 
@@ -133,8 +122,8 @@ const Dashboard = () => {
         {user.role === "admin" && (
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6 border-b pb-2 border-indigo-700 text-indigo-400 flex items-center">
-                <AssignmentTurnedInIcon className="mr-3 text-3xl" />
-                Admin Command Center
+              <AssignmentTurnedInIcon className="mr-3 text-3xl" />
+              Admin Command Center
             </h2>
             <div className="grid md:grid-cols-4 gap-4 mb-10">
               <DashboardCard
@@ -169,26 +158,28 @@ const Dashboard = () => {
 
             {/* Sub-view Area */}
             {activeView && (
-                <div className="mt-8 p-6 bg-gray-800 rounded-xl shadow-inner shadow-indigo-900/50 border border-gray-700">
-                    {/* The onBack prop now allows sub-components to dismiss themselves */}
-                    {activeView === "unresolved" && (
-                        <UnresolvedComplaints onBack={() => setActiveView(null)} />
-                    )}
-                    {activeView === "resolved" && (
-                        <ResolvedComplaints onBack={() => setActiveView(null)} />
-                    )}
-                    {activeView === "analytics" && (
-                        <ViewAnalytics onBack={() => setActiveView(null)} />
-                    )}
-                    {activeView === "sla" && (
-                        <ConfigureSLA onBack={() => setActiveView(null)} />
-                    )}
-                </div>
+              <div className="mt-8 p-6 bg-gray-800 rounded-xl shadow-inner shadow-indigo-900/50 border border-gray-700">
+                {/* The onBack prop now allows sub-components to dismiss themselves */}
+                {activeView === "unresolved" && (
+                  <UnresolvedComplaints onBack={() => setActiveView(null)} />
+                )}
+                {activeView === "resolved" && (
+                  <ResolvedComplaints onBack={() => setActiveView(null)} />
+                )}
+                {activeView === "analytics" && (
+                  <ViewAnalytics onBack={() => setActiveView(null)} />
+                )}
+                {activeView === "sla" && (
+                  <ConfigureSLA onBack={() => setActiveView(null)} />
+                )}
+              </div>
             )}
-             {!activeView && (
-                <div className="mt-8 p-12 text-center text-gray-400 border border-gray-700 rounded-xl">
-                    <p className="text-lg">Select a command from above to manage the system.</p>
-                </div>
+            {!activeView && (
+              <div className="mt-8 p-12 text-center text-gray-400 border border-gray-700 rounded-xl">
+                <p className="text-lg">
+                  Select a command from above to manage the system.
+                </p>
+              </div>
             )}
           </div>
         )}

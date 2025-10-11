@@ -70,7 +70,7 @@ const mockComplaint = {
   longitude: -118.2437,
 };
 
-const ComplaintCard = ({ complaint = mockComplaint,isShow=false }) => {
+const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
   const navigate = useNavigate();
 
   // --- State for Image Carousel ---
@@ -378,16 +378,17 @@ const ComplaintCard = ({ complaint = mockComplaint,isShow=false }) => {
           </Box>
         </Box>
         <Divider className="border-gray-300 dark:border-gray-700" />
-       
-        {isShow && assignedTo?.map((staff, idx) => (
-          <span
-            key={staff.id}
-            className="ml-6 text-gray-300 dark:text-gray-300 font-normal"
-          >
-            🎯{staff.name}
-            <br />
-          </span>
-        ))}
+
+        {isShow &&
+          assignedTo?.map((staff, idx) => (
+            <span
+              key={staff.id}
+              className="ml-6 text-gray-300 dark:text-gray-300 font-normal"
+            >
+              🎯{staff.name}
+              <br />
+            </span>
+          ))}
         {/* Deadline and Timestamps */}
         <Box className="flex justify-between items-center text-xs mt-4">
           <Box
@@ -399,10 +400,7 @@ const ComplaintCard = ({ complaint = mockComplaint,isShow=false }) => {
           >
             SLA Due: {formatDate(deadline)}
           </Box>
-          <Typography
-            variant="caption"
-            className="text-gray-500 dark:text-gray-400"
-          >
+          <Typography variant="caption" className="text-gray-300">
             Opened: {formatDate(createdAt)}
           </Typography>
         </Box>

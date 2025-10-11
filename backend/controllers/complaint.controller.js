@@ -57,6 +57,7 @@ export const createComplaint = async (req, res) => {
       photos: photoUrls,
       status: "OPEN",
       assignedTo: null,
+      urgency:duplicateResponse?.data?.urgency
     });
 
     const recipients = await User.find({ 

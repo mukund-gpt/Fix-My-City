@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime, timezone
-from complaint_detector import ComplaintDuplicateDetector, calculate_duplicate_probability
+from complaint_detector import ComplaintDuplicateDetector, calculate_duplicate_probability,predict_complaint_urgency
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -102,7 +102,8 @@ def check_duplicate():
                                      .sort('created_at', -1)
                                      .limit(100))
         complaints_to_check = [parse_complaint(c) for c in historical_complaints]
-
+        urgency_prediction = predict_complaint_urgency(target)
+        target['urgency'] = urgency_prediction
         if not complaints_to_check:
             return jsonify({
                 'has_duplicates': False,
@@ -126,7 +127,8 @@ def check_duplicate():
             'has_duplicates': len(high_confidence) > 0,
             'duplicate_count': len(high_confidence),
             'similar_count': len(results),
-            'results': safe_results
+            'results': safe_results,
+            'urgency': urgency_prediction
         })
 
     except Exception as e:

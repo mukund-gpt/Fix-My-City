@@ -316,6 +316,30 @@ class ComplaintDuplicateDetector:
         return clusters
 
 
+def predict_complaint_urgency(complaint_data):
+    """
+    Predicts the urgency of a complaint based on its text and/or category.
+    In a real application, this would use a trained ML model (e.g., using 
+    Naive Bayes, BERT, or other classifiers trained on complaint data).
+    """
+    
+    description = complaint_data.get('description', '').lower()
+    category = complaint_data.get('category', '').lower()
+
+    # High Urgency Keywords
+    high_urgency_keywords = ['leak', 'fire', 'medical', 'emergency', 'danger', 'sewage']
+    
+    # Medium Urgency Keywords
+    medium_urgency_keywords = ['broken', 'no water', 'power outage', 'major problem', 'traffic']
+
+    # Simple Keyword-based Logic
+    if any(kw in description or kw in category for kw in high_urgency_keywords):
+        return 'HIGH'
+    elif any(kw in description or kw in category for kw in medium_urgency_keywords):
+        return 'MEDIUM'
+    else:
+        return 'LOW'
+
 def calculate_duplicate_probability(similarity_scores: Dict) -> float:
     """
     Calculate probability that two complaints are duplicates

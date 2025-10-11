@@ -196,25 +196,64 @@ const Notifications = () => {
     }, [fetchNotifications]);
 
    
-
     // Handle marking a notification as read/unread
-    const handleMarkAsRead = (notificationId) => {
-        setNotifications(prev => prev.map(n => 
-            n.id === notificationId ? { ...n, isRead: !n.isRead } : n
-        ));
-        toast.success(
-            notifications.find(n => n.id === notificationId)?.isRead 
-            ? "Marked as unread." 
-            : "Marked as read."
-        );
-        // Add actual API call logic here
-    };
+    const handleMarkAsRead = async(notificationId) => {
+        try {
+            setNotifications(prev => prev.map(n => 
+                n.id === notificationId ? { ...n, isRead: !n.isRead } : n
+            ));
+            
+            // Add actual API call logic here
+            const res = await axiosInstance.put(`/notifications/read/${notificationId}`,{}, {
+                    headers:
+                        {
+                            Authorization:`Bearer ${user?.token}`
+                        }
+                });
     
+            toast.success(
+                notifications.find(n => n.id === notificationId)?.isRead 
+                ? "Marked as unread." 
+                : "Marked as read."
+            );
+        } catch (error) {
+            toast.error("Error in mark as read ")
+        }
+    };
+    const handleMarkAsReadAll = async () => {
+        try {
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+                                
+            // Add actual API call logic here
+            const res = await axiosInstance.put(`/notifications/read/all`,{}, {
+                    headers:
+                        {
+                            Authorization:`Bearer ${user?.token}`
+                        }
+                });
+    
+            toast.success("All notifications marked as read.");
+        
+        } catch (error) {
+            toast.error("Error in mark as read all")
+        }
+    }
     // Handle deleting a notification
-    const handleDeleteNotification = (notificationId) => {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        toast.success("Notification deleted.");
-        // Add actual API call logic here
+    const handleDeleteNotification = async(notificationId) => {
+        try {
+            setNotifications(prev => prev.filter(n => n.id !== notificationId));
+            // Add actual API call logic here
+            const res = await axiosInstance.delete(`/notifications/${notificationId}`, {}, {
+                    headers:
+                        {
+                            Authorization:`Bearer ${user?.token}`
+                        }
+                }
+            );
+            toast.success("Notification deleted.");
+        } catch (error) {
+            toast.error("Error in deleting")
+        }
     };
 
     const handleLoadMore = () => {
@@ -243,11 +282,7 @@ const Notifications = () => {
                     <Button 
                         variant="outlined" 
                         size="small" 
-                        onClick={() => {
-                            // Logic to mark all as read
-                            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-                            toast.success("All notifications marked as read.");
-                        }}
+                        onClick={handleMarkAsReadAll}
                         disabled={unreadCount === 0 || loading}
                     >
                         Mark All Read

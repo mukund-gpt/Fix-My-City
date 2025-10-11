@@ -292,7 +292,7 @@ const ComplaintDetail = () => {
     try {
       // Assume the API endpoint is /admin/complaints/resolve/:id and uses a PUT request
       // console.log(complaint);
-      
+
       const res = await axiosInstance.put(
         `/admin/complaints/${complaint._id}`,
         {}, // Empty body is fine if the status is updated based on the ID
@@ -301,7 +301,7 @@ const ComplaintDetail = () => {
 
       const updatedComplaint = res?.data?.data;
       // console.log(res.data);
-      
+
       setComplaint(updatedComplaint);
 
       toast.success(
@@ -332,7 +332,7 @@ const ComplaintDetail = () => {
   return (
     <Box sx={{ flexGrow: 1 }} className="bg-gray-800 min-h-screen">
       <div className="p-6 max-w-6xl mx-auto ">
-        <h1 className="text-3xl font-extrabold text-indigo-800 mb-6 border-b pb-2">
+        <h1 className="text-3xl font-extrabold text-white mb-6 border-b pb-2">
           Complaint Resolution Hub
         </h1>
 

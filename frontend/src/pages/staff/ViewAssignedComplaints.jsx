@@ -43,8 +43,6 @@ const ViewAssignedComplaints = () => {
 
   return (
     <div className="p-3">
-      <h2 className="text-2xl font-bold mb-4">My Assigned Complaints</h2>
-
       {complaints.length === 0 ? (
         <div className="bg-gray-100 p-4 rounded-lg text-center">
           <p className="text-gray-600">No complaints assigned to you yet.</p>

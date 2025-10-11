@@ -35,7 +35,7 @@ export const createNotification = async ({
 
         await newNotification.save();
 
-        console.log(`Notification created for user ${recipientId}.`);
+        // console.log(`Notification created for user ${recipientId}.`);
         return newNotification;
 
     } catch (error) {

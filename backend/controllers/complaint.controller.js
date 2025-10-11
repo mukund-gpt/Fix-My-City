@@ -64,13 +64,14 @@ export const createComplaint = async (req, res) => {
             role: { $in: ['admin'] } 
         }).select('_id');
 
+    const recipientIds = recipients.map(r => r._id);
    await createNotification({
-            recipientId: [recipients._id],
+            recipientIds,
             title: `🚨 NEW Complaint Filed: ${title}`,
-            message: `A new complaint has been filed by ${req.user.name}. It is now ${createdComplaint.status} with Urgency: ${createdComplaint.urgency}.`,
+            message: `A new complaint has been filed by ${req.user.name}. It is now ${complaint.status} with Urgency: ${complaint.urgency}.`,
             type: "NEW_COMPLAINT",
-            referenceId: createdComplaint._id,
-            senderId: SYSTEM_USER_ID,
+            referenceId: complaint._id,
+           
         });
     
     const createdComplaint = await complaint.save();

@@ -94,7 +94,6 @@ export const assignComplaint = async (req, res) => {
       message: `A new complaint (${complaint.title || complaint._id}) has been assigned to you.`,
       type: "ASSIGNMENT",
       referenceId: complaint._id,
-      senderId: req.user.id
     });
     
     //send mail to citizen

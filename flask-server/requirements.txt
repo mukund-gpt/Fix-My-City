@@ -1,6 +1,6 @@
 flask-cors
 scikit-learn
-sentence_transformers
+# sentence_transformers
 dotenv
 pymongo
 gunicorn

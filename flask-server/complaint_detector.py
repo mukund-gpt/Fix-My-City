@@ -6,7 +6,8 @@ Supports multiple similarity algorithms and machine learning models
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
+# SentenceTransformer is disabled for low-memory deployments.
+# from sentence_transformers import SentenceTransformer
 from datetime import datetime, timedelta
 import re
 from typing import List, Dict, Tuple, Optional
@@ -19,7 +20,7 @@ class ComplaintDuplicateDetector:
     """
     
     def __init__(self, 
-                 use_sentence_transformer: bool = True,
+                 use_sentence_transformer: bool = False,
                  model_name: str = 'all-MiniLM-L6-v2'):
         """
         Initialize the duplicate detector
@@ -36,12 +37,13 @@ class ComplaintDuplicateDetector:
         )
         
         self.use_sentence_transformer = use_sentence_transformer
-        if use_sentence_transformer:
-            try:
-                self.sentence_model = SentenceTransformer(model_name)
-            except:
-                print("Warning: Could not load sentence transformer. Falling back to TF-IDF only.")
-                self.use_sentence_transformer = False
+        # SentenceTransformer model loading is disabled to reduce deployment memory usage.
+        # if use_sentence_transformer:
+        #     try:
+        #         self.sentence_model = SentenceTransformer(model_name)
+        #     except:
+        #         print("Warning: Could not load sentence transformer. Falling back to TF-IDF only.")
+        #         self.use_sentence_transformer = False
     
     def preprocess_text(self, text: str) -> str:
         """Clean and preprocess text"""

@@ -17,7 +17,7 @@ CORS(app)
 
 # --- MongoDB Setup ---
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
-DB_NAME = os.getenv('DB_NAME', 'city_complaints')
+DB_NAME = os.getenv('DB_NAME', 'fixmycity')
 
 try:
     mongo_client = MongoClient(MONGO_URI)

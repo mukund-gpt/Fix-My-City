@@ -17,25 +17,34 @@ export const createComplaint = async (req, res) => {
     const { title, description, latitude, longitude } = req.body;
 
     const flaskURL = `${process.env.FLASK_SERVER}/api/check-duplicate`;
-    const duplicateResponse = await axios.post(flaskURL, {
-      target: {
-        title,
-        description,
-        latitude,
-        longitude,
-        created_at: new Date().toISOString()
-      }
-    });
+    console.log("Flask URL:", flaskURL);
+    const duplicateResponse = await axios.post(
+      flaskURL,
+      {
+        target: {
+          title,
+          description,
+          latitude,
+          longitude,
+          created_at: new Date().toISOString(),
+        },
+      },
+      {
+        proxy: false,
+      },
+    );
+    console.log("AFTER FLASK", duplicateResponse.status);
+    console.log("FLASK RESPONSE", duplicateResponse.data);
     // console.log(duplicateResponse);
-        
-    if (duplicateResponse.data.has_duplicates ) {
-          console.log('duplicate comment found');
-          
-          return res.status(200).json({
-            message:"Similar complaint is alredy registered"
-          })
+
+    if (duplicateResponse.data.has_duplicates) {
+      console.log("duplicate comment found");
+
+      return res.status(200).json({
+        message: "Similar complaint is alredy registered",
+      });
     }
-    
+
     let photoUrls = [];
 
     // Upload each image to Cloudinary in the "fixmycity" folder
@@ -57,29 +66,30 @@ export const createComplaint = async (req, res) => {
       photos: photoUrls,
       status: "OPEN",
       assignedTo: null,
-      urgency:duplicateResponse?.data?.urgency
+      urgency: duplicateResponse?.data?.urgency,
     });
 
-    const recipients = await User.find({ 
-            // Query for users who handle new complaints
-            role: { $in: ['admin'] } 
-        }).select('_id');
+    const recipients = await User.find({
+      // Query for users who handle new complaints
+      role: { $in: ["admin"] },
+    }).select("_id");
 
-    const recipientIds = recipients.map(r => r._id);
-   await createNotification({
-            recipientIds,
-            title: `🚨 NEW Complaint Filed: ${title}`,
-            message: `A new complaint has been filed by ${req.user.name}. It is now ${complaint.status} with Urgency: ${complaint.urgency}.`,
-            type: "NEW_COMPLAINT",
-            referenceId: complaint._id,
-           
-        });
-    
+    const recipientIds = recipients.map((r) => r._id);
+    await createNotification({
+      recipientIds,
+      title: `🚨 NEW Complaint Filed: ${title}`,
+      message: `A new complaint has been filed by ${req.user.name}. It is now ${complaint.status} with Urgency: ${complaint.urgency}.`,
+      type: "NEW_COMPLAINT",
+      referenceId: complaint._id,
+    });
+
     const createdComplaint = await complaint.save();
-    await broadcastDashboardUpdate();// live stat update
+    await broadcastDashboardUpdate(); // live stat update
     const citizen = await User.findById(req.user.id);
     notifyCreateComplaint(citizen.name, citizen.email, title);
-    res.status(201).json({ success: true, message: "Complaint created successfully" });
+    res
+      .status(201)
+      .json({ success: true, message: "Complaint created successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -120,7 +130,7 @@ export const getmyComplaints = async (req, res) => {
     console.log("user in get complaints", req.user);
     const complaints = await Complaint.find({ citizen: req.user.id }).populate(
       "citizen",
-      "name email"
+      "name email",
     );
     // console.log("complaints", complaints);
 
@@ -135,9 +145,9 @@ export const getComplaintsById = async (req, res) => {
       .populate("citizen", "name email")
       .populate("assignedTo", "name email")
       .populate({
-        path: "commentList",                      // Populate comments
-        populate: { path: "author", select: "name email" } // Populate comment authors
-      })
+        path: "commentList", // Populate comments
+        populate: { path: "author", select: "name email" }, // Populate comment authors
+      });
     if (!complaint)
       return res.status(404).json({ message: "Complaint not found" });
     res.json(complaint);
@@ -217,15 +227,16 @@ export const getFilteredComplaints = async (req, res) => {
   }
 };
 
-
 export const getComplaintSlaTimeline = async (req, res) => {
   try {
     const complaintId = req.params.id;
-    console.log(complaintId)
+    console.log(complaintId);
 
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) {
-      return res.status(404).json({ success: false, message: "Complaint not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Complaint not found" });
     }
 
     const timelineData = await complaint.getSlaTimeLines();
@@ -244,4 +255,3 @@ export const getComplaintSlaTimeline = async (req, res) => {
     });
   }
 };
-

@@ -59,7 +59,7 @@ export default function SubmitComplaint() {
 
     if (files.length > remainingSlots) {
       toast.error(
-        `You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`
+        `You can only upload ${remainingSlots} more image(s). Maximum 5 images allowed.`,
       );
     }
 
@@ -107,7 +107,7 @@ export default function SubmitComplaint() {
         console.error("Geolocation error:", err);
         toast.error(err.message, { id: "location-fetch" });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
 
@@ -139,7 +139,7 @@ export default function SubmitComplaint() {
 
     mapRef.current.addControl(
       new maptilersdk.NavigationControl({ visual: false }),
-      "top-left"
+      "top-left",
     );
 
     return () => {
@@ -211,7 +211,7 @@ export default function SubmitComplaint() {
 
     if (!title.trim() || !description.trim() || photos.length === 0) {
       toast.error(
-        "Please provide a title, description, and at least one photo."
+        "Please provide a title, description, and at least one photo.",
       );
       return;
     }
@@ -237,7 +237,7 @@ export default function SubmitComplaint() {
       if (res.error) {
         // Handle RTK Query errors
         throw new Error(
-          res.error?.data?.message || "Failed to submit complaint"
+          res.error?.data?.message || "Failed to submit complaint",
         );
       }
       console.log(res);
@@ -452,7 +452,7 @@ export default function SubmitComplaint() {
                 <Typography variant="subtitle1">
                   {location.lat != null && location.lng != null
                     ? `Selected Coordinates: Lat ${location.lat.toFixed(
-                        6
+                        6,
                       )}, Lng ${location.lng.toFixed(6)}`
                     : "Status: Location not yet pinned."}
                 </Typography>

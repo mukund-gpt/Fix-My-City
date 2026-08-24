@@ -42,10 +42,10 @@ const Home = () => {
       try {
         const limit = 6;
         const res = await axiosInstance.get(
-          `/complaints?page=${page}&limit=${limit}`
+          `/complaints?page=${page}&limit=${limit}`,
         );
         setComplaints((current) =>
-          page === 1 ? res.data : [...current, ...res.data]
+          page === 1 ? res.data : [...current, ...res.data],
         );
         setHasMoreComplaints(res.data.length === limit);
       } catch (error) {
@@ -66,7 +66,7 @@ const Home = () => {
       ([entry]) => {
         if (entry.isIntersecting) setPage((current) => current + 1);
       },
-      { rootMargin: "320px" }
+      { rootMargin: "320px" },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -88,13 +88,13 @@ const Home = () => {
     const initVanta = async () => {
       try {
         await loadScript(
-          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js",
         );
         await loadScript(
-          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"
+          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js",
         );
         await loadScript(
-          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"
+          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js",
         );
 
         // Initialize Fog (bottom layer)
@@ -155,7 +155,7 @@ const Home = () => {
   const totalResolved = 1890;
   const totalSubmissionsToday = 45;
   const resolutionRate = Math.round(
-    (totalResolved / (totalResolved + totalOpen)) * 100
+    (totalResolved / (totalResolved + totalOpen)) * 100,
   );
 
   const images = [
@@ -239,7 +239,6 @@ const Home = () => {
 
       <LiveStat />
 
-
       {/* Features */}
       <section className="bg-white py-10">
         <div className="container mx-auto px-6">
@@ -293,7 +292,10 @@ const Home = () => {
                 Latest reports
               </h1>
             </div>
-            <Link to="/search" className="font-bold text-yellow-400 transition hover:text-yellow-300">
+            <Link
+              to="/search"
+              className="font-bold text-yellow-400 transition hover:text-yellow-300"
+            >
               Browse all reports <span aria-hidden="true">-&gt;</span>
             </Link>
           </div>
@@ -321,18 +323,25 @@ const Home = () => {
               </div>
             )}
           </div>
-          <div ref={complaintsEndRef} className="flex min-h-16 items-center justify-center pt-8">
-            {isLoadingComplaints && <p className="text-sm font-semibold text-slate-500">Loading more reports...</p>}
-            {!isLoadingComplaints && !hasMoreComplaints && complaints.length > 0 && (
-              <p className="text-sm font-semibold text-slate-500">You&apos;re up to date.</p>
+          <div
+            ref={complaintsEndRef}
+            className="flex min-h-16 items-center justify-center pt-8"
+          >
+            {isLoadingComplaints && (
+              <p className="text-sm font-semibold text-slate-500">
+                Loading more reports...
+              </p>
             )}
+            {!isLoadingComplaints &&
+              !hasMoreComplaints &&
+              complaints.length > 0 && (
+                <p className="text-sm font-semibold text-slate-500">
+                  You&apos;re up to date.
+                </p>
+              )}
           </div>
         </div>
       </section>
-
-
-      
-
 
       {/* Call to Action */}
       {!user && (

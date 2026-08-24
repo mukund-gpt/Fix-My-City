@@ -99,7 +99,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
     if (items.length === 0) {
       // Use a cleaner no-photo placeholder
       items.push(
-        "https://placehold.co/600x400/D1D5DB/ffffff?text=No+Photo+Available"
+        "https://placehold.co/600x400/D1D5DB/ffffff?text=No+Photo+Available",
       );
     }
 
@@ -122,7 +122,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
   const handlePrev = (e) => {
     e.stopPropagation();
     setCurrentPhotoIndex(
-      (prevIndex) => (prevIndex - 1 + totalMedia) % totalMedia
+      (prevIndex) => (prevIndex - 1 + totalMedia) % totalMedia,
     );
   };
 
@@ -176,7 +176,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
       `}
       >
         {isOverdue && status !== "RESOLVED" ? (
-            <span className="flex items-center justify-center space-x-2">
+          <span className="flex items-center justify-center space-x-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -211,7 +211,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
           <Chip
             label={urgency}
             className={`font-extrabold shadow-md border-2 ${getUrgencyClasses(
-              urgency
+              urgency,
             )} transform hover:scale-105 transition duration-300`}
           />
         </Box>

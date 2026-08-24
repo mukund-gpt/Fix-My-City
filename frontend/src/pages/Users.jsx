@@ -177,7 +177,7 @@ const Users = () => {
           ))}
         </div>
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-slate-200">
+          <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
                 <th
@@ -202,10 +202,7 @@ const Users = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {users.map((u) => (
-                <tr
-                  key={u._id}
-                  className="transition duration-150"
-                >
+                <tr key={u._id} className="transition duration-150">
                   {/* Name */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                     {u.name}

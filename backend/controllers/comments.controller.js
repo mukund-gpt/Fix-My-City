@@ -28,8 +28,8 @@ export const createComment = async (req, res) => {
     const assignedStaff = Array.isArray(complaint.assignedTo)
       ? complaint.assignedTo
       : [];
-    const isAssignedStaff = assignedStaff.some((staffId) =>
-      staffId.toString() === userId.toString(),
+    const isAssignedStaff = assignedStaff.some(
+      (staffId) => staffId.toString() === userId.toString(),
     );
     const isComplaintOwner = complaint.citizen.toString() === userId.toString();
 

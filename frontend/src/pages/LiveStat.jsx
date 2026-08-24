@@ -163,7 +163,9 @@ const LiveStat = () => {
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <TrendingUp className="text-blue-400" size={24} />
-              <h3 className="text-lg font-semibold text-slate-900">In Progress</h3>
+              <h3 className="text-lg font-semibold text-slate-900">
+                In Progress
+              </h3>
             </div>
             <p className="text-4xl font-bold text-slate-900">
               {stats.overview.inProgressComplaints}

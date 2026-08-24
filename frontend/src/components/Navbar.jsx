@@ -85,10 +85,10 @@ const NavBar = ({ tabs }) => {
     const initFog = async () => {
       try {
         await loadScript(
-          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+          "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js",
         );
         await loadScript(
-          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"
+          "https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js",
         );
 
         // Clean up old effect
@@ -235,7 +235,8 @@ const NavBar = ({ tabs }) => {
           TransitionComponent={Fade}
           MenuListProps={{ className: "bg-white text-slate-800" }}
           PaperProps={{
-            className: "rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/70",
+            className:
+              "rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/70",
           }}
         >
           {currentTab.options.map((option) => (
@@ -260,7 +261,8 @@ const NavBar = ({ tabs }) => {
           onClose={handleProfileClose}
           TransitionComponent={Fade}
           PaperProps={{
-            className: "rounded-lg border border-slate-200 bg-white text-slate-800 shadow-lg",
+            className:
+              "rounded-lg border border-slate-200 bg-white text-slate-800 shadow-lg",
           }}
         >
           <MenuItem onClick={handleProfileClose} component={Link} to="/profile">

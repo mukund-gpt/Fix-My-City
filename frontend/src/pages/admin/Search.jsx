@@ -158,7 +158,9 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="font-semibold text-slate-800">{staff.name}</div>
+                      <div className="font-semibold text-slate-800">
+                        {staff.name}
+                      </div>
                       <div className="text-xs text-slate-500">
                         {staff.department || "Department not specified"}
                       </div>

@@ -253,12 +253,10 @@ The City Management Team
     });
   } catch (error) {
     console.error("Error resolving complaint:", error);
-    res
-      .status(500)
-      .json({
-        message: "An unexpected error occurred while resolving the complaint.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An unexpected error occurred while resolving the complaint.",
+      error: error.message,
+    });
   }
 };
 

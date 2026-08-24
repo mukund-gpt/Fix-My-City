@@ -131,7 +131,7 @@ export default function MapComponent() {
             `<div style="font-size:14px">
               <strong>${title}</strong><br/>
               Status: <b>${status}</b>
-            </div>`
+            </div>`,
           )
           .addTo(mapObj);
       });

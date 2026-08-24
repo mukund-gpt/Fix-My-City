@@ -22,11 +22,6 @@ router.get("/:id", protect, getComplaintsById);
 router.get("/:id/sla-timeline", protect, getComplaintSlaTimeline);
 
 router.post("/new", protect, upload.array("photos", 5), createComplaint); // For users to submit a new complaint);
-router.post(
-  "/comment",
-  protect,
-  commentUpload.single("image"),
-  createComment,
-);
+router.post("/comment", protect, commentUpload.single("image"), createComment);
 
 export default router;

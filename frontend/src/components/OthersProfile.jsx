@@ -51,9 +51,7 @@ const OthersProfile = () => {
             </Avatar>
           )}
 
-          <h2 className="text-2xl font-bold text-slate-900">
-            {profile.name}
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-900">{profile.name}</h2>
           <p className="text-slate-500">{profile.email}</p>
 
           {profile.role && (

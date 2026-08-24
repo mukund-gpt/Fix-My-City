@@ -422,7 +422,6 @@ const ComplaintDetail = () => {
                     />
 
                     <Divider className="my-6" />
-
                   </Box>
                 )}
 
@@ -528,7 +527,9 @@ const ComplaintDetail = () => {
                 <CommentDisplay key={comment._id} comment={comment} />
               ))
             ) : (
-              <p className="text-sm text-slate-500">No resolution comments yet.</p>
+              <p className="text-sm text-slate-500">
+                No resolution comments yet.
+              </p>
             )}
           </Box>
         </section>

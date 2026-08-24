@@ -50,7 +50,7 @@ export default function Reports() {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
-        }
+        },
       );
       setAnalytics(res.data);
       console.log("Analytics Response:", analytics);

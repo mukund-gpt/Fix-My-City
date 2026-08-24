@@ -155,9 +155,9 @@ export default function MapComponent() {
       <div ref={mapContainer} className="absolute top-0 left-0 w-full h-full" />
 
       {/* Summary Panel */}
-      <div className="absolute top-4 left-4 bg-gray-900 bg-opacity-80 text-white p-4 rounded-lg shadow-lg max-w-xs space-y-2">
+      <div className="absolute left-4 top-4 max-w-xs space-y-2 rounded-lg border border-slate-200 bg-white/95 p-4 text-slate-900 shadow-lg">
         <h2 className="text-lg font-bold">Complaint Summary</h2>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-slate-500">
           Marker colors represent complaint status.
         </p>
         {summary && (

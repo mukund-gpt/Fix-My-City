@@ -6,10 +6,10 @@ import toast from 'react-hot-toast';
 // --- MOCK API CALLS for SLA Configuration (Updated to handle TTA and TTR) ---
 
 // Mock initial data: TTA = Time to Acknowledge/Assign, TTR = Time to Resolve
-const initialSLAConfig = {
-    HIGH: { TTA: 4, TTR: 24 }, // 4 hours to acknowledge, 24 hours to resolve
-    MEDIUM: { TTA: 8, TTR: 72 }, // 8 hours to acknowledge, 72 hours to resolve (3 days)
-    LOW: { TTA: 24, TTR: 168 }, // 24 hours to acknowledge, 168 hours to resolve (7 days)
+const DEFAULT_SLA_CONFIG = {
+    HIGH: { TTA: 2, TTR: 24 },
+    MEDIUM: { TTA: 4, TTR: 72 },
+    LOW: { TTA: 8, TTR: 168 },
 };
 
 // Mock function to simulate fetching the current configuration
@@ -58,8 +58,9 @@ const ConfigureSLA = ({ onBack }) => {
             try {
                 const res = await fetchSLAConfig();
                 // console.log(res);
-                setConfig(res.data);
+                setConfig(res?.data || DEFAULT_SLA_CONFIG);
             } catch (error) {
+                setConfig(DEFAULT_SLA_CONFIG);
                 setMessage({ type: 'error', text: 'Failed to load current SLA settings.' });
             } finally {
                 setLoading(false);
@@ -183,7 +184,7 @@ const ConfigureSLA = ({ onBack }) => {
     };
 
     return (
-        <div className="p-6 bg-gray-900 rounded-xl text-white shadow-2xl font-sans">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm font-sans">
             {/* Header and Back Button */}
             <div className="flex justify-between items-center mb-6 border-b border-indigo-700 pb-4">
                 <h2 className="text-3xl font-extrabold text-yellow-400 flex items-center">
@@ -207,7 +208,14 @@ const ConfigureSLA = ({ onBack }) => {
             
             {/* Time Unit Selector */}
             <div className="flex justify-end mb-8">
-                <div className="inline-flex bg-gray-700 rounded-full p-1 shadow-inner">
+                <div className="inline-flex rounded-full border border-slate-200 bg-slate-100 p-1 shadow-inner">
+                    <button
+                        type="button"
+                        onClick={() => setConfig(DEFAULT_SLA_CONFIG)}
+                        className="mr-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-white hover:text-slate-900"
+                    >
+                        Restore Defaults
+                    </button>
                     <button
                         onClick={() => setTimeUnit('Hours')}
                         className={`px-4 py-2 text-sm font-semibold rounded-full transition duration-200 flex items-center ${

@@ -72,11 +72,10 @@ const mockComplaint = {
 
 const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
   const navigate = useNavigate();
+  const safeComplaint = complaint || mockComplaint;
 
   // --- State for Image Carousel ---
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-
-  if (!complaint) return null;
 
   const {
     _id,
@@ -90,7 +89,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
     deadline,
     isOverdue,
     assignedTo,
-  } = complaint;
+  } = safeComplaint;
 
   // --- Dynamic Media List (Carousel Data) ---
   const mediaItems = useMemo(() => {
@@ -130,13 +129,13 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
   const getStatusClasses = (status) => {
     switch (status) {
       case "OPEN":
-        return "bg-red-600 text-white shadow-red-500/50";
+        return "border border-red-200 bg-red-50 text-red-700";
       case "IN_PROGRESS":
-        return "bg-teal-500 text-white shadow-teal-500/50";
+        return "border border-teal-200 bg-teal-50 text-teal-700";
       case "RESOLVED":
-        return "bg-green-600 text-white shadow-green-500/50";
+        return "border border-green-200 bg-green-50 text-green-700";
       default:
-        return "bg-gray-400 text-gray-800";
+        return "border border-slate-200 bg-slate-50 text-slate-600";
     }
   };
 
@@ -165,26 +164,19 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
   // --- Component Structure ---
   return (
     <Card
-      className={`
-        relative bg-gray-800/50 rounded-2xl p-0
-        shadow-2xl overflow-hidden 
-        transition-all duration-500 transform 
-        hover:scale-[1.01] cursor-pointer
-        font-opensans
-        border-gray-700 border
-      `}
+      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400 hover:shadow-xl hover:shadow-slate-300/70 cursor-pointer font-opensans`}
       onClick={() => navigate(`/complaint/${_id}`)}
     >
       {/* Dynamic Header with Status */}
       <div
-        className={`p-4 font-poppins font-extrabold uppercase text-center 
+        className={`border-b border-slate-100 bg-white p-3 text-left font-poppins text-xs font-extrabold uppercase tracking-[0.18em]
         ${getStatusClasses(status)}
         text-shadow-sm
         ${isOverdue && status !== "RESOLVED" ? "animate-pulse" : ""}
       `}
       >
         {isOverdue && status !== "RESOLVED" ? (
-          <span className="flex items-center justify-center space-x-2">
+            <span className="flex items-center justify-center space-x-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -200,17 +192,19 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
             <span>SLA VIOLATION - OVERDUE</span>
           </span>
         ) : (
-          `Status: ${status?.replace("_", " ")}`
+          <span className="inline-flex rounded-full px-3 py-1">
+            Status: {status?.replace("_", " ")}
+          </span>
         )}
       </div>
 
       {/* Main Content Area */}
-      <CardContent className="relative z-10">
+      <CardContent className="relative z-10 flex flex-1 flex-col p-5">
         {/* Title & Urgency Badge */}
         <Box className="flex justify-between items-start mb-4">
           <Typography
             variant="h5"
-            className="text-white dark:text-white leading-tight pr-4 font-poppins"
+            className="line-clamp-2 pr-3 text-lg font-bold leading-tight text-slate-900 dark:text-slate-900 font-poppins"
           >
             {title}
           </Typography>
@@ -223,19 +217,19 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
         </Box>
         {/* Photo Carousel Area */}
         {totalMedia > 0 && (
-          <Box className="w-full h-80 overflow-hidden rounded-xl mb-4 shadow-xl border border-gray-200 dark:border-gray-700 relative group">
+          <Box className="group relative mb-5 h-52 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
             {/* Image */}
             <img
               key={currentMediaUrl} // Force re-render on image change
               src={currentMediaUrl}
               alt={`${title} - View ${currentPhotoIndex + 1}`}
-              className="w-full h-full object-cover transition-all duration-700 ease-in-out transform"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
 
             {/* Photo Counter */}
             <Chip
               label={`${currentPhotoIndex + 1} / ${totalMedia}`}
-              className="absolute top-2 right-2 bg-gray-900/80 text-white shadow-lg text-xs"
+              className="absolute right-2 top-2 bg-slate-900/80 text-white text-xs shadow-lg"
             />
 
             {/* Carousel Controls (Show only if more than one photo exists) */}
@@ -293,7 +287,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
                       className={`h-2 w-2 rounded-full transition-colors duration-300 ${
                         index === currentPhotoIndex
                           ? "bg-white shadow-lg"
-                          : "bg-gray-400/70"
+                          : "bg-slate-400/70"
                       } cursor-pointer`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -309,13 +303,13 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
         {/* Description Snippet */}
         <Typography
           variant="body2"
-          className="text-gray-300 dark:text-gray-300 mb-4 line-clamp-3 text-sm"
+          className="mb-4 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-600"
         >
           {description}
         </Typography>
         <Divider className="border-gray-300 dark:border-gray-700" />
         {/* Metrics & Details Grid */}
-        <Box className="grid grid-cols-1 md:grid-cols-2 gap-y-3 text-sm font-medium mt-4">
+        <Box className="mt-4 grid grid-cols-1 gap-3 text-sm font-medium">
           {/* Created By / Citizen */}
           <Box className="flex items-center space-x-2">
             <svg
@@ -332,13 +326,13 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
             </svg>
             <Typography
               variant="body2"
-              className="text-gray-200 dark:text-gray-400"
+              className="text-slate-500 dark:text-slate-500"
             >
               Filed by:{" "}
             </Typography>
             <Typography
               variant="body1"
-              className="text-gray-200 dark:text-white font-semibold"
+              className="font-semibold text-slate-900 dark:text-slate-900"
             >
               {citizen?.name || "Anonymous"}
             </Typography>
@@ -361,7 +355,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
             </svg>
             <Typography
               variant="body2"
-              className="text-gray-200 dark:text-gray-400"
+              className="text-slate-500 dark:text-slate-500"
             >
               Assigned:{" "}
             </Typography>
@@ -370,20 +364,20 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
               className={`font-semibold ${
                 isAssigned
                   ? "text-teal-600 dark:text-teal-400"
-                  : "text-gray-400 italic"
+                  : "text-slate-400 italic"
               }`}
             >
               {isAssigned ? `${assignedTo.length} Staff` : "Unassigned"}
             </Typography>
           </Box>
         </Box>
-        <Divider className="border-gray-300 dark:border-gray-700" />
+        <Divider className="border-slate-200 dark:border-slate-200" />
 
         {isShow &&
           assignedTo?.map((staff, idx) => (
             <span
-              key={staff.id}
-              className="ml-6 text-gray-300 dark:text-gray-300 font-normal"
+              key={staff._id || staff.id || `assigned-staff-${idx}`}
+              className="ml-6 font-normal text-slate-600 dark:text-slate-600"
             >
               🎯{staff.name}
               <br />
@@ -400,7 +394,7 @@ const ComplaintCard = ({ complaint = mockComplaint, isShow = false }) => {
           >
             SLA Due: {formatDate(deadline)}
           </Box>
-          <Typography variant="caption" className="text-gray-300">
+          <Typography variant="caption" className="text-slate-500">
             Opened: {formatDate(createdAt)}
           </Typography>
         </Box>

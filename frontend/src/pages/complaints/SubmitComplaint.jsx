@@ -258,7 +258,7 @@ export default function SubmitComplaint() {
       mt={5}
       mb={5}
       px={2}
-      className="bg-gray-800" // Light background for contrast
+      className="min-h-screen bg-white"
     >
       <Card
         sx={{

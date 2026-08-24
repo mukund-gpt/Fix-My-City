@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="border-t border-slate-200 bg-white text-slate-700">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Logo & Description */}
         <div>
           <h1 className="text-2xl font-bold text-yellow-400 mb-2">FixMyCity</h1>
-          <p className="text-gray-400">
+          <p className="text-slate-500">
             Making our traveling circus city better, one complaint at a time.
           </p>
         </div>
@@ -52,8 +52,8 @@ const Footer = () => {
         {/* Contact & Social */}
         <div>
           <h2 className="text-lg font-semibold mb-3">Contact Us</h2>
-          <p className="text-gray-400 mb-3">Email: support@fixmycity.com</p>
-          <p className="text-gray-400 mb-3">Phone: +91 12345 67890</p>
+          <p className="mb-3 text-slate-500">Email: support@fixmycity.com</p>
+          <p className="mb-3 text-slate-500">Phone: +91 12345 67890</p>
           <div className="flex space-x-3 mt-2">
             <a href="#" className="hover:text-yellow-400 transition-colors">
               <Facebook />
@@ -72,7 +72,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom */}
-      <div className="bg-gray-800 text-gray-400 text-center py-4">
+      <div className="border-t border-slate-200 bg-slate-50 py-4 text-center text-slate-500">
         &copy; {new Date().getFullYear()} FixMyCity. All rights reserved.
       </div>
     </footer>

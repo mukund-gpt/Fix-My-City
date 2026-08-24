@@ -47,7 +47,7 @@ export const assignComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(complaintId).populate(
       "citizen",
-      "name email"
+      "name email",
     );
 
     if (!complaint) {
@@ -72,6 +72,11 @@ export const assignComplaint = async (req, res) => {
     complaint.status = "IN_PROGRESS";
     await complaint.save();
 
+    await complaint.populate({
+      path: "commentList",
+      populate: { path: "author", select: "name email" },
+    });
+
     // Fetch assigned staff details
     const assignedStaff = await User.find({
       _id: { $in: complaint.assignedTo },
@@ -79,35 +84,33 @@ export const assignComplaint = async (req, res) => {
     }).select("name email department");
 
     await createNotification({
-    recipientIds:userIds,
+      recipientIds: userIds,
       title: "New Complaint Assigned",
       message: `A new complaint (${complaint.title || complaint._id}) has been assigned to you.`,
       type: "ASSIGNMENT",
       referenceId: complaint._id,
     });
-    
+
     //send mail to citizen
     const msg = citizenInProgressTemplate(
       complaint.citizen,
       complaint,
-      assignedStaff
+      assignedStaff,
     );
     sendMail(
       [complaint.citizen.email],
       "🚧 Your Complaint Is In Progress - FixMyCity",
-      msg
+      msg,
     );
 
     // Send individual emails using template
     for (const staff of assignedStaff) {
-
       const staffMsg = staffComplaintTemplate(staff, complaint);
       sendMail(
         [staff.email],
         "🛠️ New Complaint Assigned – FixMyCity",
-        staffMsg
+        staffMsg,
       );
-      
     }
 
     // Get assigned departments
@@ -115,7 +118,7 @@ export const assignComplaint = async (req, res) => {
       _id: { $in: complaint.assignedTo },
     }).distinct("department");
 
-    await broadcastDashboardUpdate();// live stat update
+    await broadcastDashboardUpdate(); // live stat update
     res.status(200).json({
       message: "Complaint assigned successfully",
       complaint,
@@ -131,7 +134,7 @@ export const getComplaints = async (req, res) => {
   try {
     const complaints = await Complaint.find().populate(
       "assignedTo",
-      "name email"
+      "name email",
     );
     res.status(200).json(complaints);
   } catch (error) {
@@ -141,71 +144,82 @@ export const getComplaints = async (req, res) => {
 
 export const updateComplaintByAdmin = async (req, res) => {
   // 1. Get IDs and Sender Info
-  // mainly for resolved 
-    const { id } = req.params;
-    // Assuming authentication middleware attaches the current user (the resolver) to req.user
-    const resolver = req.user; 
+  // mainly for resolved
+  const { id } = req.params;
+  // Assuming authentication middleware attaches the current user (the resolver) to req.user
+  const resolver = req.user;
 
-    if (!id) {
-        return res.status(400).json({ message: "Complaint ID is required." });
+  if (!id) {
+    return res.status(400).json({ message: "Complaint ID is required." });
+  }
+
+  try {
+    // 2. Fetch the original complaint to get 'createdAt' for time calculation
+    const originalComplaint = await Complaint.findById(id).populate(
+      "assignedTo",
+      "name email",
+    );
+
+    if (!originalComplaint) {
+      return res.status(404).json({ message: "Complaint not found." });
     }
 
-    try {
-        // 2. Fetch the original complaint to get 'createdAt' for time calculation
-      const originalComplaint = await Complaint.findById(id).
-        populate(
-      "assignedTo",
-      "name email"
-    );
-        if (!originalComplaint) {
-            return res.status(404).json({ message: "Complaint not found." });
-        }
-        
-        if (originalComplaint.status === "RESOLVED") {
-            return res.status(400).json({ message: "Complaint is already resolved." });
-      }
-      
-        // 3. Calculate time metrics
-        const resolvedAt = new Date();
-        const createdAt = originalComplaint.createdAt;
-        // Calculate total time elapsed since creation in milliseconds
-        const totalTimeToResolve = resolvedAt.getTime() - createdAt.getTime(); 
+    if (originalComplaint.status === "RESOLVED") {
+      return res
+        .status(400)
+        .json({ message: "Complaint is already resolved." });
+    }
 
-        // 4. Update the complaint document
-        const updatedComplaint = await Complaint.findByIdAndUpdate(
-            id,
-            {
-                status: "RESOLVED",
-                resolvedAt,
-                totalTimeToResolve,
-            },
-            { new: true } 
-        ).populate("citizen", "email name");
+    // 3. Calculate time metrics
+    const resolvedAt = new Date();
+    const createdAt = originalComplaint.createdAt;
+    // Calculate total time elapsed since creation in milliseconds
+    const totalTimeToResolve = resolvedAt.getTime() - createdAt.getTime();
 
-        if (!updatedComplaint) {
-            return res.status(500).json({ message: "Failed to update complaint status." });
-        }
+    // 4. Update the complaint document
+    const updatedComplaint = await Complaint.findByIdAndUpdate(
+      id,
+      {
+        status: "RESOLVED",
+        resolvedAt,
+        totalTimeToResolve,
+      },
+      { new: true },
+    )
+      .populate("citizen", "email name")
+      .populate("assignedTo", "name email department")
+      .populate({
+        path: "commentList",
+        populate: { path: "author", select: "name email" },
+      });
 
+    if (!updatedComplaint) {
+      return res
+        .status(500)
+        .json({ message: "Failed to update complaint status." });
+    }
 
-        // 5. Prepare and Send Email Notification
-        const citizenEmail = updatedComplaint.citizen?.email;
-        const citizenName = updatedComplaint.citizen?.name || "Valued Citizen";
+    // 5. Prepare and Send Email Notification
+    const citizenEmail = updatedComplaint.citizen?.email;
+    const citizenName = updatedComplaint.citizen?.name || "Valued Citizen";
 
-        if (citizenEmail) {
-            // Convert milliseconds to a human-readable format (e.g., hours and minutes)
-            const minutes = Math.floor(totalTimeToResolve / (1000 * 60));
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            const timeString = hours > 0 
-                ? `${hours} hour(s) and ${remainingMinutes} minute(s)` 
-                : `${remainingMinutes} minute(s)`;
+    if (citizenEmail) {
+      // Convert milliseconds to a human-readable format (e.g., hours and minutes)
+      const minutes = Math.floor(totalTimeToResolve / (1000 * 60));
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      const timeString =
+        hours > 0
+          ? `${hours} hour(s) and ${remainingMinutes} minute(s)`
+          : `${remainingMinutes} minute(s)`;
 
-            // 5.1. Generate the Assigned Staff List
-            const assignedStaffList = updatedComplaint?.assignedTo?.map(staff => `* ${staff.name || staff.email}`)
-                .join('\n');
-            const emailSubject = `Resolution Confirmation: Complaint #${updatedComplaint._id.toString().slice(-5)}`;
+      // 5.1. Generate the Assigned Staff List
+      const assignedStaffList = updatedComplaint?.assignedTo
+        ?.map((staff) => `* ${staff.name || staff.email}`)
+        .join("\n");
+      const emailSubject = `Resolution Confirmation: Complaint #${updatedComplaint._id.toString().slice(-5)}`;
 
-            const emailBody = `
+      const emailBody = `
 Dear ${citizenName},
 
 We are pleased to inform you that your complaint, titled **"${updatedComplaint.title}"**, has been **RESOLVED** by our team.
@@ -214,7 +228,7 @@ We are pleased to inform you that your complaint, titled **"${updatedComplaint.t
 **Resolution Details:**
 * **Status:** RESOLVED
 * **Time to Resolve:** ${timeString}
-* **Resolved By:** ${resolver?.name || resolver?.email || 'A team member'}
+* **Resolved By:** ${resolver?.name || resolver?.email || "A team member"}
 * **Date Resolved:** ${resolvedAt.toLocaleDateString()}
 ---
 
@@ -226,20 +240,60 @@ Thank you for your patience and for helping us improve our community services.
 Sincerely,
 The City Management Team
 `;
-            await sendMail(citizenEmail, emailSubject, emailBody);
-        } else {
-            console.warn(`Citizen email not found for complaint ID: ${id}. Skipping email.`);
-      }
-          await broadcastDashboardUpdate();// live stat update
-        res.status(200).json({
-            message: "Complaint successfully resolved and citizen notified.",
-            data: updatedComplaint,
-        });
-
-    } catch (error) {
-        console.error("Error resolving complaint:", error);
-        res.status(500).json({ message: "An unexpected error occurred while resolving the complaint.", error: error.message });
+      await sendMail(citizenEmail, emailSubject, emailBody);
+    } else {
+      console.warn(
+        `Citizen email not found for complaint ID: ${id}. Skipping email.`,
+      );
     }
+    await broadcastDashboardUpdate(); // live stat update
+    res.status(200).json({
+      message: "Complaint successfully resolved and citizen notified.",
+      data: updatedComplaint,
+    });
+  } catch (error) {
+    console.error("Error resolving complaint:", error);
+    res
+      .status(500)
+      .json({
+        message: "An unexpected error occurred while resolving the complaint.",
+        error: error.message,
+      });
+  }
+};
+
+export const reopenComplaint = async (req, res) => {
+  try {
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "OPEN",
+        resolvedAt: null,
+        totalTimeToResolve: null,
+        isOverdue: false,
+      },
+      { new: true },
+    )
+      .populate("citizen", "name email")
+      .populate("assignedTo", "name email department")
+      .populate({
+        path: "commentList",
+        populate: { path: "author", select: "name email" },
+      });
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found." });
+    }
+
+    await broadcastDashboardUpdate();
+    return res.status(200).json({
+      message: "Complaint reopened successfully.",
+      data: complaint,
+    });
+  } catch (error) {
+    console.error("Error reopening complaint:", error);
+    return res.status(500).json({ message: error.message });
+  }
 };
 
 export const getStaffByDepartment = async (req, res) => {
@@ -252,14 +306,18 @@ export const getStaffByDepartment = async (req, res) => {
     if (search.trim() === "") {
       // No search query → return all staff
       staff = await User.find({ role: "staff" }).select(
-        "name email department"
+        "name email department",
       );
     } else {
-      // Search query provided → filter by department
-      const regex = new RegExp(search, "i"); // case-insensitive
+      // Search query provided → filter by account name, department, or email
+      const regex = new RegExp(search, "i");
       staff = await User.find({
         role: "staff",
-        department: { $regex: regex },
+        $or: [
+          { name: { $regex: regex } },
+          { department: { $regex: regex } },
+          { email: { $regex: regex } },
+        ],
       }).select("name email department");
     }
 
@@ -332,43 +390,51 @@ export const getAllUser = async (req, res) => {
 };
 
 export const runSlaEscalationJob = async (req, res) => {
-    try {
-        console.log("Starting SLA Escalation Job...");
-        
-        const count = await Complaint.escalateOverdueComplaints(); 
-        
-        const message = `SLA Escalation Job finished. ${count} complaints were escalated.`;
-        console.log(message);
+  try {
+    console.log("Starting SLA Escalation Job...");
 
-        // For a true cron job, you wouldn't send a response, but for testing:
-        return res.status(200).json({ success: true, message, escalatedCount: count });
+    const count = await Complaint.escalateOverdueComplaints();
 
-    } catch (error) {
-        console.error("Error running SLA Escalation Job:", error);
-        return res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+    const message = `SLA Escalation Job finished. ${count} complaints were escalated.`;
+    console.log(message);
+
+    // For a true cron job, you wouldn't send a response, but for testing:
+    return res
+      .status(200)
+      .json({ success: true, message, escalatedCount: count });
+  } catch (error) {
+    console.error("Error running SLA Escalation Job:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+  }
 };
 
 export const manuallyEscalateComplaint = async (req, res) => {
-    const { id } = req.params;
-    const { targetStaffId, reason, currentStaffRole } = req.body; // e.g., reason: "FUNCTIONAL_NEED"
+  const { id } = req.params;
+  const { targetStaffId, reason, currentStaffRole } = req.body; // e.g., reason: "FUNCTIONAL_NEED"
 
-    try {
-        const complaint = await Complaint.findById(id);
-        if (!complaint) {
-            return res.status(404).json({ message: "Complaint not found" });
-        }
-        let newLevel = complaint.escalationLevel + 1;
-        
-        await complaint.escalate(reason || "FUNCTIONAL_NEED", targetStaffId, newLevel);
-
-        return res.status(200).json({ 
-            message: `Complaint ${id} manually escalated and reassigned.`,
-            complaint: complaint 
-        });
-
-    } catch (error) {
-        console.error("Error during manual escalation:", error);
-        return res.status(500).json({ message: "Internal server error during escalation" });
+  try {
+    const complaint = await Complaint.findById(id);
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
     }
+    let newLevel = complaint.escalationLevel + 1;
+
+    await complaint.escalate(
+      reason || "FUNCTIONAL_NEED",
+      targetStaffId,
+      newLevel,
+    );
+
+    return res.status(200).json({
+      message: `Complaint ${id} manually escalated and reassigned.`,
+      complaint: complaint,
+    });
+  } catch (error) {
+    console.error("Error during manual escalation:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error during escalation" });
+  }
 };

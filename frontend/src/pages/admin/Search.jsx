@@ -31,9 +31,12 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
   const fetchStaff = async (search = "") => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get(`/admin/staff?search=${encodeURIComponent(search)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axiosInstance.get(
+        `/admin/staff?search=${encodeURIComponent(search)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setStaffList(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
@@ -64,10 +67,10 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
       updated = [...selected, staff];
     }
     console.log(selected);
-    
+
     setSelected(updated);
     // Pass only the array of IDs back to the parent component
-    onChange && onChange(updated.map((s) => s._id)); 
+    onChange && onChange(updated.map((s) => s._id));
   };
 
   return (
@@ -93,18 +96,21 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
         // Paper adds an elevated look, className handles the fixed height and scroll
         <TableContainer component={Paper} className={SCROLL_CONTAINER_CLASSES}>
           <Table stickyHeader size="small">
-            
             {/* Table Header (Sticky) */}
             <TableHead>
-              <TableRow className="bg-gray-100"> {/* Tailwind background color */}
+              <TableRow className="bg-gray-100">
+                {" "}
+                {/* Tailwind background color */}
                 <TableCell style={{ width: 50 }}>
-                    <span className="font-semibold text-gray-700">Select</span>
+                  <span className="font-semibold text-gray-700">Select</span>
                 </TableCell>
                 <TableCell>
-                    <span className="font-semibold text-gray-700">Department Name</span>
+                  <span className="font-semibold text-gray-700">
+                    Staff Name / Department
+                  </span>
                 </TableCell>
                 <TableCell>
-                    <span className="font-semibold text-gray-700">Email</span>
+                  <span className="font-semibold text-gray-700">Email</span>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -114,25 +120,33 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
               {staffList.length === 0 && query !== "" ? (
                 // No search results found
                 <TableRow>
-                  <TableCell colSpan={3} align="center" className="py-4 text-gray-500">
+                  <TableCell
+                    colSpan={3}
+                    align="center"
+                    className="py-4 text-gray-500"
+                  >
                     No staff found matching "{query}"
                   </TableCell>
                 </TableRow>
               ) : staffList.length === 0 ? (
                 // No staff available (e.g., initial empty load)
                 <TableRow>
-                    <TableCell colSpan={3} align="center" className="py-4 text-gray-500">
-                        No staff available.
-                    </TableCell>
+                  <TableCell
+                    colSpan={3}
+                    align="center"
+                    className="py-4 text-gray-500"
+                  >
+                    No staff available.
+                  </TableCell>
                 </TableRow>
               ) : (
                 // Staff List Rows
                 staffList.map((staff) => (
-                  <TableRow 
-                    key={staff._id} 
-                    hover 
-                    role="checkbox" 
-                    tabIndex={-1} 
+                  <TableRow
+                    key={staff._id}
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
                     onClick={() => handleToggle(staff)}
                     className="cursor-pointer" // Tailwind for hover hint
                   >
@@ -143,7 +157,12 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
                         color="primary"
                       />
                     </TableCell>
-                    <TableCell>{staff.department}</TableCell>
+                    <TableCell>
+                      <div className="font-semibold text-slate-800">{staff.name}</div>
+                      <div className="text-xs text-slate-500">
+                        {staff.department || "Department not specified"}
+                      </div>
+                    </TableCell>
                     <TableCell>{staff.email}</TableCell>
                   </TableRow>
                 ))

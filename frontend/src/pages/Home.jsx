@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axiosInstance from "../api/axiosinstance.js";
 import ComplaintCard from "../components/ComplainCard.jsx";
 import { useSelector } from "react-redux";
@@ -24,7 +24,10 @@ import LiveStat from "./LiveStat.jsx";
 const Home = () => {
   const { user } = useSelector((state) => state.auth);
   const [complaints, setComplaints] = useState([]);
-  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [isLoadingComplaints, setIsLoadingComplaints] = useState(true);
+  const [hasMoreComplaints, setHasMoreComplaints] = useState(true);
+  const complaintsEndRef = useRef(null);
 
   // Two refs for Fog (bottom) and Birds (top)
   const fogRef = useRef(null);
@@ -32,19 +35,42 @@ const Home = () => {
   const fogEffect = useRef(null);
   const birdsEffect = useRef(null);
 
-  // Fetch latest complaints
+  // Fetch the public feed in small pages so the first paint stays quick.
   useEffect(() => {
-    const fetchComplaint = async () => {
+    const fetchComplaints = async () => {
+      setIsLoadingComplaints(true);
       try {
-        const res = await axiosInstance.get(`/complaints?limit=6`);
-        setComplaints(res.data);
+        const limit = 6;
+        const res = await axiosInstance.get(
+          `/complaints?page=${page}&limit=${limit}`
+        );
+        setComplaints((current) =>
+          page === 1 ? res.data : [...current, ...res.data]
+        );
+        setHasMoreComplaints(res.data.length === limit);
       } catch (error) {
         console.error(error);
-        console.log("Error fetching the latest complaints.");
+        setHasMoreComplaints(false);
+      } finally {
+        setIsLoadingComplaints(false);
       }
     };
-    fetchComplaint();
-  }, []);
+    fetchComplaints();
+  }, [page]);
+
+  useEffect(() => {
+    const sentinel = complaintsEndRef.current;
+    if (!sentinel || !hasMoreComplaints || isLoadingComplaints) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setPage((current) => current + 1);
+      },
+      { rootMargin: "320px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreComplaints, isLoadingComplaints]);
 
   // Initialize layered VANTA background (Fog + Birds)
   useEffect(() => {
@@ -149,7 +175,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="bg-gray-900 min-h-screen font-sans text-white overflow-hidden">
+    <div className="min-h-screen overflow-hidden bg-white font-sans text-slate-900">
       {/* 🌫️🕊️ Hero Section with layered Vanta effects */}
       <section className="relative py-48 overflow-hidden shadow-2xl">
         {/* Fog background (bottom) */}
@@ -211,13 +237,13 @@ const Home = () => {
         </div>
       </section>
 
-      <LiveStat/>
+      <LiveStat />
 
 
       {/* Features */}
-      <section className="py-10 bg-gray-900">
+      <section className="bg-white py-10">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-16 text-white border-b-4 border-yellow-500 pb-8">
+          <h2 className="mb-16 border-b-4 border-yellow-500 pb-8 text-center text-4xl font-bold text-slate-900">
             The Compass Points: Key Features
           </h2>
           <div className="grid lg:grid-cols-3 gap-12">
@@ -240,7 +266,7 @@ const Home = () => {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="bg-gray-800 p-8 rounded-xl shadow-2xl border-2 border-indigo-700/50 hover:border-yellow-500 transition transform hover:-translate-y-2 group"
+                className="group rounded-2xl border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/70 transition hover:-translate-y-2 hover:border-yellow-400 hover:shadow-xl"
               >
                 <div className="text-6xl mb-4 transition-transform group-hover:rotate-[10deg]">
                   {feature.icon}
@@ -248,7 +274,7 @@ const Home = () => {
                 <h3 className="text-2xl font-bold mb-3 text-yellow-400">
                   {feature.title}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">{feature.desc}</p>
+                <p className="leading-relaxed text-slate-600">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -256,25 +282,34 @@ const Home = () => {
       </section>
 
       {/* Latest Complaints */}
-      <section className="py-20 bg-gray-900 border-t border-gray-700">
+      <section className="border-t border-slate-200 bg-slate-50 py-20">
         <div className="container mx-auto px-6">
-          <h1 className="text-4xl font-bold mb-12 text-center text-white">
-            Live Dispatch: Latest Reports
-          </h1>
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="mb-2 text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">
+                Community pulse
+              </p>
+              <h1 className="text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
+                Latest reports
+              </h1>
+            </div>
+            <Link to="/search" className="font-bold text-yellow-400 transition hover:text-yellow-300">
+              Browse all reports <span aria-hidden="true">-&gt;</span>
+            </Link>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-            {complaints && complaints.length > 0 ? (
+            {complaints.length > 0 ? (
               complaints.map((complaint) => (
                 <div
                   key={complaint._id}
-                  className="cursor-pointer hover:scale-[1.03] transition duration-300 shadow-xl hover:shadow-yellow-500/20 rounded-xl overflow-hidden"
-                  onClick={() => navigate(`/complaint/${complaint._id}`)}
+                  className="h-full transition duration-300 hover:-translate-y-1"
                 >
                   <ComplaintCard complaint={complaint} />
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-10 bg-gray-800 rounded-xl shadow-inner border border-gray-700">
-                <p className="text-xl font-semibold text-gray-400">
+              <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white py-10 text-center shadow-sm">
+                <p className="text-xl font-semibold text-slate-500">
                   The ledger is quiet. Be the first to file a new chronicle! ✍️
                 </p>
                 <Link
@@ -284,6 +319,12 @@ const Home = () => {
                   Submit a Report &rarr;
                 </Link>
               </div>
+            )}
+          </div>
+          <div ref={complaintsEndRef} className="flex min-h-16 items-center justify-center pt-8">
+            {isLoadingComplaints && <p className="text-sm font-semibold text-slate-500">Loading more reports...</p>}
+            {!isLoadingComplaints && !hasMoreComplaints && complaints.length > 0 && (
+              <p className="text-sm font-semibold text-slate-500">You&apos;re up to date.</p>
             )}
           </div>
         </div>

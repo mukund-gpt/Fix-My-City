@@ -1,10 +1,11 @@
-import Comment from '../models/comment.model.js';
-import Complaint from '../models/complaint.model.js';
-import cloudinary from '../utills/cloudinary.js';
+import Comment from "../models/comment.model.js";
+import Complaint from "../models/complaint.model.js";
+import User from "../models/user.model.js";
+import cloudinary from "../utills/cloudinary.js";
 
 export const createComment = async (req, res) => {
   console.log(req.user);
-  
+
   try {
     let { text: commentText, complaintId } = req.body;
 
@@ -18,8 +19,24 @@ export const createComment = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
-    if (!complaint.assignedTo.some((staffId) => staffId.equals(req.user._id))) {
-      return res.status(403).json({ message: "Complaint is not assigned to you" });
+    const userId = req.user._id || req.user.id;
+    const account = await User.findById(userId).select("role");
+    if (!account) {
+      return res.status(401).json({ message: "User account not found" });
+    }
+    const isAdmin = account?.role === "admin";
+    const assignedStaff = Array.isArray(complaint.assignedTo)
+      ? complaint.assignedTo
+      : [];
+    const isAssignedStaff = assignedStaff.some((staffId) =>
+      staffId.toString() === userId.toString(),
+    );
+    const isComplaintOwner = complaint.citizen.toString() === userId.toString();
+
+    if (!isAdmin && !isAssignedStaff && !isComplaintOwner) {
+      return res
+        .status(403)
+        .json({ message: "You are not allowed to comment on this complaint" });
     }
 
     let imageUrl = [];
@@ -37,7 +54,7 @@ export const createComment = async (req, res) => {
     // Create the new comment
     const comment = new Comment({
       complaint: complaintId,
-      author: req.user._id,
+      author: userId,
       commentText,
       imageUrl: imageUrl || [], // Ensure imageUrl is an array
     });
@@ -54,7 +71,6 @@ export const createComment = async (req, res) => {
     });
 
     res.status(201).json({ complaint });
-
   } catch (error) {
     console.error("Error creating comment:", error);
     res.status(500).json({ message: "Server error while creating comment" });
@@ -91,7 +107,7 @@ export const editComment = async (req, res) => {
 
     //Populate author details for a consistent response
     const populatedComment = await Comment.findById(
-      updatedComment._id
+      updatedComment._id,
     ).populate("author");
 
     res.status(200).json(populatedComment);

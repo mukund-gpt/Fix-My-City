@@ -115,7 +115,9 @@ export const updateComplaintByStaff = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
 
     if (!complaint.assignedTo.some((staffId) => staffId.equals(req.user._id))) {
-      return res.status(403).json({ message: "Complaint is not assigned to you" });
+      return res
+        .status(403)
+        .json({ message: "Complaint is not assigned to you" });
     }
 
     const { status, assignedTo } = req.body;
@@ -126,11 +128,14 @@ export const updateComplaintByStaff = async (req, res) => {
       complaint.status = status;
       if (status === "RESOLVED") {
         complaint.resolvedAt = new Date();
-        complaint.totalTimeToResolve = complaint.resolvedAt - complaint.createdAt;
+        complaint.totalTimeToResolve =
+          complaint.resolvedAt - complaint.createdAt;
       }
     }
     if (assignedTo) {
-      return res.status(403).json({ message: "Staff cannot reassign complaints" });
+      return res
+        .status(403)
+        .json({ message: "Staff cannot reassign complaints" });
     }
 
     const updatedComplaint = await complaint.save();
@@ -219,6 +224,11 @@ export const viewAssignedComplaints = async (req, res) => {
 export const getFilteredComplaints = async (req, res) => {
   try {
     let { urgency, location, status, startDate, endDate } = req.query;
+    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(
+      Math.max(Number.parseInt(req.query.limit, 10) || 12, 1),
+      50,
+    );
 
     const filter = {};
     if (urgency) filter.urgency = urgency;
@@ -233,7 +243,9 @@ export const getFilteredComplaints = async (req, res) => {
     const complaints = await Complaint.find(filter)
       .populate("citizen", "name email")
       .populate("assignedTo", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json(complaints);
   } catch (error) {

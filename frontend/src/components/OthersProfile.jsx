@@ -28,7 +28,7 @@ const OthersProfile = () => {
 
   return (
     <div className="p-6 flex justify-center">
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center">
           {/* Avatar */}
           {profile.avatar ? (
@@ -51,10 +51,10 @@ const OthersProfile = () => {
             </Avatar>
           )}
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-slate-900">
             {profile.name}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">{profile.email}</p>
+          <p className="text-slate-500">{profile.email}</p>
 
           {profile.role && (
             <p className="mt-1 text-sm px-3 py-1 bg-blue-500 text-white rounded-full">
@@ -64,7 +64,7 @@ const OthersProfile = () => {
 
           {profile.bio && <p className="mt-3 text-center">{profile.bio}</p>}
           {profile.location && (
-            <p className="mt-2 text-gray-500 dark:text-gray-400">{profile.location}</p>
+            <p className="mt-2 text-slate-500">{profile.location}</p>
           )}
         </div>
       </div>

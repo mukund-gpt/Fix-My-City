@@ -138,7 +138,7 @@ const NavBar = ({ tabs }) => {
       ref={vantaRef}
       position="sticky"
       // Use a deeper background color and a subtle shadow for a premium feel
-      className="bg-gray-800 shadow-xl z-0 border-b border-indigo-700/50 "
+      className="border-b border-slate-200 bg-white shadow-sm z-0 "
       elevation={4}
     >
       <Toolbar className="max-w-8xl mx-auto mr-0 w-full flex justify-between">
@@ -157,7 +157,7 @@ const NavBar = ({ tabs }) => {
               {tab.options ? (
                 <button
                   onClick={(e) => handleMenuOpen(e, tab)}
-                  className="relative flex items-center space-x-1 text-white hover:text-yellow-400 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/30 px-3 py-1 rounded-md"
+                  className="relative flex items-center space-x-1 text-slate-700 hover:text-yellow-600 transition-all duration-300 hover:bg-slate-50 px-3 py-1 rounded-md"
                 >
                   <span className="text-lg">{tab.icon}</span>
                   <span>{tab.name}</span>
@@ -169,7 +169,7 @@ const NavBar = ({ tabs }) => {
               ) : (
                 <Link
                   to={tab.path}
-                  className="relative flex items-center space-x-1 text-white hover:text-yellow-400 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/30 px-3 py-1 rounded-md"
+                  className="relative flex items-center space-x-1 text-slate-700 hover:text-yellow-600 transition-all duration-300 hover:bg-slate-50 px-3 py-1 rounded-md"
                 >
                   <span className="text-lg">{tab.icon}</span>
                   <span>{tab.name}</span>
@@ -184,7 +184,7 @@ const NavBar = ({ tabs }) => {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/login"
-              className="text-white hover:text-yellow-400 transition-all duration-300 hover:scale-105"
+              className="text-slate-700 hover:text-yellow-600 transition-colors"
             >
               Login
             </Link>
@@ -206,7 +206,7 @@ const NavBar = ({ tabs }) => {
                 alt={user?.name || "User"}
                 className="bg-yellow-400 text-black"
               />
-              <Typography className="px-5 text-white">
+              <Typography className="px-5 text-slate-800">
                 {user?.name || "User"}
               </Typography>
             </IconButton>
@@ -233,9 +233,9 @@ const NavBar = ({ tabs }) => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
           TransitionComponent={Fade}
-          MenuListProps={{ className: "bg-gray-800 text-white" }}
+          MenuListProps={{ className: "bg-white text-slate-800" }}
           PaperProps={{
-            className: "bg-gray-800 rounded-lg shadow-lg shadow-yellow-400/20",
+            className: "rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/70",
           }}
         >
           {currentTab.options.map((option) => (
@@ -244,7 +244,7 @@ const NavBar = ({ tabs }) => {
               component={Link}
               to={option.path}
               onClick={handleMenuClose}
-              className="hover:bg-gray-700 transition-colors"
+              className="transition-colors hover:bg-slate-50"
             >
               {option.name}
             </MenuItem>
@@ -260,7 +260,7 @@ const NavBar = ({ tabs }) => {
           onClose={handleProfileClose}
           TransitionComponent={Fade}
           PaperProps={{
-            className: "bg-gray-800 text-white rounded-lg shadow-lg",
+            className: "rounded-lg border border-slate-200 bg-white text-slate-800 shadow-lg",
           }}
         >
           <MenuItem onClick={handleProfileClose} component={Link} to="/profile">
@@ -281,13 +281,13 @@ const NavBar = ({ tabs }) => {
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        PaperProps={{ className: "bg-gray-900 text-white w-64" }}
+        PaperProps={{ className: "w-64 bg-white text-slate-800" }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <h2 className="text-xl font-bold text-yellow-400">FixMyCity</h2>
           <IconButton
             onClick={() => setDrawerOpen(false)}
-            className="text-white"
+            className="text-slate-700"
           >
             <CloseIcon />
           </IconButton>
@@ -300,7 +300,7 @@ const NavBar = ({ tabs }) => {
                   component={Link}
                   to={tab.path}
                   onClick={() => setDrawerOpen(false)}
-                  className="hover:bg-gray-800 transition-all"
+                  className="transition-all hover:bg-slate-50"
                 >
                   <ListItemText primary={tab.name} />
                 </ListItemButton>

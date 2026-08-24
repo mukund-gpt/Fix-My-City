@@ -213,10 +213,10 @@ const ViewAnalytics = () => {
       : 0;
 
   return (
-    <Box className="p-6 bg-gray-800 min-h-screen">
+    <Box className="min-h-screen bg-slate-50 p-6">
       <Typography
         variant="h4"
-        className="mb-1 font-extrabold text-white border-b pb-2"
+        className="mb-1 border-b pb-2 font-extrabold text-slate-900"
       >
         Admin Analytics Dashboard
       </Typography>

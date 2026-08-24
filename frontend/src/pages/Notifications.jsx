@@ -104,7 +104,7 @@ const useTimeAgo = (timestamp) => {
 const fetchNotificationChunk = (offset, limit) => {
   // Sort mock data by timestamp (most recent first)
   const sortedData = mockNotifications.sort(
-    (a, b) => b.timestamp - a.timestamp
+    (a, b) => b.timestamp - a.timestamp,
   );
 
   // Simulate pagination
@@ -136,7 +136,9 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
   const navigate = useNavigate();
 
   const timeAgo = useMemo(() => {
-    const seconds = Math.floor((new Date() - timestamp) / 1000);
+    const date = new Date(timestamp);
+    if (!timestamp || Number.isNaN(date.getTime())) return "Date unavailable";
+    const seconds = Math.max(Math.floor((new Date() - date) / 1000), 0);
     let interval = seconds / 31536000;
     if (interval > 1) return Math.floor(interval) + " years ago";
     interval = seconds / 2592000;
@@ -185,7 +187,8 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
       }
     >
       <ListItemText
-        onClick={() => navigate(`/complaint/${referenceId}`)}
+        onClick={() => referenceId && navigate(`/complaint/${referenceId}`)}
+        className={referenceId ? "cursor-pointer" : ""}
         primary={
           <Box className="flex items-center space-x-2">
             {!isRead && (
@@ -265,73 +268,82 @@ const Notifications = () => {
         setLoading(false);
       }
     },
-    [hasMore, offset]
+    [hasMore, offset],
   );
 
-    useEffect(() => {
-        fetchNotifications(false);
-    }, [fetchNotifications]);
+  useEffect(() => {
+    fetchNotifications(false);
+  }, [fetchNotifications]);
 
-   
-    // Handle marking a notification as read/unread
-    const handleMarkAsRead = async(notificationId) => {
-        try {
-            setNotifications(prev => prev.map(n => 
-                (n._id || n.id) === notificationId ? { ...n, isRead: !n.isRead } : n
-            ));
-            
-            // Add actual API call logic here
-            const res = await axiosInstance.put(`/notifications/read/${notificationId}`,{}, {
-                    headers:
-                        {
-                            Authorization:`Bearer ${user?.token}`
-                        }
-                });
-    
-            toast.success(
-                !notifications.find(n => (n._id || n.id) === notificationId)?.isRead 
-                ? "Marked as unread." 
-                : "Marked as read."
-            );
-        } catch (error) {
-            toast.error("Error in mark as read ")
-        }
-    };
-    const handleMarkAsReadAll = async () => {
-        try {
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-                                
-            // Add actual API call logic here
-            const res = await axiosInstance.put(`/notifications/read/all`,{}, {
-                    headers:
-                        {
-                            Authorization:`Bearer ${user?.token}`
-                        }
-                });
-    
-            toast.success("All notifications marked as read.");
-        
-        } catch (error) {
-            toast.error("Error in mark as read all")
-        }
+  // Handle marking a notification as read/unread
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      setNotifications((prev) =>
+        prev.map((n) =>
+          (n._id || n.id) === notificationId ? { ...n, isRead: !n.isRead } : n,
+        ),
+      );
+
+      // Add actual API call logic here
+      const res = await axiosInstance.put(
+        `/notifications/read/${notificationId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        },
+      );
+
+      toast.success(
+        !notifications.find((n) => (n._id || n.id) === notificationId)?.isRead
+          ? "Marked as unread."
+          : "Marked as read.",
+      );
+    } catch (error) {
+      toast.error("Error in mark as read ");
     }
-    // Handle deleting a notification
-    const handleDeleteNotification = async(notificationId) => {
-        try {
-            setNotifications(prev => prev.filter(n => (n._id || n.id) !== notificationId));
-            // Add actual API call logic here
-            const res = await axiosInstance.delete(`/notifications/${notificationId}`, {
-                    headers:
-                        {
-                            Authorization:`Bearer ${user?.token}`
-                        }
-                }
-            );
-            toast.success("Notification deleted.");
-        } catch (error) {
-            toast.error("Error in deleting")
-        }
-    };
+  };
+  const handleMarkAsReadAll = async () => {
+    try {
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+
+      // Add actual API call logic here
+      const res = await axiosInstance.put(
+        `/notifications/read/all`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        },
+      );
+
+      toast.success("All notifications marked as read.");
+    } catch (error) {
+      toast.error("Error in mark as read all");
+    }
+  };
+  // Handle deleting a notification
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      setNotifications((prev) =>
+        prev.filter((n) => (n._id || n.id) !== notificationId),
+      );
+      // Add actual API call logic here
+      const res = await axiosInstance.delete(
+        `/notifications/${notificationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        },
+      );
+      toast.success("Notification deleted.");
+    } catch (error) {
+      toast.error("Error in deleting");
+    }
+  };
 
   const handleLoadMore = () => {
     if (!loading) {
@@ -342,54 +354,57 @@ const Notifications = () => {
   // Derived state for the unread count
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-    return (
-        <Box className="p-6 bg-gray-50 min-h-screen">
-            <Box className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-8">
-                
-                {/* Header */}
-                <Typography variant="h4" component="h1" className="font-extrabold text-gray-800 mb-2 border-b pb-2">
-                    Your Notifications
-                </Typography>
-                <Box className="flex justify-between items-center mb-6">
-                    <Typography variant="h6" className="text-indigo-600 font-semibold">
-                        {unreadCount > 0 
-                            ? `${unreadCount} unread items` 
-                            : 'All caught up!'}
-                    </Typography>
-                    <Button 
-                        variant="outlined" 
-                        size="small" 
-                        onClick={handleMarkAsReadAll}
-                        disabled={unreadCount === 0 || loading}
-                    >
-                        Mark All Read
-                    </Button>
-                </Box>
-                
-                {/* Notification List */}
-                <List className="p-0">
-                    {notifications.length === 0 && !loading ? (
-                         <Box className="text-center p-10 bg-gray-100 rounded-lg">
-                            <Typography variant="h6" className="text-gray-500">
-                                Nothing here yet.
-                            </Typography>
-                            <Typography variant="body2" className="text-gray-400">
-                                Check back later for updates.
-                            </Typography>
-                        </Box>
-                    ) : (
-                        notifications.map((notification, index) => (
-                            <div key={notification.id}>
-                                <NotificationItem 
-                                    notification={notification} 
-                                    onMarkAsRead={handleMarkAsRead} 
-                                    onDelete={handleDeleteNotification}
-                                />
-                                {index < notifications.length - 1 && <Divider component="li" className="!my-2" />}
-                            </div>
-                        ))
-                    )}
-                </List>
+  return (
+    <Box className="p-6 bg-gray-50 min-h-screen">
+      <Box className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-8">
+        {/* Header */}
+        <Typography
+          variant="h4"
+          component="h1"
+          className="font-extrabold text-gray-800 mb-2 border-b pb-2"
+        >
+          Your Notifications
+        </Typography>
+        <Box className="flex justify-between items-center mb-6">
+          <Typography variant="h6" className="text-indigo-600 font-semibold">
+            {unreadCount > 0 ? `${unreadCount} unread items` : "All caught up!"}
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleMarkAsReadAll}
+            disabled={unreadCount === 0 || loading}
+          >
+            Mark All Read
+          </Button>
+        </Box>
+
+        {/* Notification List */}
+        <List className="p-0">
+          {notifications.length === 0 && !loading ? (
+            <Box className="text-center p-10 bg-gray-100 rounded-lg">
+              <Typography variant="h6" className="text-gray-500">
+                Nothing here yet.
+              </Typography>
+              <Typography variant="body2" className="text-gray-400">
+                Check back later for updates.
+              </Typography>
+            </Box>
+          ) : (
+            notifications.map((notification, index) => (
+              <div key={notification.id}>
+                <NotificationItem
+                  notification={notification}
+                  onMarkAsRead={handleMarkAsRead}
+                  onDelete={handleDeleteNotification}
+                />
+                {index < notifications.length - 1 && (
+                  <Divider component="li" className="!my-2" />
+                )}
+              </div>
+            ))
+          )}
+        </List>
 
         {/* Load More Button */}
         <Box className="text-center mt-6">

@@ -94,13 +94,13 @@ export default function Reports() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-800 p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 p-4 font-sans sm:p-8">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8 border-b pb-4">
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             Service Reports & Analytics
           </h1>
-          <p className="text-gray-300 mt-1">
+          <p className="mt-1 text-slate-500">
             Generate key performance indicators and download reports for
             detailed analysis.
           </p>

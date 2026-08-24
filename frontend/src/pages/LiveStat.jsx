@@ -98,13 +98,13 @@ const LiveStat = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="mb-2 text-4xl font-bold text-slate-900">
                 Real-time monitoring and analytics
               </h1>
             </div>
@@ -160,72 +160,72 @@ const LiveStat = () => {
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <TrendingUp className="text-blue-400" size={24} />
-              <h3 className="text-white text-lg font-semibold">In Progress</h3>
+              <h3 className="text-lg font-semibold text-slate-900">In Progress</h3>
             </div>
-            <p className="text-4xl font-bold text-white">
+            <p className="text-4xl font-bold text-slate-900">
               {stats.overview.inProgressComplaints}
             </p>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="text-red-400" size={24} />
-              <h3 className="text-white text-lg font-semibold">Overdue</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Overdue</h3>
             </div>
             <p className="text-4xl font-bold text-red-400">
               {stats.overview.overdueComplaints}
             </p>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Clock className="text-green-400" size={24} />
-              <h3 className="text-white text-lg font-semibold">
+              <h3 className="text-lg font-semibold text-slate-900">
                 Avg Resolution
               </h3>
             </div>
-            <p className="text-4xl font-bold text-white">
+            <p className="text-4xl font-bold text-slate-900">
               {stats.performance.averageResolutionTime.days}
-              <span className="text-lg text-gray-400 ml-2">days</span>
+              <span className="ml-2 text-lg text-slate-500">days</span>
             </p>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="mt-1 text-sm text-slate-500">
               {stats.performance.averageResolutionTime.hours} hours
             </p>
           </div>
         </div>
 
         {/* Urgency Distribution */}
-        <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700 mb-8">
-          <h3 className="text-white text-xl font-semibold mb-4">
+        <div className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-xl font-semibold text-slate-900">
             Urgency Distribution
           </h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
+              <div className="mb-2 w-full rounded-lg bg-red-50 p-4">
                 <p className="text-red-400 text-3xl font-bold">
                   {stats.distribution.urgency.HIGH}
                 </p>
               </div>
-              <p className="text-gray-400 text-sm">High Priority</p>
+              <p className="text-sm text-slate-500">High Priority</p>
             </div>
             <div className="text-center">
-              <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
+              <div className="mb-2 w-full rounded-lg bg-yellow-50 p-4">
                 <p className="text-yellow-400 text-3xl font-bold">
                   {stats.distribution.urgency.MEDIUM}
                 </p>
               </div>
-              <p className="text-gray-400 text-sm">Medium Priority</p>
+              <p className="text-sm text-slate-500">Medium Priority</p>
             </div>
             <div className="text-center">
-              <div className="w-full bg-gray-700 rounded-lg p-4 mb-2">
+              <div className="mb-2 w-full rounded-lg bg-green-50 p-4">
                 <p className="text-green-400 text-3xl font-bold">
                   {stats.distribution.urgency.LOW}
                 </p>
               </div>
-              <p className="text-gray-400 text-sm">Low Priority</p>
+              <p className="text-sm text-slate-500">Low Priority</p>
             </div>
           </div>
         </div>
@@ -233,8 +233,8 @@ const LiveStat = () => {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Last 7 Days Trend */}
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-            <h3 className="text-white text-xl font-semibold mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-xl font-semibold text-slate-900">
               Last 7 Days Trend
             </h3>
             <ResponsiveContainer width="100%" height={250}>
@@ -262,8 +262,8 @@ const LiveStat = () => {
           </div>
 
           {/* Status Trend */}
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-            <h3 className="text-white text-xl font-semibold mb-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-xl font-semibold text-slate-900">
               Status Distribution
             </h3>
             <ResponsiveContainer width="100%" height={250}>

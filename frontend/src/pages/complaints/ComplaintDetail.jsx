@@ -1,6 +1,7 @@
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCamera from "@mui/icons-material/PhotoCamera"; // NEW: For image upload icon
+import ReplayIcon from "@mui/icons-material/Replay";
 import {
   Box,
   Button,
@@ -133,21 +134,26 @@ const StaffCommentForm = ({ onSubmit, isSubmitting }) => {
 // 2. CommentDisplay Component (Placeholder to display a single comment)
 // Assumes a comment object looks like: { _id, text, image, user: { name, role }, createdAt }
 const CommentDisplay = ({ comment }) => {
+  const authorName = comment.author?.name || "Unknown user";
+  const authorEmail = comment.author?.email;
   // Helper to format date
+  const commentDate = comment.createdAt ? new Date(comment.createdAt) : null;
   const formattedDate =
-    new Date(comment.createdAt).toLocaleDateString() +
-    " " +
-    new Date(comment.createdAt).toLocaleTimeString();
+    commentDate && !Number.isNaN(commentDate.getTime())
+      ? `${commentDate.toLocaleDateString()} ${commentDate.toLocaleTimeString()}`
+      : "Date unavailable";
   // console.log(comment);
 
   return (
-    <Box className="p-3 border rounded-lg shadow-sm bg-blue-50">
+    <Box className="rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm">
       <div className="flex justify-between items-center mb-1">
         <Typography variant="subtitle2" className="font-bold text-indigo-700">
-          {comment.author.name}
-          <span className="text-xs font-normal ml-2 text-gray-500">
-            ({comment.author.email})
-          </span>
+          {authorName}
+          {authorEmail && (
+            <span className="text-xs font-normal ml-2 text-gray-500">
+              ({authorEmail})
+            </span>
+          )}
         </Typography>
         <Typography variant="caption" color="textSecondary">
           {formattedDate}
@@ -159,16 +165,18 @@ const CommentDisplay = ({ comment }) => {
       >
         {comment.commentText}
       </Typography>
-      {comment.imageUrl.length !== 0 && (
+      {comment.imageUrl?.length > 0 && (
         <Box className="mt-2">
-          {/* NOTE: Adjust the path/URL based on your backend storage setup */}
-          <img
-            src={comment.image}
-            alt="Evidence"
-            className="max-h-40 w-full object-contain rounded border"
-          />
-          <Typography variant="caption" className="text-gray-500 mt-1 block">
-            Evidence Image
+          {comment.imageUrl.map((imageUrl) => (
+            <img
+              key={imageUrl}
+              src={imageUrl}
+              alt="Evidence"
+              className="mb-2 max-h-40 w-full rounded border object-contain last:mb-0"
+            />
+          ))}
+          <Typography variant="caption" className="mt-1 block text-gray-500">
+            Evidence Image{comment.imageUrl.length > 1 ? "s" : ""}
           </Typography>
         </Box>
       )}
@@ -226,7 +234,7 @@ const ComplaintDetail = () => {
       const res = await axiosInstance.put(
         `/admin/complaints/assign`,
         { complaintId: complaint._id, userIds: selectedIds },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const updatedComplaint = res?.data?.complaint;
@@ -256,16 +264,19 @@ const ComplaintDetail = () => {
     }
 
     try {
-      // Assume your API for staff comments is at /staff/complaints/comment
       const res = await axiosInstance.post(
-        `/staff/complaints/comment`,
+        userRole === "admin"
+          ? `/admin/complaints/comment`
+          : userRole === "staff"
+            ? `/staff/complaints/comment`
+            : `/complaints/comment`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             // Content-Type: multipart/form-data is usually handled automatically by axios
           },
-        }
+        },
       );
 
       // Update the complaint state with the new comment and comments array
@@ -296,7 +307,7 @@ const ComplaintDetail = () => {
       const res = await axiosInstance.put(
         `/admin/complaints/${complaint._id}`,
         {}, // Empty body is fine if the status is updated based on the ID
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const updatedComplaint = res?.data?.data;
@@ -305,13 +316,31 @@ const ComplaintDetail = () => {
       setComplaint(updatedComplaint);
 
       toast.success(
-        `Complaint #${complaint.complaintId} successfully marked as Resolved! 🎉`
+        `Complaint #${complaint._id} successfully marked as Resolved! 🎉`,
       );
     } catch (err) {
       console.error(err);
       toast.error(
-        err.response?.data?.message || "Failed to mark complaint as resolved."
+        err.response?.data?.message || "Failed to mark complaint as resolved.",
       );
+    } finally {
+      setIsMarkingResolved(false);
+    }
+  };
+
+  const handleReopen = async () => {
+    setIsMarkingResolved(true);
+    try {
+      const res = await axiosInstance.post(
+        `/admin/complaints/${complaint._id}/reopen`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setComplaint(res?.data?.data);
+      toast.success("Complaint reopened successfully.");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to reopen complaint.");
     } finally {
       setIsMarkingResolved(false);
     }
@@ -330,9 +359,9 @@ const ComplaintDetail = () => {
   const isResolved = complaint.status === "RESOLVED";
 
   return (
-    <Box sx={{ flexGrow: 1 }} className="bg-gray-800 min-h-screen">
+    <Box sx={{ flexGrow: 1 }} className="min-h-screen bg-white">
       <div className="p-6 max-w-6xl mx-auto ">
-        <h1 className="text-3xl font-extrabold text-white mb-6 border-b pb-2">
+        <h1 className="mb-6 border-b pb-2 text-3xl font-extrabold text-slate-900">
           Complaint Resolution Hub
         </h1>
 
@@ -349,8 +378,12 @@ const ComplaintDetail = () => {
             <ComplaintCard isShow complaint={complaint} />
           </div>
 
-          {/* RIGHT SIDE: Admin/Staff Actions Panel (1/3 width) */}
-          {(userRole === "admin" || userRole === "staff") && (
+          {/* RIGHT SIDE: Role-specific comment and management panel */}
+          {(userRole === "admin" ||
+            userRole === "staff" ||
+            (userRole === "citizen" &&
+              String(complaint.citizen?._id || complaint.citizen) ===
+                String(user?._id || user?.id))) && (
             <Box className="lg:col-span-1">
               <Box className="bg-white p-6 rounded-xl shadow-2xl sticky top-4">
                 <Typography
@@ -360,18 +393,26 @@ const ComplaintDetail = () => {
                 >
                   {userRole === "admin"
                     ? "Admin Actions"
-                    : "Resolution Log & Actions"}
+                    : userRole === "staff"
+                      ? "Resolution Log & Actions"
+                      : "Complaint Discussion"}
                 </Typography>
                 <Divider className="mb-4" />
 
                 {/* --- STAFF ACTIONS SECTION --- */}
-                {userRole === "staff" && (
+                {(userRole === "staff" ||
+                  userRole === "admin" ||
+                  userRole === "citizen") && (
                   <Box className="mb-6">
                     <Typography
                       variant="subtitle1"
                       className="font-bold text-gray-700 mb-4"
                     >
-                      Add Resolution Update
+                      {userRole === "admin"
+                        ? "Add Admin Comment"
+                        : userRole === "staff"
+                          ? "Add Resolution Update"
+                          : "Add Comment"}
                     </Typography>
 
                     {/* 1. New Comment Form */}
@@ -382,32 +423,24 @@ const ComplaintDetail = () => {
 
                     <Divider className="my-6" />
 
-                    {/* 2. Display Existing Comments */}
-                    <Typography
-                      variant="subtitle1"
-                      className="font-bold text-gray-700 mb-2"
-                    >
-                      Comment History:
-                    </Typography>
-                    <Box className="max-h-96 overflow-y-auto space-y-3 p-1">
-                      {/* Assuming your complaint object has a 'comments' array */}
-                      {complaint?.commentList &&
-                      complaint.commentList.length > 0 ? (
-                        complaint.commentList.map((comment) => (
-                          <CommentDisplay key={comment._id} comment={comment} />
-                        ))
-                      ) : (
-                        <p className="text-sm text-gray-500">
-                          No resolution comments yet.
-                        </p>
-                      )}
-                    </Box>
                   </Box>
                 )}
 
                 {/* --- ADMIN ACTIONS SECTION --- */}
                 {userRole === "admin" && (
                   <>
+                    {complaint.status !== "OPEN" && (
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={handleReopen}
+                        disabled={isMarkingResolved}
+                        startIcon={<ReplayIcon />}
+                        className="mb-4"
+                      >
+                        REOPEN COMPLAINT
+                      </Button>
+                    )}
                     {/* making complaint as resolved */}
                     <Button
                       variant="contained"
@@ -479,6 +512,26 @@ const ComplaintDetail = () => {
             </Box>
           )}
         </div>
+
+        <section className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <Typography
+            variant="h6"
+            component="h2"
+            className="mb-4 font-bold text-slate-900"
+          >
+            Comment History
+          </Typography>
+          <Divider className="mb-4" />
+          <Box className="max-h-96 space-y-3 overflow-y-auto p-1">
+            {complaint.commentList?.length > 0 ? (
+              complaint.commentList.map((comment) => (
+                <CommentDisplay key={comment._id} comment={comment} />
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">No resolution comments yet.</p>
+            )}
+          </Box>
+        </section>
       </div>
 
       {/* --- Assignment Drawer (Admin Only) --- */}
@@ -494,7 +547,7 @@ const ComplaintDetail = () => {
             },
           }}
         >
-          <Box className="p-6 h-full flex flex-col bg-gray-50">
+          <Box className="flex h-full flex-col bg-white p-6">
             {/* Drawer Header */}
             <Box className="flex justify-between items-center mb-6 pb-4 border-b">
               <Typography

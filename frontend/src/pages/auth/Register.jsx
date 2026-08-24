@@ -77,9 +77,9 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       {/* Background overlay with subtle gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-gray-900 to-black opacity-90"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 via-white to-slate-100"></div>
 
       <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-gray-100 transform transition-all duration-500 hover:shadow-indigo-500/30">
         <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-2">

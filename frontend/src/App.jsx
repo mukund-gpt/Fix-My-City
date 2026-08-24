@@ -23,8 +23,8 @@ function App() {
       userRole === "admin"
         ? adminTabs
         : userRole === "staff"
-        ? staffTabs
-        : userTabs;
+          ? staffTabs
+          : userTabs;
 
     setTabs(updatedtabs);
     // console.log(updatedtabs);
@@ -34,7 +34,7 @@ function App() {
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <NavBar tabs={tabs} />
-        <main className="flex-grow bg-gray-800">
+        <main className="flex-grow">
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
               <Route path="/login" element={<Login />} />

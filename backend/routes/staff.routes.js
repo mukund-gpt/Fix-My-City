@@ -15,7 +15,7 @@ const upload = multer({ storage });
 router.use(protect, requireRole("staff"));
 
 router.get("/complaints", viewAssignedComplaints); // For staff to get all complaints
-router.post("/complaints/comment", upload.single("image"), createComment)
+router.post("/complaints/comment", upload.single("image"), createComment);
 router.put("/complaints/:id", updateComplaintByStaff);
 // router.get("/reports", protect, adminOrStaff, getReports);
 export default router;

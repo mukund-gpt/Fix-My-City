@@ -25,8 +25,8 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-xl p-8 bg-gray-800 rounded-xl shadow-lg border border-yellow-400/50">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-900">
+        <p className="rounded-xl border border-yellow-300 bg-white p-8 text-xl shadow-lg">
           Please login to access your dashboard.
         </p>
       </div>
@@ -42,7 +42,7 @@ const Dashboard = () => {
     `;
 
     // Determine specific styling based on role/type
-    let typeClasses = `bg-gray-800 text-white border-gray-700 hover:scale-[1.03] hover:ring-2 hover:ring-yellow-400`;
+    let typeClasses = `bg-white text-slate-800 border-slate-200 hover:-translate-y-1 hover:border-yellow-400 hover:shadow-lg`;
     let iconColor = color;
 
     if (path) {
@@ -78,7 +78,7 @@ const Dashboard = () => {
 
   return (
     // CHANGE: Dark background and padding for aesthetic
-    <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-white">
+    <div className="min-h-screen bg-slate-50 p-4 text-slate-900 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* --- Dashboard Layouts --- */}
 
@@ -158,7 +158,7 @@ const Dashboard = () => {
 
             {/* Sub-view Area */}
             {activeView && (
-              <div className="mt-8 p-6 bg-gray-800 rounded-xl shadow-inner shadow-indigo-900/50 border border-gray-700">
+              <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 {/* The onBack prop now allows sub-components to dismiss themselves */}
                 {activeView === "unresolved" && (
                   <UnresolvedComplaints onBack={() => setActiveView(null)} />

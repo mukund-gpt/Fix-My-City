@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import axiosInstance from "../api/axiosinstance";
 
 const roles = [
@@ -13,9 +11,6 @@ const roles = [
 
 const Users = () => {
   const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +42,7 @@ const Users = () => {
     };
 
     fetchUsers();
-  }, [dispatch, user?.role, user.token, selectedRole]);
+  }, [user?.role, user?.token, selectedRole]);
 
   // Helper to determine role badge color
   const getRoleBadge = (role) => {
@@ -97,8 +92,8 @@ const Users = () => {
 
   if (user.role !== "admin") {
     return (
-      <div className="min-h-screen bg-gray-900 p-8 text-white flex justify-center items-center">
-        <div className="p-8 bg-gray-800 rounded-xl border border-red-700 text-red-400 shadow-xl">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-8 text-slate-900">
+        <div className="rounded-xl border border-red-200 bg-white p-8 text-red-600 shadow-xl">
           <h2 className="text-2xl font-bold mb-4">Permission Denied</h2>
           <p>
             You must be an administrator to access the User Management page.
@@ -110,7 +105,7 @@ const Users = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen bg-gray-900 p-8 text-white flex justify-center items-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-8 text-slate-900">
         <div className="flex items-center text-yellow-400 text-xl font-medium">
           <svg
             className="animate-spin -ml-1 mr-3 h-6 w-6"
@@ -139,8 +134,8 @@ const Users = () => {
 
   if (error)
     return (
-      <div className="min-h-screen bg-gray-900 p-8 text-white flex justify-center items-center">
-        <div className="p-8 bg-gray-800 rounded-xl border border-red-700 text-red-400 shadow-xl">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-8 text-slate-900">
+        <div className="rounded-xl border border-red-200 bg-white p-8 text-red-600 shadow-xl">
           <h2 className="text-2xl font-bold mb-4">Error</h2>
           <p>{error}</p>
         </div>
@@ -148,20 +143,16 @@ const Users = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4 sm:p-8 text-white">
-             {" "}
+    <div className="min-h-screen bg-slate-50 p-4 text-slate-900 sm:p-8">
       <div className="max-w-7xl mx-auto">
-                   {" "}
         <h1 className="text-4xl font-extrabold mb-2 text-indigo-400 flex items-center">
-                          <AccountCircleIcon className="mr-3 text-5xl" />       
-                  User Management Console            {" "}
+          <AccountCircleIcon className="mr-3 text-5xl" />
+          User Management Console
         </h1>
-                   {" "}
         <p className="mb-6 text-gray-400">
-                          View, manage, and audit all user accounts across the
-          system. Total users:{" "}
-          <span className="font-bold text-yellow-400">{users.length}</span>     
-               {" "}
+          View, manage, and audit all user accounts across the system. Total
+          users:
+          <span className="font-bold text-yellow-400">{users.length}</span>
         </p>
         {/* NEW: Filter Buttons */}
         <div className="flex flex-wrap gap-3 mb-8">
@@ -177,7 +168,7 @@ const Users = () => {
                             ${
                               selectedRole === role.key
                                 ? "bg-indigo-500 text-white shadow-lg ring-2 ring-indigo-300"
-                                : "bg-gray-700 text-gray-300 hover:bg-indigo-400 hover:text-gray-900"
+                                : "border border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-indigo-50"
                             }
                         `}
             >
@@ -185,121 +176,62 @@ const Users = () => {
             </button>
           ))}
         </div>
-                   {" "}
-        <div className="bg-gray-800 rounded-xl shadow-2xl overflow-x-auto border border-gray-700">
-                         {" "}
-          <table className="min-w-full divide-y divide-gray-700">
-                               {" "}
-            <thead className="bg-gray-700">
-                                     {" "}
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                                           {" "}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                                                  Name                          
-                   {" "}
+                  Name
                 </th>
-                                           {" "}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell"
+                  className="hidden px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell"
                 >
-                                                  Email                        
-                     {" "}
+                  Email
                 </th>
-                                           {" "}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500"
                 >
-                                                  Role                          
-                   {" "}
+                  Role
                 </th>
-                                           {" "}
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell"
-                >
-                  {" "}
-                </th>
-                                           {" "}
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider"
-                >
-                                                  Actions                      
-                       {" "}
-                </th>
-                                       {" "}
               </tr>
-                                 {" "}
             </thead>
-                               {" "}
-            <tbody className="divide-y divide-gray-800">
-                                     {" "}
+            <tbody className="divide-y divide-slate-100">
               {users.map((u) => (
                 <tr
                   key={u._id}
-                  className="hover:bg-gray-700 transition duration-150"
+                  className="transition duration-150"
                 >
-                                                  {/* Name */}                 
-                               {" "}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                                        {u.name}               
-                                   {" "}
+                  {/* Name */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                    {u.name}
                   </td>
-                                                  {/* Email */}                 
-                               {" "}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 hidden sm:table-cell">
-                                                        {u.email}               
-                                   {" "}
+                  {/* Email */}
+                  <td className="hidden px-6 py-4 whitespace-nowrap text-sm text-slate-500 sm:table-cell">
+                    {u.email}
                   </td>
-                                                  {/* Role */}                 
-                               {" "}
+                  {/* Role */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                        {getRoleBadge(u.role)} 
-                                                 {" "}
+                    {getRoleBadge(u.role)}
                   </td>
-                                                                               
-                    {/* Actions */}                               {" "}
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                       {" "}
-                    <button
-                      onClick={() => navigate(`/profile/${u._id}`)}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-200 bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition shadow-lg"
-                      title={`View profile for ${u.name}`}
-                    >
-                                                             {" "}
-                      <VisibilityIcon className="w-4 h-4 mr-1" />               
-                                              View                              
-                           {" "}
-                    </button>
-                                                   {" "}
-                  </td>
-                                             {" "}
                 </tr>
               ))}
-                                 {" "}
             </tbody>
-                           {" "}
           </table>
-                     {" "}
         </div>
-                   {" "}
+
         {users.length === 0 && !loading && (
-          <div className="mt-8 p-12 text-center text-gray-400 border border-gray-700 rounded-xl bg-gray-800">
-                               {" "}
+          <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
             <p className="text-xl">
               No users found in the system for this filter.
             </p>
-                           {" "}
           </div>
         )}
-               {" "}
       </div>
-         {" "}
     </div>
   );
 };

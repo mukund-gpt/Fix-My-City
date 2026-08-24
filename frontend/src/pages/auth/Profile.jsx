@@ -16,21 +16,17 @@ import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-
   
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "",
-    // userId is excluded
   });
 
   const handleOpen = () => {
     setFormData({
       name: user.name,
       email: user.email,
-      role: user.role,
     });
     setOpen(true);
   };
@@ -63,14 +59,15 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
+    <div className="min-h-screen bg-white px-4 py-12 sm:px-8">
+      <div className="mx-auto flex max-w-7xl justify-center">
       <Card
         className="
           rounded-2xl shadow-2xl w-96 
-          bg-gray-900 text-white 
-          overflow-hidden border border-gray-700
+          bg-white text-slate-900
+          overflow-hidden border border-slate-200
           transform transition-transform duration-500 ease-in-out
-          hover:scale-105 hover:shadow-yellow-500/30
+          hover:shadow-yellow-500/30
         "
         sx={{ backdropFilter: "blur(8px)" }}
       >
@@ -102,35 +99,35 @@ const Profile = () => {
 
         {/* Info Section */}
         <CardContent className="p-6 space-y-4">
-          <Divider className="bg-gray-700" />
+          <Divider className="bg-slate-200" />
 
           <div>
             <Typography
               variant="subtitle2"
-              className="text-gray-400 uppercase tracking-wider"
+              className="uppercase tracking-wider text-slate-500"
             >
               Email
             </Typography>
-            <Typography variant="body1" className="text-yellow-400 font-medium">
+            <Typography variant="body1" className="font-medium text-slate-900">
               {user.email}
             </Typography>
           </div>
 
-          <Divider className="bg-gray-700" />
+          <Divider className="bg-slate-200" />
 
           <div>
             <Typography
               variant="subtitle2"
-              className="text-gray-400 uppercase tracking-wider"
+              className="uppercase tracking-wider text-slate-500"
             >
               Role
             </Typography>
-            <Typography variant="body1" className="text-yellow-400 font-medium">
+            <Typography variant="body1" className="font-medium text-slate-900">
               {user.role}
             </Typography>
           </div>
 
-          <Divider className="bg-gray-700" />
+          <Divider className="bg-slate-200" />
 
           <div>
             <Typography
@@ -141,13 +138,13 @@ const Profile = () => {
             </Typography>
             <Typography
               variant="body2"
-              className="text-gray-300 break-words"
+              className="break-words text-slate-600"
             >
               {user._id}
             </Typography>
           </div>
 
-          <Divider className="bg-gray-700" />
+          <Divider className="bg-slate-200" />
 
           {/* Action Button */}
           <Button
@@ -181,13 +178,6 @@ const Profile = () => {
             onChange={handleChange}
             fullWidth
           />
-          <TextField
-            label="Role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            fullWidth
-          />
           <Button variant="contained" onClick={handleSave}>
             Save
           </Button>
@@ -195,6 +185,7 @@ const Profile = () => {
       </Drawer>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

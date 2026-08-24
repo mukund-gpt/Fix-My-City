@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { server } from "../../constants/config.js";
 
- export const api = createApi({
+export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${server}/api/` }),
   tagTypes: ["Complaint", "User", "Notification"],
@@ -22,7 +22,6 @@ import { server } from "../../constants/config.js";
 
     createComplaint: builder.mutation({
       query: ({ data, token }) => ({
-      
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -131,6 +130,6 @@ export const {
   useGetAllUsersQuery,
 
   useGetNotificationsQuery,
-    useLazySearchUsersQuery,
-    useUpdateComplaintStatusByAdminMutation,
+  useLazySearchUsersQuery,
+  useUpdateComplaintStatusByAdminMutation,
 } = api;

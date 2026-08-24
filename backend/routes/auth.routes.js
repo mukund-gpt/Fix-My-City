@@ -1,14 +1,20 @@
 import express from "express";
-import { getAdminDetails, logoutAdmin, verifyAdmin } from "../controllers/admin.controller.js";
+import {
+  getAdminDetails,
+  logoutAdmin,
+  verifyAdmin,
+} from "../controllers/admin.controller.js";
 import {
   deleteUserAccount,
+  getUserDetails,
   googleLogin,
   loginUser,
   logoutUser,
   registerUser,
 } from "../controllers/auth.controller.js";
 import { getAllUsers } from "../controllers/user.controller.js";
-import User from "../models/user.model.js";
+
+import { protect, requireRole } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 router.get("/:id", async (req, res) => {
@@ -23,15 +29,15 @@ router.get("/:id", async (req, res) => {
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/google-login", googleLogin);
-router.post("/logout", logoutUser);
-// user routes 
+router.post("/logout", protect, logoutUser);
+// user routes
 
-router.get("/user", getAllUsers);
-router.delete("/user", deleteUserAccount);
+router.get("/user", protect, getUserDetails);
+router.delete("/user", protect, deleteUserAccount);
 
 // admin routes
-router.get("/admin", getAdminDetails);
-router.post("/admin/verify",verifyAdmin);
-router.post("/admin/logout", logoutAdmin);
+router.get("/admin", protect, requireRole("admin"), getAdminDetails);
+router.post("/admin/verify", verifyAdmin);
+router.post("/admin/logout", protect, requireRole("admin"), logoutAdmin);
 
 export default router;

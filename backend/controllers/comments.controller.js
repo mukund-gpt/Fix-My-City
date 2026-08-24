@@ -1,11 +1,12 @@
 import Comment from '../models/comment.model.js';
 import Complaint from '../models/complaint.model.js';
+import cloudinary from '../utills/cloudinary.js';
 
 export const createComment = async (req, res) => {
   console.log(req.user);
   
   try {
-    let { text: commentText, image: imageUrl, complaintId } = req.body;
+    let { text: commentText, complaintId } = req.body;
 
     if (!commentText) {
       commentText = "Done";
@@ -17,10 +18,26 @@ export const createComment = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
+    if (!complaint.assignedTo.some((staffId) => staffId.equals(req.user._id))) {
+      return res.status(403).json({ message: "Complaint is not assigned to you" });
+    }
+
+    let imageUrl = [];
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "fixmycity/comments" },
+          (error, result) => (error ? reject(error) : resolve(result)),
+        );
+        stream.end(req.file.buffer);
+      });
+      imageUrl = [uploadResult.secure_url];
+    }
+
     // Create the new comment
     const comment = new Comment({
       complaint: complaintId,
-      author: req.user.id,
+      author: req.user._id,
       commentText,
       imageUrl: imageUrl || [], // Ensure imageUrl is an array
     });
@@ -31,10 +48,12 @@ export const createComment = async (req, res) => {
     complaint.commentList.push(createdComment._id);
     await complaint.save();
 
-    // Populate author details before sending back
-    const populatedComment = await Comment.findById(createdComment._id).populate("author");
+    await complaint.populate({
+      path: "commentList",
+      populate: { path: "author", select: "name email" },
+    });
 
-    res.status(201).json(complaint);
+    res.status(201).json({ complaint });
 
   } catch (error) {
     console.error("Error creating comment:", error);

@@ -32,7 +32,7 @@ export const getReports = async (req, res) => {
 
         const complaints = await Complaint.find(filter)
             .populate("citizen", "name email")
-            .populate("assignedTo", "name")
+            .populate("assignedTo", "name department")
             .populate({
                 path: "commentList",
                 populate: { path: "author", select: "name email" }
@@ -60,7 +60,7 @@ export const getReports = async (req, res) => {
             },
             {
                 $group: {
-                _id: { $ifNull: ["$assignedStaff.name", "Unassigned"] },
+                _id: { $ifNull: ["$assignedStaff.department", "Unassigned"] },
                 count: { $sum: 1 },
                 },
             },
@@ -108,7 +108,7 @@ export const getReports = async (req, res) => {
             const fields = [
                 { label: "ID", value: "_id" },
                 { label: "Title", value: "title" },
-                { label: "Category", value: "category" },
+                { label: "Department", value: "department" },
                 { label: "Status", value: "status" },
                 { label: "Submitted By", value: "citizen.name" },
                 { label: "Submitter Email", value: "citizen.email" },
@@ -120,6 +120,7 @@ export const getReports = async (req, res) => {
             const processedData = complaints.map(c => ({
                 ...c,
                 assignedStaff: c.assignedTo?.map(staff => staff.name).join(", ") || "N/A",
+                department: c.assignedTo?.map(staff => staff.department).filter(Boolean).join(", ") || "Unassigned",
                 createdAt: new Date(c.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
                 resolvedAt: c.resolvedAt ? new Date(c.resolvedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "N/A",
                 comments: c.commentList?.map(
@@ -195,7 +196,7 @@ export const getReports = async (req, res) => {
                 const rowY = doc.y;
                 doc.text(c._id.toString().slice(-6), itemX, rowY, { width: 90 });
                 doc.text(c.title, titleX, rowY, { width: 140 });
-                doc.text(c.category, categoryX, rowY, { width: 90 });
+                doc.text(c.assignedTo?.map(staff => staff.department).filter(Boolean).join(", ") || "Unassigned", categoryX, rowY, { width: 90 });
                 doc.text(c.status, statusX, rowY, { width: 70 });
                 doc.text(new Date(c.createdAt).toLocaleDateString("en-IN"), dateX, rowY, { width: 100, align: 'right' });
                 

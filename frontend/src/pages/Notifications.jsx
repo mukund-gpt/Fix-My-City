@@ -124,13 +124,15 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
   // console.log(notification);
 
   const {
-    id,
+    _id,
+    id: legacyId,
     title,
     message,
     isRead,
     createdAt: timestamp,
     referenceId,
   } = notification;
+  const notificationId = _id || legacyId;
   const navigate = useNavigate();
 
   const timeAgo = useMemo(() => {
@@ -160,7 +162,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
           <IconButton
             edge="end"
             aria-label={isRead ? "Mark Unread" : "Mark Read"}
-            onClick={() => onMarkAsRead(referenceId)}
+            onClick={() => onMarkAsRead(notificationId)}
             size="small"
             color={isRead ? "default" : "primary"}
           >
@@ -173,7 +175,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
           <IconButton
             edge="end"
             aria-label="Delete"
-            onClick={() => onDelete(id)}
+            onClick={() => onDelete(notificationId)}
             size="small"
             color="error"
           >
@@ -275,7 +277,7 @@ const Notifications = () => {
     const handleMarkAsRead = async(notificationId) => {
         try {
             setNotifications(prev => prev.map(n => 
-                n.id === notificationId ? { ...n, isRead: !n.isRead } : n
+                (n._id || n.id) === notificationId ? { ...n, isRead: !n.isRead } : n
             ));
             
             // Add actual API call logic here
@@ -287,7 +289,7 @@ const Notifications = () => {
                 });
     
             toast.success(
-                notifications.find(n => n.id === notificationId)?.isRead 
+                !notifications.find(n => (n._id || n.id) === notificationId)?.isRead 
                 ? "Marked as unread." 
                 : "Marked as read."
             );
@@ -316,9 +318,9 @@ const Notifications = () => {
     // Handle deleting a notification
     const handleDeleteNotification = async(notificationId) => {
         try {
-            setNotifications(prev => prev.filter(n => n.id !== notificationId));
+            setNotifications(prev => prev.filter(n => (n._id || n.id) !== notificationId));
             // Add actual API call logic here
-            const res = await axiosInstance.delete(`/notifications/${notificationId}`, {}, {
+            const res = await axiosInstance.delete(`/notifications/${notificationId}`, {
                     headers:
                         {
                             Authorization:`Bearer ${user?.token}`

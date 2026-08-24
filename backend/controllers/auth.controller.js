@@ -47,10 +47,14 @@ export const loginUser = async (req, res) => {
       return res.status(201).json({ message: "Invalid email", success: false });
     }
 
-    // const isPasswordCorrect = await user.matchPassword(password);
-    // if (!isPasswordCorrect) {
-    //   return res.status(401).json({ message: "Incorrect password" });
-    // }
+    const isPasswordCorrect = user.password
+      ? await user.matchPassword(password)
+      : false;
+    if (!isPasswordCorrect) {
+      return res
+        .status(401)
+        .json({ message: "Invalid email or password", success: false });
+    }
 
     if (user.role !== role) {
       return res
@@ -111,7 +115,7 @@ export const googleLogin = async (req, res) => {
 
 export const getUserDetails = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -122,11 +126,11 @@ export const getUserDetails = async (req, res) => {
 };
 export const deleteUserAccount = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    await user.remove();
+    await User.deleteOne({ _id: user._id });
     res.status(200).json({ message: "User account deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -149,7 +153,7 @@ export const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
   try {
     // Here you would typically verify the token and reset the password
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -162,13 +166,7 @@ export const resetPassword = async (req, res) => {
 };
 export const logoutUser = async (req, res) => {
   try {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      res.clearCookie("connect.sid");
-      res.status(200).json({ message: "Logout successful" });
-    });
+    res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

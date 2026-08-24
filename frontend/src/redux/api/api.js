@@ -80,11 +80,11 @@ import { server } from "../../constants/config.js";
       invalidatesTags: ["Complaint"],
     }),
     assignComplaint: builder.mutation({
-      query: ({ complaintId, staffId }) => ({
+      query: ({ complaintId, userIds }) => ({
         url: `admin/complaints/assign`,
         method: "PUT",
         credentials: "include",
-        body: { complaintId, staffId },
+        body: { complaintId, userIds },
       }),
       invalidatesTags: ["Complaint"],
     }),

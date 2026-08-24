@@ -327,7 +327,7 @@ const ComplaintDetail = () => {
       </div>
     );
 
-  const isResolved = complaint.status === "Resolved";
+  const isResolved = complaint.status === "RESOLVED";
 
   return (
     <Box sx={{ flexGrow: 1 }} className="bg-gray-800 min-h-screen">

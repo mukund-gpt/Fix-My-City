@@ -2,12 +2,14 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { server } from "../../constants/config.js";
 
-export const getUserDetails = createAsyncThunk("user/getUserDetails", async () => {
+export const getUserDetails = createAsyncThunk("user/getUserDetails", async (_, thunkAPI) => {
     try {
+        const token = thunkAPI.getState().auth.user?.token;
         const config = {
             withCredentials: true,
                 headers: {
                     "Content-Type":"application/json",
+                    Authorization: `Bearer ${token}`,
                 }
         }
         const { data } = await axios.get(`${server}/api/auth/user`, config);
@@ -17,13 +19,15 @@ export const getUserDetails = createAsyncThunk("user/getUserDetails", async () =
     }
 });
 
-export const updateUserDetails = createAsyncThunk("user/updateUserDetails", async (userData) => {   
+export const updateUserDetails = createAsyncThunk("user/updateUserDetails", async (userData, thunkAPI) => {   
     try {
+    const token = thunkAPI.getState().auth.user?.token;
         const config = {
             withCredentials: true,
 
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
         };
 
@@ -35,12 +39,14 @@ export const updateUserDetails = createAsyncThunk("user/updateUserDetails", asyn
     }
 });
 
-export const deleteUserAccount = createAsyncThunk("user/deleteUserAccount", async () => {
+export const deleteUserAccount = createAsyncThunk("user/deleteUserAccount", async (_, thunkAPI) => {
     try {
+    const token = thunkAPI.getState().auth.user?.token;
         const config = {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
         };
         const { data } = await axios.delete(`${server}/api/auth/user`, config);
@@ -49,12 +55,14 @@ export const deleteUserAccount = createAsyncThunk("user/deleteUserAccount", asyn
         throw error.response.data.message || "Failed to delete user account";
     }   
 });
-export const userLogout = createAsyncThunk("user/logout", async () => {
+export const userLogout = createAsyncThunk("user/logout", async (_, thunkAPI) => {
     try {
+    const token = thunkAPI.getState().auth.user?.token;
         const config = {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
         };
         const { data } = await axios.post(`${server}/api/auth/logout`, {}, config);

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getUserDetails } from "../../redux/thunks/user";
 
 const Settings = () => {
  

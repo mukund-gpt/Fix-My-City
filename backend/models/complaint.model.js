@@ -163,8 +163,8 @@ complaintSchema.methods.escalate = async function (escalationReason, targetStaff
         
         const notificationPromises = Array.from(staffIdsToNotify).map(staffId => {
             return Notification.create({ 
-                recipient: staffId, 
-                sender: SYSTEM_USER_ID, 
+                recipient: [staffId], 
+                sender: null, 
                 title: title,
                 message: messageBase,
                 type: 'ALERT', // Use ALERT for high-priority escalation
@@ -203,8 +203,6 @@ complaintSchema.statics.escalateOverdueComplaints = async function () {
     // Placeholder function for demonstration 
     // (Replace with your actual User lookup logic from the previous answer)
     const findTargetStaffId = async (level, urgency, complaint) => {
-        if (level === 1) return 'TEAM_LEAD_USER_ID_A';
-        if (level === 2) return 'MANAGER_USER_ID_B';
         return null;
     };
     // ------------------------------------------------------------------

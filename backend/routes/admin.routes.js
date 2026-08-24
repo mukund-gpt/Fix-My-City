@@ -13,20 +13,22 @@ import {
     getResolvedComplaints,
     getUnresolvedComplaints,
 } from "../controllers/complaint.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect, requireRole } from "../middlewares/auth.middleware.js";
 import { getReports } from "../utills/generatereports.js";
 
 const router = express.Router();
+
+router.use(protect, requireRole("admin"));
 
 router.get("/users", getAllUser);
 router.get("/staff", getStaffByDepartment
     
 )
-router.get("/complaints", protect, getComplaints);
-router.put("/complaints/assign", protect, assignComplaint); // For admin to assign complaints
-router.get("/complaints/unresolved", protect, getUnresolvedComplaints);
-router.get("/complaints/resolved", protect, getResolvedComplaints);
-router.put("/complaints/:id", protect, updateComplaintByAdmin); // For admin to update complaint status
+router.get("/complaints", getComplaints);
+router.put("/complaints/assign", assignComplaint); // For admin to assign complaints
+router.get("/complaints/unresolved", getUnresolvedComplaints);
+router.get("/complaints/resolved", getResolvedComplaints);
+router.put("/complaints/:id", updateComplaintByAdmin); // For admin to update complaint status
 router.post('/complaints/:id/escalate', manuallyEscalateComplaint);
 router.post('/job/run-escalation', runSlaEscalationJob);
 router.get("/analytics",getanalyatics);

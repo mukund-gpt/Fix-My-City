@@ -6,7 +6,7 @@ export const getLocations = async (req, res) => {
     const complaints = await Complaint.find({
       latitude: { $exists: true, $ne: null },
       longitude: { $exists: true, $ne: null },
-    }).select("latitude longitude status location");
+    }).select("latitude longitude status location title");
 
     // Separate complaints by status
     const openComplaints = [];

@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 // NOTE: Ensure this path is correct for your project
 import axiosInstance from "../../api/axiosinstance";
+import { useSelector } from "react-redux";
 
 // Sets the fixed height and enables vertical scrolling (Tailwind CSS classes)
 // h-48 is approx 12rem/192px, fitting 3-4 rows
@@ -24,12 +25,15 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
   const [loading, setLoading] = useState(false);
   // selected holds the full staff objects
   const [selected, setSelected] = useState(selectedStaff || []);
+  const token = useSelector((state) => state.auth.user?.token);
 
   // Fetch staff from backend
   const fetchStaff = async (search = "") => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get(`/admin/staff?search=${search}`);
+      const res = await axiosInstance.get(`/admin/staff?search=${encodeURIComponent(search)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setStaffList(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
@@ -41,7 +45,7 @@ export default function StaffSearch({ selectedStaff = [], onChange }) {
   // Fetch all staff initially
   useEffect(() => {
     fetchStaff();
-  }, []);
+  }, [token]);
 
   // Debounce search input
   useEffect(() => {

@@ -65,7 +65,7 @@ export const createComplaint = async (req, res) => {
       longitude,
       photos: photoUrls,
       status: "OPEN",
-      assignedTo: null,
+      assignedTo: [],
       urgency: duplicateResponse?.data?.urgency,
     });
 
@@ -114,9 +114,24 @@ export const updateComplaintByStaff = async (req, res) => {
     if (!complaint)
       return res.status(404).json({ message: "Complaint not found" });
 
+    if (!complaint.assignedTo.some((staffId) => staffId.equals(req.user._id))) {
+      return res.status(403).json({ message: "Complaint is not assigned to you" });
+    }
+
     const { status, assignedTo } = req.body;
-    if (status) complaint.status = status;
-    if (assignedTo) complaint.assignedTo = assignedTo;
+    if (status) {
+      if (!["OPEN", "IN_PROGRESS", "RESOLVED"].includes(status)) {
+        return res.status(400).json({ message: "Invalid complaint status" });
+      }
+      complaint.status = status;
+      if (status === "RESOLVED") {
+        complaint.resolvedAt = new Date();
+        complaint.totalTimeToResolve = complaint.resolvedAt - complaint.createdAt;
+      }
+    }
+    if (assignedTo) {
+      return res.status(403).json({ message: "Staff cannot reassign complaints" });
+    }
 
     const updatedComplaint = await complaint.save();
     res.json(updatedComplaint);
@@ -239,7 +254,15 @@ export const getComplaintSlaTimeline = async (req, res) => {
         .json({ success: false, message: "Complaint not found" });
     }
 
-    const timelineData = await complaint.getSlaTimeLines();
+    const timelineData = [
+      { status: "OPEN", at: complaint.createdAt },
+      ...(complaint.status !== "OPEN" && complaint.updatedAt
+        ? [{ status: complaint.status, at: complaint.updatedAt }]
+        : []),
+      ...(complaint.resolvedAt
+        ? [{ status: "RESOLVED", at: complaint.resolvedAt }]
+        : []),
+    ];
 
     return res.status(200).json({
       success: true,

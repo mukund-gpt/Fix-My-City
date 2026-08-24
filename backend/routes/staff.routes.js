@@ -5,15 +5,17 @@ import {
   updateComplaintByStaff,
   viewAssignedComplaints,
 } from "../controllers/complaint.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect, requireRole } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 // Configure multer storage (memory or disk)
 const storage = multer.memoryStorage(); // use diskStorage if you want to save images to server
 const upload = multer({ storage });
 
-router.get("/complaints", protect, viewAssignedComplaints); // For staff to get all complaints
-router.post("/complaints/comment",protect,upload.single("image"),createComment)
-router.put("/complaints/:id", protect,updateComplaintByStaff);
+router.use(protect, requireRole("staff"));
+
+router.get("/complaints", viewAssignedComplaints); // For staff to get all complaints
+router.post("/complaints/comment", upload.single("image"), createComment)
+router.put("/complaints/:id", updateComplaintByStaff);
 // router.get("/reports", protect, adminOrStaff, getReports);
 export default router;
